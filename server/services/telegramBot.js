@@ -261,11 +261,119 @@ export const sendAllClassReminders = async () => {
   }
 };
 
+// Format attendance summary message
+const formatAttendanceMessage = (group, absentStudents, presentStudents) => {
+  const today = new Date().toLocaleDateString('uz-UZ');
+  
+  let message = `
+📋 <b>DAVOMAT XULOSASI</b>
+
+🏷️ <b>Guruh:</b> ${group.name}
+📅 <b>Sana:</b> ${today}
+📚 <b>Kurs:</b> ${group.course_id?.name || 'Noma\'lum'}
+
+📊 <b>Davomat natijalari:</b>
+❌ <b>Kelmaganlar:</b> ${absentStudents.length} ta
+  `.trim();
+
+  if (absentStudents.length > 0) {
+    const absentList = absentStudents.map((student, index) => {
+      return `${index + 1}. <b>${student.full_name}</b>
+   📞 ${student.phone}`;
+    }).join('\n\n');
+
+    message += `
+
+❌ <b>Kelmagan o'quvchilar:</b>
+
+${absentList}`;
+  } else {
+    message += `
+
+✅ <b>Barcha o'quvchilar darsga kelishgan!</b>`;
+  }
+
+  return message;
+};
+
+// Format scores message
+const formatScoresMessage = (group, presentStudents) => {
+  const today = new Date().toLocaleDateString('uz-UZ');
+  
+  let message = `
+🎯 <b>BUGUNGI DARS BALLARI</b>
+
+  `.trim();
+
+  if (presentStudents.length > 0) {
+    const scoresList = presentStudents.map((student, index) => {
+      return `${index + 1}. <b>${student.full_name}</b>
+   📞 ${student.phone}
+   🎯 <b>Ball:</b> ${student.score || 0}`;
+    }).join('\n\n');
+
+    message += `
+
+📝 <b>Ballar ro'yxati:</b>
+
+${scoresList}`;
+  }
+
+  return message;
+};
+
+// Send attendance summary after 1 hour
+export const sendAttendanceSummary = async (groupId, date) => {
+  try {
+    const group = await Group.findById(groupId).populate('course_id');
+    if (!group || !group.telegram_chat_id) return;
+
+    // Get today's attendance records
+    const attendanceRecords = await Attendance.find({
+      group_id: groupId,
+      date: new Date(date)
+    }).populate('student_id');
+
+    // Get all students in group
+    const allStudents = await Student.find({ group_id: groupId });
+
+    // Separate present and absent students
+    const presentStudents = attendanceRecords
+      .filter(record => record.status === 'PRESENT')
+      .map(record => ({
+        ...record.student_id.toObject(),
+        score: record.score || 0
+      }));
+
+    const absentStudents = allStudents.filter(student => 
+      !attendanceRecords.some(record => 
+        record.student_id._id.toString() === student._id.toString() && 
+        record.status === 'PRESENT'
+      )
+    );
+
+    // Send attendance summary (absent students)
+    const attendanceMessage = formatAttendanceMessage(group, absentStudents, presentStudents);
+    await sendTelegramMessageToChat(group.telegram_chat_id, attendanceMessage);
+    
+    // Send scores message (present students with scores)
+    if (presentStudents.length > 0) {
+      const scoresMessage = formatScoresMessage(group, presentStudents);
+      await sendTelegramMessageToChat(group.telegram_chat_id, scoresMessage);
+    }
+    
+    console.log(`✅ Attendance summary and scores sent to group ${group.name}`);
+  } catch (error) {
+    console.error('Error sending attendance summary:', error);
+  }
+};
+
 export default {
   sendPaymentNotification,
   sendDailyReminders,
   sendPaymentDueReminder,
   sendClassReminder,
   sendAllClassReminders,
+  sendAttendanceSummary,
   testBotConnection
 };
