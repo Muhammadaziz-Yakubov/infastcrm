@@ -89,7 +89,7 @@ function AppRoutes() {
         } />
         <Route path="tasks" element={<AdminTasks />} />
         <Route path="rating" element={<Rating />} />
-      </Route>
+              </Route>
     </Routes>
   );
 }

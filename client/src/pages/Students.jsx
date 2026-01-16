@@ -19,7 +19,9 @@ import {
   Key,
   UserCheck,
   Bell,
-  AlertCircle
+  AlertCircle,
+  Wallet,
+  Banknote
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -46,7 +48,12 @@ export default function Students() {
     status: 'ACTIVE',
     joined_date: format(new Date(), 'yyyy-MM-dd'),
     login: '',
-    password: ''
+    password: '',
+    // Payment fields
+    first_payment_amount: '',
+    first_payment_date: format(new Date(), 'yyyy-MM-dd'),
+    first_payment_type: 'CASH',
+    require_first_payment: true
   });
 
   useEffect(() => {
@@ -92,15 +99,45 @@ export default function Students() {
       if (editingStudent) {
         await api.put(`/students/${editingStudent._id}`, dataToSend);
       } else {
-        await api.post('/students', dataToSend);
+        // Create student
+        const studentResponse = await api.post('/students', dataToSend);
+        const newStudent = studentResponse.data;
+        
+        // If first payment is required, create payment
+        if (dataToSend.require_first_payment && dataToSend.first_payment_amount) {
+          const paymentData = {
+            student_id: newStudent._id,
+            amount: parseFloat(dataToSend.first_payment_amount),
+            payment_date: dataToSend.first_payment_date,
+            payment_type: dataToSend.first_payment_type,
+            note: 'Birinchi oy to\'lovi (o\'quvchi qo\'shilganda)'
+          };
+          
+          await api.post('/payments', paymentData);
+        } else {
+          // If no payment made, set next payment date to today (so they appear in "To'lov yaqin" list)
+          const updateData = {
+            next_payment_date: new Date().toISOString().split('T')[0], // Today
+            status: 'DEBTOR' // Mark as debtor since they didn't pay
+          };
+          
+          await api.put(`/students/${newStudent._id}`, updateData);
+        }
       }
+      
       setShowModal(false);
       setEditingStudent(null);
       resetForm();
       fetchStudents();
     } catch (error) {
-      console.error('Error saving student:', error);
-      alert(error.response?.data?.message || 'Xatolik yuz berdi');
+      console.error('❌ Error saving student:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error data:', JSON.stringify(error.response?.data, null, 2));
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error headers:', error.response?.headers);
+      
+      const errorMessage = error.response?.data?.message || 'Xatolik yuz berdi';
+      alert(`Xatolik: ${errorMessage}\n\nStatus: ${error.response?.status}\n\nDetails: ${JSON.stringify(error.response?.data, null, 2)}`);
     }
   };
 
@@ -139,7 +176,12 @@ export default function Students() {
       status: 'ACTIVE',
       joined_date: format(new Date(), 'yyyy-MM-dd'),
       login: '',
-      password: ''
+      password: '',
+      // Payment fields
+      first_payment_amount: '',
+      first_payment_date: format(new Date(), 'yyyy-MM-dd'),
+      first_payment_type: 'CASH',
+      require_first_payment: true
     });
     setShowPassword(false);
   };
@@ -519,6 +561,87 @@ export default function Students() {
                 </div>
               </div>
 
+              {/* Payment section - only for new students */}
+              {!editingStudent && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                    <Wallet size={16} className="text-green-500" />
+                    Birinchi oy to'lovi
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="require_first_payment"
+                        checked={formData.require_first_payment}
+                        onChange={(e) => setFormData({ ...formData, require_first_payment: e.target.checked })}
+                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      />
+                      <label htmlFor="require_first_payment" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Birinchi oy to'lovini qilish kerak
+                      </label>
+                    </div>
+
+                    {formData.require_first_payment && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            To'lov summasi *
+                          </label>
+                          <div className="relative">
+                            <Banknote size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                              type="number"
+                              value={formData.first_payment_amount}
+                              onChange={(e) => setFormData({ ...formData, first_payment_amount: e.target.value })}
+                              required={formData.require_first_payment}
+                              className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                              placeholder="500000"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            To'lov turi *
+                          </label>
+                          <select
+                            value={formData.first_payment_type}
+                            onChange={(e) => setFormData({ ...formData, first_payment_type: e.target.value })}
+                            required={formData.require_first_payment}
+                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                          >
+                            <option value="CASH">Naqd pul</option>
+                            <option value="CARD">Plastik karta</option>
+                            <option value="CLICK">Click</option>
+                            <option value="PAYME">Payme</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
+                    {formData.require_first_payment && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          To'lov sanasi *
+                        </label>
+                        <div className="relative">
+                          <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                          <input
+                            type="date"
+                            value={formData.first_payment_date}
+                            onChange={(e) => setFormData({ ...formData, first_payment_date: e.target.value })}
+                            required={formData.require_first_payment}
+                            className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Kabinet login/password section */}
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -570,7 +693,7 @@ export default function Students() {
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={closeModal}
                   className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
                 >
                   Bekor qilish

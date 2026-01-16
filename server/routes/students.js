@@ -14,7 +14,7 @@ router.get('/', authenticate, async (req, res) => {
     
     // Handle special payment filters
     if (payment_filter === 'PAYMENT_DUE') {
-      // To'lov muddati yaqinlashgan (3 kun ichida)
+      // To'lov muddati yaqinlashgan (3 kun ichida) - DEBTOR larni ham qo'shamiz
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const threeDaysLater = new Date(today);
@@ -24,7 +24,7 @@ router.get('/', authenticate, async (req, res) => {
         $gte: today,
         $lte: threeDaysLater
       };
-      filter.status = { $nin: ['STOPPED', 'DEBTOR'] };
+      filter.status = { $nin: ['STOPPED'] }; // DEBTOR larni ham qo'shamiz
     } else if (payment_filter === 'OVERDUE') {
       // To'lov muddati o'tgan (lekin hali DEBTOR emas)
       const today = new Date();
@@ -71,6 +71,7 @@ router.get('/check-login/:login', authenticate, async (req, res) => {
 // Create student (Admin only)
 router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
+    console.log('📝 Creating student with data:', req.body);
     const { login, password, ...studentData } = req.body;
     
     // Check if login already exists
@@ -89,8 +90,10 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
     
     await student.save();
     await student.populate('group_id');
+    console.log('✅ Student created successfully:', student);
     res.status(201).json(student);
   } catch (error) {
+    console.error('❌ Error creating student:', error);
     res.status(400).json({ message: error.message });
   }
 });

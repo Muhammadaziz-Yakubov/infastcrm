@@ -2,6 +2,7 @@ import express from 'express';
 import Payment from '../models/Payment.js';
 import Student from '../models/Student.js';
 import { authenticate } from '../middleware/auth.js';
+import { sendPaymentNotification } from '../services/telegramBot.js';
 
 const router = express.Router();
 
@@ -90,6 +91,10 @@ router.post('/', authenticate, async (req, res) => {
       path: 'student_id',
       populate: { path: 'group_id' }
     });
+
+    // Send Telegram notification
+    await sendPaymentNotification(payment.student_id._id, payment);
+
     res.status(201).json(payment);
   } catch (error) {
     res.status(400).json({ message: error.message });

@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
+import { sendDailyReminders, testBotConnection } from './services/telegramBot.js';
 import authRoutes from './routes/auth.js';
 import studentAuthRoutes from './routes/studentAuth.js';
 import courseRoutes from './routes/courses.js';
@@ -85,6 +86,14 @@ const connectDB = async () => {
 
 connectDB();
 
+// Test Telegram bot connection on startup (only once)
+setTimeout(async () => {
+  const connected = await testBotConnection();
+  if (connected) {
+    console.log('🤖 Telegram bot successfully connected and ready!');
+  }
+}, 3000);
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/student-auth', studentAuthRoutes);
@@ -102,6 +111,12 @@ app.use('/api/tasks', taskRoutes);
 cron.schedule('0 9 * * *', () => {
   console.log('🔄 Running daily payment status check...');
   checkPaymentStatus();
+});
+
+// Daily payment reminders (runs at 12:00 PM every day)
+cron.schedule('0 12 * * *', () => {
+  console.log('📅 Sending daily payment reminders...');
+  sendDailyReminders();
 });
 
 app.listen(PORT, () => {
