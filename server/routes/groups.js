@@ -3,6 +3,7 @@ import Group from '../models/Group.js';
 import Student from '../models/Student.js';
 import Lead from '../models/Lead.js';
 import { authenticate } from '../middleware/auth.js';
+import { sendTelegramMessageToChat } from '../services/telegramBot.js';
 
 const router = express.Router();
 
@@ -37,6 +38,30 @@ router.post('/', authenticate, async (req, res) => {
     const group = new Group(req.body);
     await group.save();
     await group.populate('course_id');
+    
+    // Send test message to Telegram group if chat_id provided
+    if (group.telegram_chat_id) {
+      try {
+        const testMessage = `
+🎉 <b>GURUH QO'SHILDI!</b>
+
+🏷️ <b>Guruh:</b> ${group.name}
+📚 <b>Kurs:</b> ${group.course_id?.name || 'Noma\'lum'}
+📅 <b>Kunlar:</b> ${group.days_of_week.join(', ')}
+⏰ <b>Vaqt:</b> ${group.time || 'Belgilanmagan'}
+👥 <b>O'quvchilar:</b> ${group.min_students}-${group.max_students} kishi
+
+🤖 InFast CRM bot guruhga muvaffaqiyatli ulandi!
+Endi guruhga avtomatik eslatmalar yuboriladi.
+        `.trim();
+        
+        await sendTelegramMessageToChat(group.telegram_chat_id, testMessage);
+        console.log(`✅ Test message sent to group ${group.name}`);
+      } catch (telegramError) {
+        console.error(`❌ Failed to send test message to group ${group.name}:`, telegramError.message);
+      }
+    }
+    
     res.status(201).json(group);
   } catch (error) {
     res.status(400).json({ message: error.message });

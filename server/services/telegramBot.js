@@ -227,7 +227,7 @@ export const sendClassReminder = async (groupId) => {
 };
 
 // Send message to specific chat
-const sendTelegramMessageToChat = async (chatId, message) => {
+export const sendTelegramMessageToChat = async (chatId, message) => {
   try {
     await bot.sendMessage(chatId, message, {
       parse_mode: 'HTML',
