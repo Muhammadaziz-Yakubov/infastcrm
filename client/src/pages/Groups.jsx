@@ -28,7 +28,8 @@ export default function Groups() {
     days_of_week: [],
     time: '',
     min_students: 3,
-    max_students: 15
+    max_students: 15,
+    telegram_chat_id: ''
   });
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -123,7 +124,8 @@ export default function Groups() {
       days_of_week: group.days_of_week || [],
       time: group.time || '',
       min_students: group.min_students || 3,
-      max_students: group.max_students || 15
+      max_students: group.max_students || 15,
+      telegram_chat_id: group.telegram_chat_id || ''
     });
     setShowModal(true);
   };
@@ -148,7 +150,8 @@ export default function Groups() {
       days_of_week: [],
       time: '',
       min_students: 3,
-      max_students: 15
+      max_students: 15,
+      telegram_chat_id: ''
     });
   };
 
@@ -444,6 +447,22 @@ export default function Groups() {
                     className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Telegram Chat ID
+                </label>
+                <input
+                  type="text"
+                  value={formData.telegram_chat_id}
+                  onChange={(e) => setFormData({ ...formData, telegram_chat_id: e.target.value })}
+                  placeholder="-1001234567890"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Guruhning Telegram chat ID si (masalan: -1001234567890)
+                </p>
               </div>
 
           <div className="flex gap-3 pt-4">

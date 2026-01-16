@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
-import { sendDailyReminders, testBotConnection } from './services/telegramBot.js';
+import { sendDailyReminders, sendAllClassReminders, testBotConnection } from './services/telegramBot.js';
 import authRoutes from './routes/auth.js';
 import studentAuthRoutes from './routes/studentAuth.js';
 import courseRoutes from './routes/courses.js';
@@ -117,6 +117,12 @@ cron.schedule('0 9 * * *', () => {
 cron.schedule('0 12 * * *', () => {
   console.log('📅 Sending daily payment reminders...');
   sendDailyReminders();
+});
+
+// Daily class reminders (runs at 7:00 AM every day)
+cron.schedule('0 7 * * *', () => {
+  console.log('📚 Sending daily class reminders...');
+  sendAllClassReminders();
 });
 
 app.listen(PORT, () => {

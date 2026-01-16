@@ -40,6 +40,10 @@ const groupSchema = new mongoose.Schema({
     type: Number,
     default: 15,
     min: 1
+  },
+  telegram_chat_id: {
+    type: String,
+    default: '' // Guruhning Telegram chat ID si
   }
 }, {
   timestamps: true

@@ -165,9 +165,107 @@ export const testBotConnection = async () => {
   }
 };
 
+// Format class reminder message
+const formatClassReminderMessage = (group, debtorStudents) => {
+  const dayNames = {
+    'Mon': 'Dushanba',
+    'Tue': 'Seshanba', 
+    'Wed': 'Chorshanba',
+    'Thu': 'Payshanba',
+    'Fri': 'Juma',
+    'Sat': 'Shanba',
+    'Sun': 'Yakshanba'
+  };
+
+  const daysText = group.days_of_week.map(day => dayNames[day]).join(', ');
+
+  let message = `
+📚 <b>DARS ESLATMASI</b>
+
+🏷️ <b>Guruh:</b> ${group.name}
+📅 <b>Kunlar:</b> ${daysText}
+⏰ <b>Vaqt:</b> ${group.time}
+
+📅 <b>Bugun darsimiz bor!</b>
+  `.trim();
+
+  if (debtorStudents.length > 0) {
+    const debtorList = debtorStudents.map((student, index) => {
+      return `${index + 1}. <b>${student.full_name}</b>
+   📞 ${student.phone}
+   💰 To'lov sanasi: ${new Date(student.next_payment_date).toLocaleDateString('uz-UZ')}`;
+    }).join('\n\n');
+
+    message += `
+
+⚠️ <b>Qarzdor o'quvchilar:</b>
+
+${debtorList}
+
+🔔 Iltimos, ushbu o'quvchilar to'lovni qiling agarda tolov qilinmasa darsga kira olmaysiz !`;
+  }
+  return message;
+};
+
+// Send class reminder to specific group
+export const sendClassReminder = async (groupId) => {
+  try {
+    const group = await Group.findById(groupId).populate('course_id');
+    if (!group || !group.telegram_chat_id) return;
+
+    // Get debtor students in this group
+    const debtorStudents = await Student.find({
+      group_id: groupId,
+      status: 'DEBTOR'
+    });
+
+    const message = formatClassReminderMessage(group, debtorStudents);
+    await sendTelegramMessageToChat(group.telegram_chat_id, message);
+  } catch (error) {
+    console.error('Error sending class reminder:', error);
+  }
+};
+
+// Send message to specific chat
+const sendTelegramMessageToChat = async (chatId, message) => {
+  try {
+    await bot.sendMessage(chatId, message, {
+      parse_mode: 'HTML',
+      disable_web_page_preview: true
+    });
+    console.log(`✅ Message sent to chat ${chatId}`);
+  } catch (error) {
+    console.error(`❌ Error sending message to chat ${chatId}:`, error.message);
+  }
+};
+
+// Send class reminders for all groups (runs at 7:00 AM)
+export const sendAllClassReminders = async () => {
+  try {
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'short' });
+    
+    // Get groups that have class today
+    const groupsToday = await Group.find({
+      days_of_week: today,
+      status: 'ACTIVE',
+      telegram_chat_id: { $ne: '' }
+    }).populate('course_id');
+
+    console.log(`📚 Found ${groupsToday.length} groups with classes today`);
+
+    for (const group of groupsToday) {
+      await sendClassReminder(group._id);
+    }
+  } catch (error) {
+    console.error('Error sending all class reminders:', error);
+  }
+};
+
 export default {
   sendPaymentNotification,
   sendDailyReminders,
   sendPaymentDueReminder,
+  sendClassReminder,
+  sendAllClassReminders,
   testBotConnection
 };
