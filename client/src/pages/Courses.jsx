@@ -20,24 +20,6 @@ export default function Courses() {
     fetchCourses();
   }, []);
 
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (showModal) {
-      // Save current scroll position
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      
-      return () => {
-        // Restore scroll position when modal closes
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [showModal]);
 
   const fetchCourses = async () => {
     try {
@@ -95,6 +77,22 @@ export default function Courses() {
       console.error('Error deleting course:', error);
       alert('Xatolik yuz berdi');
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      monthly_price: '',
+      lessons_per_month: '',
+      description: '',
+      is_active: true
+    });
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingCourse(null);
+    resetForm();
   };
 
   if (loading) {
@@ -182,7 +180,7 @@ export default function Courses() {
       {/* Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         title={editingCourse ? 'Kursni tahrirlash' : 'Yangi kurs'}
         size="sm"
       >
@@ -256,7 +254,7 @@ export default function Courses() {
           <div className="flex gap-3 pt-4">
             <button
               type="button"
-              onClick={() => setShowModal(false)}
+              onClick={closeModal}
               className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
             >
               Bekor qilish

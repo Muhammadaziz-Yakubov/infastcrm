@@ -1,15 +1,32 @@
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 
-export default function Modal({ isOpen, onClose, title, children, size = 'md' }) {
+export default function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'md',
+  closeOnBackdrop = true,
+  closeOnEsc = true,
+}) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = 'unset';
-      };
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+
+    document.body.style.overflow = 'hidden';
+
+    const handleEsc = (e) => {
+      if (!closeOnEsc) return;
+      if (e.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', handleEsc);
+
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose, closeOnEsc]);
 
   if (!isOpen) return null;
 
@@ -17,40 +34,42 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
     sm: 'max-w-md',
     md: 'max-w-lg',
     lg: 'max-w-2xl',
-    xl: 'max-w-4xl'
+    xl: 'max-w-4xl',
+  };
+
+  const handleBackdropClick = () => {
+    if (closeOnBackdrop) onClose();
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 overflow-y-auto"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
+    <div className="modal-container">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
-      
-      {/* Modal wrapper - flex container for centering */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        {/* Modal content */}
-        <div 
-          className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full ${sizeClasses[size]} animate-fade-in-up`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
-            >
-              <X size={20} className="text-gray-500 dark:text-gray-400" />
-            </button>
-          </div>
-          
-          {/* Body */}
-          <div className="p-5 max-h-[calc(100vh-180px)] overflow-y-auto">
-            {children}
-          </div>
+      <div
+        className="modal-overlay modal-backdrop"
+        onClick={handleBackdropClick}
+      />
+
+      {/* Modal */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        className={`modal-content ${sizeClasses[size]}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="modal-header">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            aria-label="Close modal"
+          >
+            <X size={20} className="text-gray-500 dark:text-gray-400" />
+          </button>
         </div>
+
+        {/* Body */}
+        <div className="modal-body">{children}</div>
       </div>
     </div>
   );

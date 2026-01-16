@@ -97,6 +97,12 @@ export default function Staff() {
     setShowPassword(false);
   };
 
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingStaff(null);
+    resetForm();
+  };
+
   const getRoleColor = (role) => {
     switch (role) {
       case 'ADMIN': return 'from-purple-500 to-indigo-500';
@@ -229,7 +235,7 @@ export default function Staff() {
       {/* Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         title={editingStaff ? 'Xodimni tahrirlash' : 'Yangi xodim'}
         size="sm"
       >
@@ -321,7 +327,7 @@ export default function Staff() {
           <div className="flex gap-3 pt-4">
             <button
               type="button"
-              onClick={() => setShowModal(false)}
+              onClick={closeModal}
               className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
             >
               Bekor qilish

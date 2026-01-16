@@ -152,6 +152,18 @@ export default function Groups() {
     });
   };
 
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingGroup(null);
+    resetForm();
+  };
+
+  const closeActivateModal = () => {
+    setShowActivateModal(false);
+    setActivatingGroup(null);
+    resetForm();
+  };
+
   const toggleDay = (day) => {
     setFormData({
       ...formData,
@@ -336,7 +348,7 @@ export default function Groups() {
       {/* Create/Edit Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         title={editingGroup ? 'Guruhni tahrirlash' : 'Yangi guruh'}
         size="lg"
       >
@@ -437,7 +449,7 @@ export default function Groups() {
           <div className="flex gap-3 pt-4">
             <button
               type="button"
-              onClick={() => setShowModal(false)}
+              onClick={closeModal}
               className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
             >
               Bekor qilish
@@ -455,7 +467,7 @@ export default function Groups() {
       {/* Activate Modal */}
       <Modal
         isOpen={showActivateModal && !!activatingGroup}
-        onClose={() => setShowActivateModal(false)}
+        onClose={closeActivateModal}
         title="Guruhni faollashtirish"
         size="sm"
       >
@@ -481,7 +493,7 @@ export default function Groups() {
         <div className="flex gap-3 pt-4">
           <button
             type="button"
-            onClick={() => setShowActivateModal(false)}
+            onClick={closeActivateModal}
             className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
           >
             Bekor qilish

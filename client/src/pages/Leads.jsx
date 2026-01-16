@@ -106,6 +106,12 @@ export default function Leads() {
     });
   };
 
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingLead(null);
+    resetForm();
+  };
+
   const getStatusGradient = (status) => {
     switch (status) {
       case 'CONFIRMED': return 'from-emerald-400 to-green-500';
@@ -301,7 +307,7 @@ export default function Leads() {
       {/* Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         title={editingLead ? "Nabor o'quvchini tahrirlash" : "Yangi nabor o'quvchi"}
         size="sm"
       >

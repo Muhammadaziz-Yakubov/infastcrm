@@ -54,24 +54,6 @@ export default function Students() {
     fetchStudents();
   }, [statusFilter, groupFilter, paymentFilter]);
 
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (showModal) {
-      // Save current scroll position
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      
-      return () => {
-        // Restore scroll position when modal closes
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [showModal]);
 
   const fetchGroups = async () => {
     try {
@@ -160,6 +142,12 @@ export default function Students() {
       password: ''
     });
     setShowPassword(false);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingStudent(null);
+    resetForm();
   };
 
   const getStatusGradient = (status) => {
@@ -425,7 +413,7 @@ export default function Students() {
       {/* Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         title={editingStudent ? "O'quvchini tahrirlash" : "Yangi o'quvchi"}
         size="md"
       >

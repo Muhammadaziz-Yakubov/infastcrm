@@ -118,6 +118,12 @@ export default function Payments() {
     });
   };
 
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingPayment(null);
+    resetForm();
+  };
+
   const getPaymentTypeLabel = (type) => {
     switch (type) {
       case 'CASH': return 'Naqd';
@@ -344,7 +350,7 @@ export default function Payments() {
       {/* Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={closeModal}
         title={editingPayment ? "To'lovni tahrirlash" : "Yangi to'lov"}
         size="sm"
       >
