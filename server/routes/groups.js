@@ -2,8 +2,9 @@ import express from 'express';
 import Group from '../models/Group.js';
 import Student from '../models/Student.js';
 import Lead from '../models/Lead.js';
-import { authenticate } from '../middleware/auth.js';
-import { sendTelegramMessageToChat } from '../services/telegramBot.js';
+import Attendance from '../models/Attendance.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
+import { sendTelegramMessageToChat, sendAttendanceSummary } from '../services/telegramBot.js';
 
 const router = express.Router();
 
@@ -150,6 +151,75 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
     res.json({ message: 'Group deleted successfully' });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Send attendance message to group
+router.post('/:id/send-attendance', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { date } = req.body;
+    await sendAttendanceSummary(req.params.id, date);
+    res.json({ message: 'Attendance message sent successfully' });
+  } catch (error) {
+    console.error('Error sending attendance message:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Send scores message to group
+router.post('/:id/send-scores', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { date } = req.body;
+    const group = await Group.findById(req.params.id).populate('course_id');
+    if (!group || !group.telegram_chat_id) {
+      return res.status(404).json({ message: 'Group not found or no chat ID' });
+    }
+
+    // Get today's attendance records
+    const attendanceRecords = await Attendance.find({
+      group_id: req.params.id,
+      date: new Date(date)
+    }).populate('student_id');
+
+    // Get present students with scores
+    const presentStudents = attendanceRecords
+      .filter(record => record.status === 'PRESENT')
+      .map(record => ({
+        ...record.student_id.toObject(),
+        score: record.score || 0
+      }));
+
+    if (presentStudents.length === 0) {
+      return res.status(404).json({ message: 'No present students found for today' });
+    }
+
+    // Format scores message
+    const today = new Date().toLocaleDateString('uz-UZ');
+    let message = `
+🎯 <b>BUGUNGI DARS BALLARI</b>
+
+🏷️ <b>Guruh:</b> ${group.name}
+📅 <b>Sana:</b> ${today}
+📚 <b>Kurs:</b> ${group.course_id?.name || 'Noma\'lum'}
+
+📊 <b>Kelgan o'quvchilar:</b> ${presentStudents.length} ta
+
+📝 <b>Ballar ro'yxati:</b>
+    `.trim();
+
+    const scoresList = presentStudents.map((student, index) => {
+      return `${index + 1}. <b>${student.full_name}</b>
+   📞 ${student.phone}
+   🎯 <b>Ball:</b> ${student.score || 0}`;
+    }).join('\n\n');
+
+    message += `\n\n${scoresList}`;
+
+    await sendTelegramMessageToChat(group.telegram_chat_id, message);
+    res.json({ message: 'Scores message sent successfully' });
+  } catch (error) {
+    console.error('Error sending scores message:', error);
     res.status(500).json({ message: error.message });
   }
 });

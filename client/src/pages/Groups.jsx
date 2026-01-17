@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Modal from '../components/Modal';
-import { Plus, Edit, Trash2, Play, Users, Clock, Calendar, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Play, Users, Clock, Calendar, Search, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Groups() {
@@ -15,6 +15,8 @@ export default function Groups() {
   const [editingGroup, setEditingGroup] = useState(null);
   const [activatingGroup, setActivatingGroup] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchParams] = useSearchParams();
   const statusFilter = searchParams.get('status');
   const { user } = useAuth();
@@ -194,6 +196,37 @@ export default function Groups() {
     }
   };
 
+  const handleShowMessageModal = (group) => {
+    setSelectedGroup(group);
+    setShowMessageModal(true);
+  };
+
+  const handleSendMessage = async (messageType) => {
+    if (!selectedGroup) return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (messageType === 'attendance') {
+        await api.post(`/groups/${selectedGroup._id}/send-attendance`, {
+          date: today
+        });
+        alert('Davomat xabari yuborildi!');
+      } else if (messageType === 'scores') {
+        await api.post(`/groups/${selectedGroup._id}/send-scores`, {
+          date: today
+        });
+        alert('Ballar xabari yuborildi!');
+      }
+      
+      setShowMessageModal(false);
+      setSelectedGroup(null);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Xabar yuborishda xatolik yuz berdi');
+    }
+  };
+
   const filteredGroups = groups.filter(group =>
     group.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -325,6 +358,13 @@ export default function Groups() {
                         className="p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                       >
                         <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => setShowMessageModal(group)}
+                        className="p-2 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                        title="Guruhga xabar yuborish"
+                      >
+                        <MessageSquare size={18} />
                       </button>
                       <button
                         onClick={() => handleDelete(group._id)}
@@ -523,6 +563,51 @@ export default function Groups() {
           >
             Faollashtirish
           </button>
+        </div>
+      </Modal>
+
+      {/* Message Modal */}
+      <Modal
+        isOpen={showMessageModal && !!selectedGroup}
+        onClose={() => {
+          setShowMessageModal(false);
+          setSelectedGroup(null);
+        }}
+        title="Guruhga xabar yuborish"
+        size="sm"
+      >
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl mb-4">
+          <p className="text-green-700 dark:text-green-300">
+            <strong>{selectedGroup?.name}</strong> guruhiga xabar yuborish
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Qaysi turdagi xabarni yubormoqchisiz?
+          </p>
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <button
+            onClick={() => handleSendMessage('attendance')}
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-400 to-orange-500 text-white rounded-xl font-medium shadow-lg hover:from-red-500 hover:to-orange-600 transition-all"
+          >
+            📋 Davomat xabari
+          </button>
+          <button
+            onClick={() => handleSendMessage('scores')}
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-400 to-indigo-500 text-white rounded-xl font-medium shadow-lg hover:from-blue-500 hover:to-indigo-600 transition-all"
+          >
+            🎯 Ballar xabari
+          </button>
+        </div>
+
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            <strong>Davomat xabari:</strong> Bugun kelmagan o'quvchilar ro'yxati<br/>
+            <strong>Ballar xabari:</strong> Bugun kelgan o'quvchilar va ularning ballari
+          </p>
         </div>
       </Modal>
     </div>
