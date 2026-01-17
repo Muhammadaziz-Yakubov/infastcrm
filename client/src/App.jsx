@@ -12,6 +12,7 @@ import Courses from './pages/Courses';
 import Groups from './pages/Groups';
 import Students from './pages/Students';
 import Leads from './pages/Leads';
+import Marketing from './pages/Marketing';
 import Payments from './pages/Payments';
 import Attendance from './pages/Attendance';
 import Staff from './pages/Staff';
@@ -78,6 +79,11 @@ function AppRoutes() {
         <Route path="leads" element={
           <PrivateRoute adminOnly>
             <Leads />
+          </PrivateRoute>
+        } />
+        <Route path="marketing" element={
+          <PrivateRoute adminOnly>
+            <Marketing />
           </PrivateRoute>
         } />
         <Route path="payments" element={<Payments />} />

@@ -46,6 +46,19 @@ const studentSchema = new mongoose.Schema({
   },
   next_payment_date: {
     type: Date
+  },
+  lead_source: {
+    type: String,
+    enum: ['Instagram', 'Telegram', 'Tanishlar', 'Reklama', 'Veb-sayt', 'Boshqa'],
+    default: 'Boshqa'
+  },
+  original_lead_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lead'
+  },
+  conversion_date: {
+    type: Date,
+    default: Date.now
   }
 }, {
   timestamps: true

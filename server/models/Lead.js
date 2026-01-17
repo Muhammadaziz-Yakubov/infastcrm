@@ -18,8 +18,34 @@ const leadSchema = new mongoose.Schema({
   },
   lead_status: {
     type: String,
-    enum: ['INTERESTED', 'REGISTERED', 'CONFIRMED'],
-    default: 'INTERESTED'
+    enum: ['LEAD', 'INTERESTED', 'REGISTERED', 'CONFIRMED', 'CONVERTED', 'LOST'],
+    default: 'LEAD'
+  },
+  source: {
+    type: String,
+    enum: ['Instagram', 'Telegram', 'Tanishlar', 'Reklama', 'Veb-sayt', 'Boshqa'],
+    default: 'Boshqa'
+  },
+  course_interest: {
+    type: String,
+    trim: true
+  },
+  notes: {
+    type: String,
+    trim: true
+  },
+  assigned_to: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  converted_to_student: {
+    type: Date
+  },
+  follow_up_date: {
+    type: Date
+  },
+  last_contact_date: {
+    type: Date
   }
 }, {
   timestamps: true
