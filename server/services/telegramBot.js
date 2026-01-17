@@ -544,8 +544,20 @@ ${scoresList}`;
 // Send attendance summary after 1 hour
 export const sendAttendanceSummary = async (groupId, date) => {
   try {
+    console.log(`📋 Starting attendance summary for group ${groupId}`);
+    
     const group = await Group.findById(groupId).populate('course_id');
-    if (!group || !group.telegram_chat_id) return;
+    if (!group) {
+      console.log(`❌ Group ${groupId} not found`);
+      return;
+    }
+    
+    if (!group.telegram_chat_id) {
+      console.log(`❌ Group ${group.name} has no telegram_chat_id`);
+      return;
+    }
+    
+    console.log(`📋 Found group ${group.name} with chat_id: ${group.telegram_chat_id}`);
 
     // Get today's attendance records
     const attendanceRecords = await Attendance.find({
@@ -573,19 +585,24 @@ export const sendAttendanceSummary = async (groupId, date) => {
 
     // Send attendance summary (absent students)
     let currentChatId = group.telegram_chat_id;
+    console.log(`📤 Attempting to send to chat_id: ${currentChatId}`);
+    
     let attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
     
     // If sending failed due to supergroup upgrade, try to update chat_id
     if (!attendanceSent) {
+      console.log(`🔄 Failed to send, trying to update chat_id...`);
       const newChatId = await updateGroupChatId(group._id, currentChatId);
       if (newChatId !== currentChatId) {
         currentChatId = newChatId;
+        console.log(`📤 Retrying with new chat_id: ${currentChatId}`);
         attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
       }
     }
     
     // Send scores message (present students with scores)
     if (presentStudents.length > 0 && attendanceSent) {
+      console.log(`📤 Sending scores message...`);
       const scoresMessage = formatScoresMessage(group, presentStudents);
       await sendTelegramMessageToChat(currentChatId, scoresMessage);
     }

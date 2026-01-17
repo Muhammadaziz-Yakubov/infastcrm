@@ -83,9 +83,12 @@ router.post('/', authenticate, async (req, res) => {
     await attendance.populate('group_id');
     
     // Schedule attendance summary after 1 hour
+    console.log(`🔍 Checking group ${attendance.group_id.name} for telegram_chat_id: ${attendance.group_id.telegram_chat_id}`);
+    
     if (attendance.group_id.telegram_chat_id) {
       setTimeout(async () => {
         try {
+          console.log(`⏰ Sending attendance summary for group ${attendance.group_id.name} now...`);
           await sendAttendanceSummary(attendance.group_id._id, attendance.date);
         } catch (error) {
           console.error('Error sending scheduled attendance summary:', error);
@@ -93,6 +96,8 @@ router.post('/', authenticate, async (req, res) => {
       }, 60 * 60 * 1000); // 1 hour in milliseconds
       
       console.log(`⏰ Attendance summary scheduled for group ${attendance.group_id.name} in 1 hour`);
+    } else {
+      console.log(`⚠️ Group ${attendance.group_id.name} has no telegram_chat_id, skipping attendance summary`);
     }
     
     res.status(201).json(attendance);
