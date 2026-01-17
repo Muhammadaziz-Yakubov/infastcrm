@@ -159,6 +159,16 @@ router.delete('/:id', authenticate, async (req, res) => {
 router.post('/:id/send-attendance', authenticate, requireAdmin, async (req, res) => {
   try {
     const { date } = req.body;
+    console.log(`📤 Sending attendance message for group ${req.params.id} on date ${date}`);
+    
+    // Refresh group data before sending
+    const group = await Group.findById(req.params.id).populate('course_id');
+    if (!group) {
+      return res.status(404).json({ message: 'Group not found' });
+    }
+    
+    console.log(`📋 Group found: ${group.name} with chat_id: ${group.telegram_chat_id}`);
+    
     await sendAttendanceSummary(req.params.id, date);
     res.json({ message: 'Attendance message sent successfully' });
   } catch (error) {
@@ -171,10 +181,18 @@ router.post('/:id/send-attendance', authenticate, requireAdmin, async (req, res)
 router.post('/:id/send-scores', authenticate, requireAdmin, async (req, res) => {
   try {
     const { date } = req.body;
+    console.log(`📤 Sending scores message for group ${req.params.id} on date ${date}`);
+    
     const group = await Group.findById(req.params.id).populate('course_id');
-    if (!group || !group.telegram_chat_id) {
-      return res.status(404).json({ message: 'Group not found or no chat ID' });
+    if (!group) {
+      return res.status(404).json({ message: 'Group not found' });
     }
+    
+    if (!group.telegram_chat_id) {
+      return res.status(404).json({ message: 'Group has no chat ID' });
+    }
+    
+    console.log(`📋 Group found: ${group.name} with chat_id: ${group.telegram_chat_id}`);
 
     // Get today's attendance records
     const attendanceRecords = await Attendance.find({

@@ -545,7 +545,7 @@ export const sendAttendanceSummary = async (groupId, date) => {
   try {
     console.log(`📋 Starting attendance summary for group ${groupId}`);
     
-    const group = await Group.findById(groupId).populate('course_id');
+    let group = await Group.findById(groupId).populate('course_id');
     if (!group) {
       console.log(`❌ Group ${groupId} not found`);
       return;
@@ -557,6 +557,10 @@ export const sendAttendanceSummary = async (groupId, date) => {
     }
     
     console.log(`📋 Found group ${group.name} with chat_id: ${group.telegram_chat_id}`);
+    
+    // Refresh group data to get latest chat_id
+    group = await Group.findById(groupId).populate('course_id');
+    console.log(`🔄 Refreshed group ${group.name} with chat_id: ${group.telegram_chat_id}`);
 
     // Get today's attendance records
     const attendanceRecords = await Attendance.find({
