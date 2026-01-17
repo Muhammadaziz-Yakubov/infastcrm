@@ -82,7 +82,7 @@ router.post('/', authenticate, async (req, res) => {
     await attendance.populate('student_id');
     await attendance.populate('group_id');
     
-    // Schedule attendance summary after 1 hour
+    // Schedule attendance summary after 10 minutes
     console.log(`🔍 Checking group ${attendance.group_id.name} for telegram_chat_id: ${attendance.group_id.telegram_chat_id}`);
     
     if (attendance.group_id.telegram_chat_id) {
@@ -93,9 +93,9 @@ router.post('/', authenticate, async (req, res) => {
         } catch (error) {
           console.error('Error sending scheduled attendance summary:', error);
         }
-      }, 60 * 60 * 1000); // 1 hour in milliseconds
+      }, 10 * 60 * 1000); // 10 minutes in milliseconds
       
-      console.log(`⏰ Attendance summary scheduled for group ${attendance.group_id.name} in 1 hour`);
+      console.log(`⏰ Attendance summary scheduled for group ${attendance.group_id.name} in 10 minutes`);
     } else {
       console.log(`⚠️ Group ${attendance.group_id.name} has no telegram_chat_id, skipping attendance summary`);
     }
@@ -119,6 +119,21 @@ router.put('/:id', authenticate, async (req, res) => {
     if (!attendance) {
       return res.status(404).json({ message: 'Attendance record not found' });
     }
+    
+    // Schedule attendance summary after 10 minutes when attendance is updated
+    if (attendance.group_id.telegram_chat_id) {
+      setTimeout(async () => {
+        try {
+          console.log(`⏰ Sending attendance summary for updated group ${attendance.group_id.name} now...`);
+          await sendAttendanceSummary(attendance.group_id._id, attendance.date);
+        } catch (error) {
+          console.error('Error sending scheduled attendance summary:', error);
+        }
+      }, 10 * 60 * 1000); // 10 minutes in milliseconds
+      
+      console.log(`⏰ Attendance summary scheduled for updated group ${attendance.group_id.name} in 10 minutes`);
+    }
+    
     res.json(attendance);
   } catch (error) {
     res.status(400).json({ message: error.message });
