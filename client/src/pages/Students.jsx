@@ -52,6 +52,7 @@ export default function Students() {
     joined_date: format(new Date(), 'yyyy-MM-dd'),
     login: '',
     password: '',
+    lead_source: 'Boshqa',
     // Payment fields
     first_payment_amount: '',
     first_payment_date: format(new Date(), 'yyyy-MM-dd'),
@@ -154,7 +155,8 @@ export default function Students() {
       status: student.status,
       joined_date: student.joined_date ? format(new Date(student.joined_date), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       login: student.login || '',
-      password: ''
+      password: '',
+      lead_source: student.lead_source || 'Boshqa'
     });
     setShowModal(true);
   };
@@ -222,6 +224,7 @@ export default function Students() {
       joined_date: format(new Date(), 'yyyy-MM-dd'),
       login: '',
       password: '',
+      lead_source: 'Boshqa',
       // Payment fields
       first_payment_amount: '',
       first_payment_date: format(new Date(), 'yyyy-MM-dd'),
