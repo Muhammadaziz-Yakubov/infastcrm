@@ -18,6 +18,8 @@ import Attendance from './pages/Attendance';
 import Staff from './pages/Staff';
 import AdminTasks from './pages/AdminTasks';
 import Rating from './pages/Rating';
+import Exams from './pages/Exams';
+import StudentExams from './pages/StudentExams';
 import Layout from './components/Layout';
 
 function PrivateRoute({ children, adminOnly = false }) {
@@ -58,6 +60,7 @@ function AppRoutes() {
       <Route path="/student/tasks" element={<StudentTasks />} />
       <Route path="/student/code-editor/:taskId" element={<StudentCodeEditor />} />
       <Route path="/student/rating" element={<StudentRating />} />
+      <Route path="/student/exams" element={<StudentExams />} />
       
       {/* Protected Routes */}
       <Route
@@ -86,6 +89,11 @@ function AppRoutes() {
             <Marketing />
           </PrivateRoute>
         } />
+        <Route path="exams" element={
+          <PrivateRoute adminOnly>
+            <Exams />
+          </PrivateRoute>
+        } />
         <Route path="payments" element={<Payments />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="staff" element={
@@ -93,7 +101,11 @@ function AppRoutes() {
             <Staff />
           </PrivateRoute>
         } />
-        <Route path="tasks" element={<AdminTasks />} />
+        <Route path="tasks" element={
+          <PrivateRoute adminOnly>
+            <AdminTasks />
+          </PrivateRoute>
+        } />
         <Route path="rating" element={<Rating />} />
               </Route>
     </Routes>

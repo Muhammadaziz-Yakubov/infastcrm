@@ -23,7 +23,8 @@ export default function Rating() {
 
   const fetchRatings = async () => {
     try {
-      const response = await api.get('/tasks/ratings/students');
+      // Use the same public endpoint as student rating
+      const response = await api.get('/public/ratings');
       setRatings(response.data);
     } catch (error) {
       console.error('Error fetching ratings:', error);
@@ -53,8 +54,8 @@ export default function Rating() {
   };
 
   const filteredRatings = ratings.filter(r =>
-    r.student?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.student?.group?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    r.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.group_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -103,15 +104,15 @@ export default function Rating() {
             </div>
             <div className="text-center">
               <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
-                {top3[1]?.student?.full_name}
+                {top3[1]?.full_name}
               </h3>
               <p className="text-sm text-gray-500 truncate max-w-[150px]">
-                {top3[1]?.student?.group?.name}
+                {top3[1]?.group_name}
               </p>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <Star className="text-gray-400 fill-gray-400" size={16} />
                 <span className="font-bold text-gray-600 dark:text-gray-300">
-                  {top3[1]?.averageScore}
+                  {top3[1]?.percentage?.toFixed(1)}
                 </span>
               </div>
             </div>
@@ -130,15 +131,15 @@ export default function Rating() {
             </div>
             <div className="text-center">
               <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate max-w-[150px]">
-                {top3[0]?.student?.full_name}
+                {top3[0]?.full_name}
               </h3>
               <p className="text-sm text-gray-500 truncate max-w-[150px]">
-                {top3[0]?.student?.group?.name}
+                {top3[0]?.group_name}
               </p>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <Star className="text-yellow-500 fill-yellow-500" size={18} />
                 <span className="font-bold text-xl text-yellow-600">
-                  {top3[0]?.averageScore}
+                  {top3[0]?.percentage?.toFixed(1)}
                 </span>
               </div>
             </div>
@@ -152,15 +153,15 @@ export default function Rating() {
             </div>
             <div className="text-center">
               <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
-                {top3[2]?.student?.full_name}
+                {top3[2]?.full_name}
               </h3>
               <p className="text-sm text-gray-500 truncate max-w-[150px]">
-                {top3[2]?.student?.group?.name}
+                {top3[2]?.group_name}
               </p>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <Star className="text-amber-500 fill-amber-500" size={16} />
                 <span className="font-bold text-amber-600">
-                  {top3[2]?.averageScore}
+                  {top3[2]?.percentage?.toFixed(1)}
                 </span>
               </div>
             </div>
@@ -181,7 +182,7 @@ export default function Rating() {
         <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {filteredRatings.map((rating, index) => (
             <div 
-              key={rating.student?._id}
+              key={rating.student_id || index}
               className={`flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors animate-fade-in-up ${
                 rating.rank <= 3 ? 'bg-gradient-to-r from-yellow-50 to-transparent dark:from-yellow-900/10' : ''
               }`}
@@ -200,22 +201,22 @@ export default function Rating() {
               {/* Student Info */}
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                  {rating.student?.full_name}
+                  {rating.full_name}
                 </h3>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Users size={14} />
-                  <span className="truncate">{rating.student?.group?.name || 'Guruh yo\'q'}</span>
+                  <span className="truncate">{rating.group_name || 'Guruh yo\'q'}</span>
                   <span>•</span>
-                  <span>{rating.taskCount} vazifa</span>
+                  <span>{rating.completed_tasks} vazifa</span>
                 </div>
               </div>
 
               {/* Score */}
               <div className="text-right">
-                <div className={`text-2xl font-bold ${getScoreColor(rating.averageScore)}`}>
-                  {rating.averageScore}
+                <div className={`text-2xl font-bold ${getScoreColor(rating.percentage)}`}>
+                  {rating.percentage?.toFixed(1)}
                 </div>
-                <div className="text-xs text-gray-400">o'rtacha ball</div>
+                <div className="text-xs text-gray-400">%</div>
               </div>
 
               {/* Stars for top 3 */}

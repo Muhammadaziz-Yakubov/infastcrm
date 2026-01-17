@@ -11,10 +11,13 @@ const taskSubmissionSchema = new mongoose.Schema({
     ref: 'Student',
     required: true
   },
-  code: {
-    type: String,
-    required: true
-  },
+  submitted_files: [{
+    filename: String,
+    original_name: String,
+    file_path: String,
+    file_size: Number,
+    mime_type: String
+  }],
   description: {
     type: String,
     default: ''

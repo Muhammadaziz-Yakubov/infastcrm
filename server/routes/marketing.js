@@ -12,18 +12,45 @@ router.get('/stats', authenticate, requireAdmin, async (req, res) => {
     const convertedLeads = await Lead.countDocuments({ lead_status: 'CONVERTED' });
     const lostLeads = await Lead.countDocuments({ lead_status: 'LOST' });
     
-    // Source statistics
-    const sourceStats = await Lead.aggregate([
+    // Source statistics (from leads)
+    const leadSourceStats = await Lead.aggregate([
       {
         $group: {
           _id: '$source',
-          count: { $sum: 1 },
-          converted: {
+          totalLeads: { $sum: 1 },
+          convertedLeads: {
             $sum: { $cond: [{ $eq: ['$lead_status', 'CONVERTED'] }, 1, 0] }
           }
         }
       }
     ]);
+
+    // Source statistics (from students)
+    const studentSourceStats = await Student.aggregate([
+      {
+        $group: {
+          _id: '$lead_source',
+          totalStudents: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Combine lead and student stats
+    const combinedSourceStats = leadSourceStats.map(leadStat => {
+      const studentStat = studentSourceStats.find(s => s._id === leadStat._id);
+      return {
+        _id: leadStat._id,
+        totalLeads: leadStat.totalLeads,
+        convertedLeads: leadStat.convertedLeads,
+        totalStudents: studentStat?.totalStudents || 0,
+        conversionRate: leadStat.totalLeads > 0 ? (leadStat.convertedLeads / leadStat.totalLeads * 100) : 0
+      };
+    });
+
+    // Find top source
+    const topSourceStat = combinedSourceStats.reduce((top, current) => 
+      current.totalLeads > (top?.totalLeads || 0) ? current : top, null
+    );
 
     // Monthly leads
     const monthlyLeads = await Lead.aggregate([
@@ -48,7 +75,9 @@ router.get('/stats', authenticate, requireAdmin, async (req, res) => {
       convertedLeads,
       lostLeads,
       conversionRate,
-      sourceStats,
+      topSource: topSourceStat?._id || 'Noma\'lum',
+      topSourceLeads: topSourceStat?.totalLeads || 0,
+      sourceStats: combinedSourceStats,
       monthlyLeads
     });
   } catch (error) {
@@ -88,23 +117,59 @@ router.get('/leads', authenticate, requireAdmin, async (req, res) => {
 // Create new lead
 router.post('/leads', authenticate, requireAdmin, async (req, res) => {
   try {
-    const lead = new Lead(req.body);
+    console.log('📝 Creating lead with data:', req.body);
+    
+    // Clean up the request data
+    const leadData = { ...req.body };
+    
+    // Remove empty string fields that should be ObjectId or null
+    if (!leadData.assigned_to) {
+      delete leadData.assigned_to;
+    }
+    if (!leadData.follow_up_date) {
+      delete leadData.follow_up_date;
+    }
+    
+    console.log('📝 Cleaned lead data:', leadData);
+    
+    const lead = new Lead(leadData);
     await lead.save();
     await lead.populate('group_id', 'name');
     await lead.populate('assigned_to', 'name email');
     
+    console.log('✅ Lead created successfully:', lead);
     res.status(201).json(lead);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('❌ Error creating lead:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      name: error.name,
+      errors: error.errors
+    });
+    res.status(400).json({ 
+      message: error.message,
+      details: error.errors
+    });
   }
 });
 
 // Update lead
 router.put('/leads/:id', authenticate, requireAdmin, async (req, res) => {
   try {
+    // Clean up the request data
+    const leadData = { ...req.body };
+    
+    // Remove empty string fields that should be ObjectId or null
+    if (!leadData.assigned_to) {
+      delete leadData.assigned_to;
+    }
+    if (!leadData.follow_up_date) {
+      delete leadData.follow_up_date;
+    }
+    
     const lead = await Lead.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      leadData,
       { new: true, runValidators: true }
     )
       .populate('group_id', 'name')

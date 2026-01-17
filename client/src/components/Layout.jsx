@@ -18,7 +18,9 @@ import {
   Sparkles,
   FileCode,
   Trophy,
-  TrendingUp
+  TrendingUp,
+  FileText,
+  Target
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -37,6 +39,8 @@ export default function Layout() {
     { path: '/students', icon: UserCheck, label: 'O\'quvchilar' },
     { path: '/leads', icon: UserPlus, label: 'Nabor', adminOnly: true },
     { path: '/marketing', icon: TrendingUp, label: 'Marketing', adminOnly: true },
+    { path: '/tasks', icon: Target, label: 'Vazifalar', adminOnly: true },
+    { path: '/exams', icon: FileText, label: 'Imtihonlar', adminOnly: true },
     { path: '/payments', icon: CreditCard, label: 'To\'lovlar' },
     { path: '/attendance', icon: ClipboardCheck, label: 'Davomat' },
     { path: '/rating', icon: Trophy, label: 'Reyting' },

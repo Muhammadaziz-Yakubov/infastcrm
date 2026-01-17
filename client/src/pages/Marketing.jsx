@@ -10,18 +10,21 @@ import {
   Edit, 
   Trash2, 
   Calendar,
-  Filter,
   Search,
   BarChart3,
   Target,
   UserCheck,
   UserX,
-  Clock,
   Instagram,
   MessageCircle,
   Share2,
   Radio,
-  Globe
+  Globe,
+  MoreVertical,
+  ChevronRight,
+  Filter,
+  Clock,
+  Layout
 } from 'lucide-react';
 
 export default function Marketing() {
@@ -34,6 +37,7 @@ export default function Marketing() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
+  const [groups, setGroups] = useState([]);
   const { user } = useAuth();
   const isAdmin = user?.role === 'ADMIN';
 
@@ -48,8 +52,6 @@ export default function Marketing() {
     follow_up_date: ''
   });
 
-  const [groups, setGroups] = useState([]);
-
   const sourceIcons = {
     'Instagram': <Instagram size={16} />,
     'Telegram': <MessageCircle size={16} />,
@@ -60,20 +62,33 @@ export default function Marketing() {
   };
 
   const statusColors = {
-    'LEAD': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-    'INTERESTED': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-    'REGISTERED': 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
-    'CONFIRMED': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400',
-    'CONVERTED': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-    'LOST': 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+    'LEAD': 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-400',
+    'INTERESTED': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400',
+    'REGISTERED': 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-400',
+    'CONFIRMED': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-400',
+    'CONVERTED': 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400',
+    'LOST': 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
   };
 
   useEffect(() => {
-    fetchStats();
-    fetchLeads();
-    fetchSources();
-    fetchGroups();
+    fetchAllData();
   }, [statusFilter, sourceFilter, searchTerm]);
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchStats(),
+        fetchLeads(),
+        fetchSources(),
+        fetchGroups()
+      ]);
+    } catch (error) {
+      console.error("Ma'lumotlarni yuklashda xatolik:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -119,19 +134,22 @@ export default function Marketing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const dataToSend = { ...formData };
+      if (!dataToSend.assigned_to) delete dataToSend.assigned_to;
+      if (!dataToSend.follow_up_date) delete dataToSend.follow_up_date;
+
       if (editingLead) {
-        await api.put(`/marketing/leads/${editingLead._id}`, formData);
+        await api.put(`/marketing/leads/${editingLead._id}`, dataToSend);
       } else {
-        await api.post('/marketing/leads', formData);
+        await api.post('/marketing/leads', dataToSend);
       }
       
-      fetchLeads();
-      fetchStats();
+      fetchAllData();
       setShowModal(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving lead:', error);
-      alert('Xatolik yuz berdi');
+      const errorMessage = error.response?.data?.message || 'Xatolik yuz berdi';
+      alert(`Xatolik: ${errorMessage}`);
     }
   };
 
@@ -140,7 +158,7 @@ export default function Marketing() {
     setFormData({
       name: lead.name,
       phone: lead.phone,
-      group_id: lead.group_id._id || lead.group_id,
+      group_id: lead.group_id?._id || lead.group_id || '',
       source: lead.source,
       course_interest: lead.course_interest || '',
       notes: lead.notes || '',
@@ -151,27 +169,24 @@ export default function Marketing() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Leadni o\'chirishni tasdiqlaysizmi?')) return;
+    if (!window.confirm('Leadni o\'chirishni tasdiqlaysizmi?')) return;
     try {
       await api.delete(`/marketing/leads/${id}`);
       fetchLeads();
       fetchStats();
     } catch (error) {
-      console.error('Error deleting lead:', error);
-      alert('Xatolik yuz berdi');
+      alert('O\'chirishda xatolik yuz berdi');
     }
   };
 
   const handleConvert = async (id) => {
-    if (!confirm('Leadni o\'quvchiga aylantirishni tasdiqlaysizmi?')) return;
+    if (!window.confirm('Leadni o\'quvchiga aylantirishni tasdiqlaysizmi?')) return;
     try {
       await api.post(`/marketing/leads/${id}/convert`);
-      fetchLeads();
-      fetchStats();
+      fetchAllData();
       alert('Lead muvaffaqiyatli o\'quvchiga aylantirildi!');
     } catch (error) {
-      console.error('Error converting lead:', error);
-      alert('Xatolik yuz berdi');
+      alert(error.response?.data?.message || 'Aylantirishda xatolik yuz berdi');
     }
   };
 
@@ -191,400 +206,358 @@ export default function Marketing() {
 
   if (!isAdmin) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Sizda bu sahifaga kirish huquqi yo'q</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 text-center">
+        <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-3xl">
+          <UserX size={48} className="text-red-500 mx-auto mb-4" />
+          <p className="text-gray-900 dark:text-white font-bold text-xl">Kirish taqiqlangan</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">Sizda marketing bo'limini ko'rish huquqi yo'q.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Marketing</h1>
-        <p className="text-gray-600 dark:text-gray-400">Leadlar va manbalar boshqaruvi</p>
+    <div className="p-4 md:p-8 max-w-[1600px] mx-auto pb-24 md:pb-10 bg-gray-50 dark:bg-[#0f172a] min-h-screen">
+      
+      {/* 1. HEADER SECTION */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div className="space-y-1">
+          <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight">Marketing</h1>
+          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+            <Layout size={16} />
+            <p className="text-sm font-medium">Boshqaruv paneli / Leadlar</p>
+          </div>
+        </div>
+        <button
+          onClick={() => { resetForm(); setShowModal(true); }}
+          className="group relative flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl shadow-indigo-500/30 transition-all active:scale-95 overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-white/10 group-hover:translate-x-full transition-transform duration-500"></div>
+          <Plus size={22} className="relative z-10" />
+          <span className="relative z-10">Yangi Lead Qo'shish</span>
+        </button>
       </div>
 
-      {/* Stats Cards */}
+      {/* 2. STATS GRID */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Jami Leadlar</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalLeads}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-10">
+          {[
+            { label: 'Jami Leadlar', val: stats.totalLeads, icon: Users, col: 'blue', desc: 'Umumiy oqim' },
+            { label: 'Konversiya', val: `${stats.conversionRate}%`, icon: TrendingUp, col: 'green', desc: 'Samaradorlik' },
+            { label: 'O\'quvchilar', val: stats.convertedLeads, icon: UserCheck, col: 'emerald', desc: 'Aylantirildi' },
+            { label: 'Boy berildi', val: stats.lostLeads, icon: UserX, col: 'red', desc: 'Rad etilganlar' },
+            { label: 'Top Manba', val: stats.topSource || 'N/A', icon: Target, col: 'purple', sub: `${stats.topSourceLeads} lead`, desc: 'Eng yaxshi natija' }
+          ].map((item, i) => (
+            <div key={i} className="group bg-white dark:bg-gray-800 p-5 md:p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300">
+              <div className={`w-12 h-12 rounded-2xl bg-${item.col}-500/10 text-${item.col}-600 dark:text-${item.col}-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                <item.icon size={24} />
               </div>
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                <Users className="text-blue-600 dark:text-blue-400" size={24} />
-              </div>
+              <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest leading-none">{item.label}</p>
+              <h3 className="text-2xl md:text-3xl font-black dark:text-white mt-2 mb-1">{item.val}</h3>
+              <p className="text-[10px] text-gray-400 font-medium">{item.desc} {item.sub && `• ${item.sub}`}</p>
             </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Konversiya</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.conversionRate}%</p>
-              </div>
-              <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                <TrendingUp className="text-green-600 dark:text-green-400" size={24} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Aylantirilgan</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.convertedLeads}</p>
-              </div>
-              <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                <UserCheck className="text-green-600 dark:text-green-400" size={24} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Yo'qotilgan</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.lostLeads}</p>
-              </div>
-              <div className="p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
-                <UserX className="text-red-600 dark:text-red-400" size={24} />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* Sources Analytics */}
-      {sources.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <BarChart3 size={20} />
-            Manbalar bo'yicha statistika
-          </h2>
-          <div className="space-y-3">
-            {sources.map((source, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white dark:bg-gray-600 rounded-lg">
-                    {sourceIcons[source._id] || <Users size={16} />}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{source._id}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {source.totalLeads} ta lead
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {source.conversionRate.toFixed(1)}%
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {source.convertedLeads}/{source.totalLeads}
-                  </p>
-                </div>
-              </div>
-            ))}
+      {/* 3. ANALYTICS & FILTERS */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        {/* Progress Charts */}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-black flex items-center gap-3 dark:text-white">
+              <BarChart3 size={24} className="text-indigo-500" /> 
+              Manbalar tahlili
+            </h2>
           </div>
-        </div>
-      )}
-
-      {/* Filters and Search */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 mb-6">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Qidirish..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-5">
+              {sources.map((s, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm group-hover:rotate-12 transition-transform">
+                      {sourceIcons[s._id] || <Users size={18}/>}
+                    </div>
+                    <div>
+                      <p className="text-sm font-black dark:text-white">{s._id}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase">{s.totalLeads} ta murojaat</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-indigo-600 dark:text-indigo-400">{s.conversionRate.toFixed(1)}%</p>
+                    <p className="text-[10px] text-gray-400 font-bold">KONVERSIYA</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex flex-col justify-center space-y-6">
+              {sources.map((s, i) => {
+                const perc = stats && stats.totalLeads > 0 ? (s.totalLeads / stats.totalLeads * 100) : 0;
+                return (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between items-end">
+                      <span className="text-xs font-black text-gray-600 dark:text-gray-300 uppercase tracking-tighter">{s._id}</span>
+                      <span className="text-xs font-black text-indigo-500">{perc.toFixed(0)}%</span>
+                    </div>
+                    <div className="h-3 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden p-0.5">
+                      <div 
+                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out" 
+                        style={{width: `${perc}%`}}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-          >
-            <option value="">Barcha statuslar</option>
-            <option value="LEAD">Lead</option>
-            <option value="INTERESTED">Qiziqqan</option>
-            <option value="REGISTERED">Ro'yxatdan o'tgan</option>
-            <option value="CONFIRMED">Tasdiqlangan</option>
-            <option value="CONVERTED">Aylantirilgan</option>
-            <option value="LOST">Yo'qotilgan</option>
-          </select>
+        </div>
+        
+        {/* Advanced Filters */}
+        <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-indigo-500/40 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-white/20 rounded-2xl">
+                <Filter size={24} />
+              </div>
+              <h3 className="text-xl font-black">Aqlli Filtr</h3>
+            </div>
+            
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-indigo-200 ml-1">Qidiruv</label>
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Ism yoki telefon..." 
+                    className="w-full bg-indigo-500/40 border-2 border-indigo-400/30 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold placeholder:text-indigo-300 focus:outline-none focus:border-white/50 focus:bg-indigo-500/60 transition-all"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
 
-          <select
-            value={sourceFilter}
-            onChange={(e) => setSourceFilter(e.target.value)}
-            className="px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-          >
-            <option value="">Barcha manbalar</option>
-            <option value="Instagram">Instagram</option>
-            <option value="Telegram">Telegram</option>
-            <option value="Tanishlar">Tanishlar</option>
-            <option value="Reklama">Reklama</option>
-            <option value="Veb-sayt">Veb-sayt</option>
-            <option value="Boshqa">Boshqa</option>
-          </select>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-indigo-200 ml-1">Status bo'yicha</label>
+                <select 
+                  className="w-full bg-indigo-500/40 border-2 border-indigo-400/30 rounded-2xl py-4 px-4 text-sm font-bold focus:outline-none focus:border-white/50 focus:bg-indigo-500/60 transition-all appearance-none"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="" className="text-gray-900">Barcha Statuslar</option>
+                  {Object.keys(statusColors).map(s => <option key={s} value={s} className="text-gray-900">{s}</option>)}
+                </select>
+              </div>
 
-          <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="btn-primary flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold whitespace-nowrap"
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-indigo-200 ml-1">Manba bo'yicha</label>
+                <select 
+                  className="w-full bg-indigo-500/40 border-2 border-indigo-400/30 rounded-2xl py-4 px-4 text-sm font-bold focus:outline-none focus:border-white/50 focus:bg-indigo-500/60 transition-all appearance-none"
+                  value={sourceFilter}
+                  onChange={(e) => setSourceFilter(e.target.value)}
+                >
+                  <option value="" className="text-gray-900">Barcha Manbalar</option>
+                  {Object.keys(sourceIcons).map(s => <option key={s} value={s} className="text-gray-900">{s}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => {setSearchTerm(''); setStatusFilter(''); setSourceFilter('');}}
+            className="mt-8 w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 active:scale-95 transition-all"
           >
-            <Plus size={20} />
-            Yangi Lead
+            Filtrlarni tozalash
           </button>
         </div>
       </div>
 
-      {/* Leads Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Ism
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Telefon
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Manba
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Guruh
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Sana
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Amallar
-                </th>
+      {/* 4. LEADS LIST */}
+      <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50/50 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700">
+                <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Mijoz ma'lumotlari</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Muloqot manbasi</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Joriy Status</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Sana</th>
+                <th className="px-8 py-6 text-right text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Amallar</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-              {leads.map((lead) => (
-                <tr key={lead._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                          {lead.name.charAt(0).toUpperCase()}
-                        </span>
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
+              {leads.length > 0 ? leads.map((lead) => (
+                <tr key={lead._id} className="group hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-all">
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-500/20">
+                        {lead.name[0].toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {lead.name}
-                        </p>
-                        {lead.course_interest && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {lead.course_interest}
-                          </p>
-                        )}
+                        <p className="font-black text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">{lead.name}</p>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400 font-bold">
+                          <Phone size={10} /> {lead.phone}
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-900 dark:text-white">
-                      <Phone size={14} className="mr-2 text-gray-400" />
-                      {lead.phone}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm text-gray-900 dark:text-white">
-                      <div className="mr-2">
-                        {sourceIcons[lead.source] || <Users size={14} />}
-                      </div>
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700/50 rounded-xl w-fit text-xs font-black dark:text-gray-300">
+                      <span className="text-indigo-500">{sourceIcons[lead.source]}</span>
                       {lead.source}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColors[lead.lead_status]}`}>
+                  <td className="px-8 py-5">
+                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-black border-2 uppercase tracking-tighter ${statusColors[lead.lead_status]}`}>
                       {lead.lead_status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {lead.group_id?.name || '-'}
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+                      <Clock size={14} />
+                      {new Date(lead.createdAt).toLocaleDateString('uz-UZ')}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(lead.createdAt).toLocaleDateString('uz-UZ')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-8 py-5">
+                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       {lead.lead_status !== 'CONVERTED' && (
-                        <button
-                          onClick={() => handleConvert(lead._id)}
-                          className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
-                          title="O'quvchiga aylantirish"
-                        >
-                          <UserCheck size={16} />
+                        <button onClick={() => handleConvert(lead._id)} className="p-2.5 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors" title="Aylantirish">
+                          <UserCheck size={20}/>
                         </button>
                       )}
-                      <button
-                        onClick={() => handleEdit(lead)}
-                        className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
-                        title="Tahrirlash"
-                      >
-                        <Edit size={16} />
+                      <button onClick={() => handleEdit(lead)} className="p-2.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-xl transition-colors" title="Tahrirlash">
+                        <Edit size={20}/>
                       </button>
-                      <button
-                        onClick={() => handleDelete(lead._id)}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                        title="O'chirish"
-                      >
-                        <Trash2 size={16} />
+                      <button onClick={() => handleDelete(lead._id)} className="p-2.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors" title="O'chirish">
+                        <Trash2 size={20}/>
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan="5" className="px-8 py-20 text-center">
+                    <div className="flex flex-col items-center">
+                      <Search size={48} className="text-gray-200 mb-4" />
+                      <p className="text-gray-400 font-bold">Hech qanday lead topilmadi</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
+
+        {/* Mobile View */}
+        <div className="md:hidden divide-y divide-gray-100 dark:divide-gray-700">
+          {leads.map((lead) => (
+            <div key={lead._id} className="p-6 space-y-5 active:bg-gray-50 dark:active:bg-gray-900/50 transition-colors">
+              <div className="flex justify-between items-start">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 font-black text-xl">
+                    {lead.name[0]}
+                  </div>
+                  <div>
+                    <h4 className="font-black text-gray-900 dark:text-white leading-tight">{lead.name}</h4>
+                    <p className="text-sm text-gray-400 font-bold mt-1">{lead.phone}</p>
+                  </div>
+                </div>
+                <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black border-2 uppercase ${statusColors[lead.lead_status]}`}>
+                  {lead.lead_status}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2 text-xs font-black text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 px-3 py-2 rounded-xl">
+                  {sourceIcons[lead.source]} {lead.source}
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => handleConvert(lead._id)} className="p-3 text-emerald-500"><UserCheck size={20}/></button>
+                  <button onClick={() => handleEdit(lead)} className="p-3 text-indigo-500"><Edit size={20}/></button>
+                  <button onClick={() => handleDelete(lead._id)} className="p-3 text-rose-500"><Trash2 size={20}/></button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Lead Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          resetForm();
-        }}
-        title={editingLead ? 'Leadni tahrirlash' : 'Yangi Lead qo\'shish'}
+      {/* 5. MODAL FORM */}
+      <Modal 
+        isOpen={showModal} 
+        onClose={() => { setShowModal(false); resetForm(); }}
+        title={editingLead ? 'Lead Ma\'lumotlarini Yangilash' : 'Yangi Lead Ro\'yxatga Olish'}
         size="md"
       >
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Ism
-              </label>
-              <input
-                type="text"
-                required
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase text-gray-400 ml-1">To'liq ismi *</label>
+              <input 
+                type="text" required
+                className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl font-bold dark:text-white transition-all"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
               />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Telefon
-              </label>
-              <input
-                type="tel"
-                required
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase text-gray-400 ml-1">Telefon raqami *</label>
+              <input 
+                type="tel" required
+                className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl font-bold dark:text-white transition-all"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Guruh
-              </label>
-              <select
-                required
-                value={formData.group_id}
-                onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              >
-                <option value="">Guruhni tanlang</option>
-                {groups.map((group) => (
-                  <option key={group._id} value={group._id}>
-                    {group.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Manba
-              </label>
-              <select
-                value={formData.source}
-                onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              >
-                <option value="Instagram">Instagram</option>
-                <option value="Telegram">Telegram</option>
-                <option value="Tanishlar">Tanishlar</option>
-                <option value="Reklama">Reklama</option>
-                <option value="Veb-sayt">Veb-sayt</option>
-                <option value="Boshqa">Boshqa</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Kurs qiziqishi
-              </label>
-              <input
-                type="text"
-                value={formData.course_interest}
-                onChange={(e) => setFormData({ ...formData, course_interest: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Izohlar
-              </label>
-              <textarea
-                rows={3}
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Follow-up sanasi
-              </label>
-              <input
-                type="date"
-                value={formData.follow_up_date}
-                onChange={(e) => setFormData({ ...formData, follow_up_date: e.target.value })}
-                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
               />
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <button
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase text-gray-400 ml-1">Qiziqayotgan guruhi</label>
+              <select 
+                className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl font-bold dark:text-white transition-all appearance-none"
+                value={formData.group_id}
+                onChange={(e) => setFormData({...formData, group_id: e.target.value})}
+              >
+                <option value="">Tanlang...</option>
+                {groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase text-gray-400 ml-1">Kelish manbasi</label>
+              <select 
+                className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl font-bold dark:text-white transition-all appearance-none"
+                value={formData.source}
+                onChange={(e) => setFormData({...formData, source: e.target.value})}
+              >
+                {Object.keys(sourceIcons).map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase text-gray-400 ml-1">Qo'shimcha izohlar</label>
+            <textarea 
+              rows="3"
+              className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl font-bold dark:text-white transition-all resize-none"
+              value={formData.notes}
+              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+            ></textarea>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button 
               type="button"
-              onClick={() => {
-                setShowModal(false);
-                resetForm();
-              }}
-              className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+              onClick={() => setShowModal(false)}
+              className="flex-1 py-4 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-gray-200 transition-all"
             >
               Bekor qilish
             </button>
-            <button
+            <button 
               type="submit"
-              className="flex-1 btn-primary px-4 py-3 rounded-xl font-medium"
+              className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 active:scale-95 transition-all"
             >
               {editingLead ? 'Saqlash' : 'Qo\'shish'}
             </button>

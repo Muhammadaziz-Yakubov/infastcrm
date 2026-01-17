@@ -17,6 +17,9 @@ import attendanceRoutes from './routes/attendance.js';
 import dashboardRoutes from './routes/dashboard.js';
 import staffRoutes from './routes/staff.js';
 import taskRoutes from './routes/tasks.js';
+import examRoutes from './routes/exams.js';
+import studentExamRoutes from './routes/studentExams.js';
+import publicRoutes from './routes/public.js';
 import User from './models/User.js';
 
 dotenv.config();
@@ -63,6 +66,9 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
 
 // Telegram webhook endpoint
 app.post('/api/telegram/webhook', handleWebhook);
@@ -118,6 +124,9 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/exams', examRoutes);
+app.use('/api/student/exams', studentExamRoutes);
+app.use('/api/public', publicRoutes);
 
 // Daily job to check payment status (runs at 9 AM every day)
 cron.schedule('0 9 * * *', () => {

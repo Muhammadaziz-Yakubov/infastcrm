@@ -28,8 +28,8 @@ export default function StudentRating() {
 
   const fetchRatings = async () => {
     try {
-      // Use admin endpoint with student token - we need to create a public ratings endpoint
-      const response = await api.get('/tasks/ratings/students');
+      // Use public ratings endpoint first
+      const response = await api.get('/public/ratings');
       setRatings(response.data);
     } catch (error) {
       console.error('Error fetching ratings:', error);
@@ -218,7 +218,7 @@ export default function StudentRating() {
           <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {ratings.map((rating, index) => (
               <div 
-                key={rating.student?._id}
+                key={rating.student_id || index}
                 className={`flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors animate-fade-in-up ${
                   rating.rank <= 3 ? 'bg-gradient-to-r from-yellow-50 to-transparent dark:from-yellow-900/10' : ''
                 }`}
@@ -237,22 +237,22 @@ export default function StudentRating() {
                 {/* Student Info */}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                    {rating.student?.full_name}
+                    {rating.full_name}
                   </h3>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Users size={14} />
-                    <span className="truncate">{rating.student?.group?.name || 'Guruh yo\'q'}</span>
+                    <span className="truncate">{rating.group_name || 'Guruh yo\'q'}</span>
                     <span>•</span>
-                    <span>{rating.taskCount} vazifa</span>
+                    <span>{rating.completed_tasks} vazifa</span>
                   </div>
                 </div>
 
                 {/* Score */}
                 <div className="text-right">
-                  <div className={`text-2xl font-bold ${getScoreColor(rating.averageScore)}`}>
-                    {rating.averageScore}
+                  <div className={`text-2xl font-bold ${getScoreColor(rating.percentage)}`}>
+                    {rating.percentage.toFixed(1)}
                   </div>
-                  <div className="text-xs text-gray-400">ball</div>
+                  <div className="text-xs text-gray-400">%</div>
                 </div>
 
                 {/* Stars for top 3 */}
