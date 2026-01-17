@@ -147,6 +147,68 @@ export const sendPaymentDueReminder = async (studentId) => {
   }
 };
 
+// Handle /start command
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  const chatType = msg.chat.type;
+  
+  console.log(`📱 Message from chat ID: ${chatId} (type: ${chatType})`);
+  
+  let responseMessage = '';
+  
+  if (chatType === 'private') {
+    responseMessage = `🚫 <b>Xatolik!</b>
+
+🤖 Bu bot faqat guruhda ishlaydi va siz boshqara olmaysiz!
+
+📝 <b>Izoh:</b>
+• Bot faqat InFast CRM tizimi uchun mo'ljallangan
+• Guruhga avtomatik eslatmalar yuborish uchun ishlatiladi
+• Shaxsiy chatlarda ishlamaydi
+
+👥 <b>To'g'ri foydalanish:</b>
+• Guruh adminiga murojaat qiling
+• Botni guruhga qo'shishni so'rang
+• Admin guruhni tizimga ulaydi
+
+📚 <b>InFast CRM</b> - O'quv markazi uchun zamonaviy boshqaruv tizimi`;
+  } else {
+    responseMessage = `✅ <b>Bot guruhga muvaffaqiyatli qo'shildi!</b>
+
+🤖 InFast CRM bot endi bu guruhda ishlamoqda!
+
+📋 <b>Bot funksiyalari:</b>
+• 📅 Kunlik dars eslatmalari (7:00)
+• 💰 To'lov eslatmalari (12:00)  
+• 📊 Davomat xulosalari (darsdan 1 soat keyin)
+• 🎯 Dars ballari xabarlari
+
+⚙️ <b>Sozlash uchun:</b>
+• Guruh ma'lumotlarini InFast CRM tizimida yangilang
+• Telegram Chat ID ni to'g'ri kiriting
+
+🎉 <b>Tayyor!</b> Endi guruhga avtomatik xabarlar keladi!`;
+  }
+  
+  bot.sendMessage(chatId, responseMessage, {
+    parse_mode: 'HTML',
+    disable_web_page_preview: true
+  });
+});
+
+// Listen for any message to detect new chat_id
+bot.on('message', (msg) => {
+  const chatId = msg.chat.id;
+  const chatType = msg.chat.type;
+  
+  // Log all messages to help find new chat_id
+  if (chatType !== 'private') {
+    console.log(`📢 Message from group chat ID: ${chatId} (type: ${chatType})`);
+    console.log(`👥 Group name: ${msg.chat.title || 'No title'}`);
+    console.log(`📝 Update your .env file with: TELEGRAM_CHAT_ID=${chatId}`);
+  }
+});
+
 // Test bot connection
 let connectionTested = false;
 export const testBotConnection = async () => {
@@ -156,7 +218,18 @@ export const testBotConnection = async () => {
     const botInfo = await bot.getMe();
     console.log('🤖 Bot connected successfully:', botInfo.username);
     
-    await sendTelegramMessage('🤖 InFast CRM Bot Aktivlashitirdi va to`liq ishlamoqda ! ✅');
+    // Try to send test message, if fails due to supergroup, update chat_id
+    try {
+      await sendTelegramMessage('🤖 InFast CRM Bot Aktivlashitirdi va to`liq ishlamoqda ! ✅');
+    } catch (error) {
+      if (error.message.includes('upgraded to a supergroup')) {
+        console.log('⚠️ Main group was upgraded to supergroup. Please update the main chat_id in .env file.');
+        console.log('📝 Current chat_id is outdated. Get new chat_id from Telegram and update TELEGRAM_CHAT_ID in .env');
+      } else {
+        throw error;
+      }
+    }
+    
     connectionTested = true;
     return true;
   } catch (error) {
@@ -226,6 +299,42 @@ export const sendClassReminder = async (groupId) => {
   }
 };
 
+// Get updated chat info (for supergroup upgrades)
+export const getChatInfo = async (chatId) => {
+  try {
+    const chatInfo = await bot.getChat(chatId);
+    return chatInfo;
+  } catch (error) {
+    console.error(`❌ Error getting chat info for ${chatId}:`, error.message);
+    return null;
+  }
+};
+
+// Get new chat_id for supergroup upgrade
+export const getNewChatIdForSupergroup = async (oldChatId) => {
+  try {
+    // Try to get chat info - this might fail or return new ID
+    const chatInfo = await bot.getChat(oldChatId);
+    if (chatInfo && chatInfo.id !== oldChatId) {
+      console.log(`🔄 New chat_id found: ${chatInfo.id} (old: ${oldChatId})`);
+      return chatInfo.id.toString();
+    }
+    
+    // If that doesn't work, we need to get the new ID manually
+    console.log(`⚠️ Could not automatically get new chat_id for ${oldChatId}`);
+    console.log(`📝 Please get new chat_id manually:`);
+    console.log(`   1. Add bot to the upgraded group`);
+    console.log(`   2. Send any message to the group`);
+    console.log(`   3. Check server logs for 'message from chat ID: XXX'`);
+    console.log(`   4. Update TELEGRAM_CHAT_ID in .env file`);
+    
+    return null;
+  } catch (error) {
+    console.error(`❌ Error getting new chat_id:`, error.message);
+    return null;
+  }
+};
+
 // Send message to specific chat
 export const sendTelegramMessageToChat = async (chatId, message) => {
   try {
@@ -234,8 +343,25 @@ export const sendTelegramMessageToChat = async (chatId, message) => {
       disable_web_page_preview: true
     });
     console.log(`✅ Message sent to chat ${chatId}`);
+    return true;
   } catch (error) {
     console.error(`❌ Error sending message to chat ${chatId}:`, error.message);
+    
+    // If group was upgraded to supergroup, try to get new chat_id
+    if (error.message.includes('upgraded to a supergroup')) {
+      console.log(`⚠️ Group ${chatId} was upgraded to supergroup. Please update the chat_id.`);
+      
+      // Try to get new chat info
+      const chatInfo = await getChatInfo(chatId);
+      if (chatInfo && chatInfo.id !== chatId) {
+        console.log(`🔄 New chat_id found: ${chatInfo.id}`);
+        console.log(`📝 Please update group telegram_chat_id from ${chatId} to ${chatInfo.id}`);
+      }
+      
+      return false;
+    }
+    
+    return false;
   }
 };
 
@@ -353,18 +479,46 @@ export const sendAttendanceSummary = async (groupId, date) => {
     );
 
     // Send attendance summary (absent students)
-    const attendanceMessage = formatAttendanceMessage(group, absentStudents, presentStudents);
-    await sendTelegramMessageToChat(group.telegram_chat_id, attendanceMessage);
+    let currentChatId = group.telegram_chat_id;
+    let attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
+    
+    // If sending failed due to supergroup upgrade, try to update chat_id
+    if (!attendanceSent) {
+      const newChatId = await updateGroupChatId(group._id, currentChatId);
+      if (newChatId !== currentChatId) {
+        currentChatId = newChatId;
+        attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
+      }
+    }
     
     // Send scores message (present students with scores)
-    if (presentStudents.length > 0) {
+    if (presentStudents.length > 0 && attendanceSent) {
       const scoresMessage = formatScoresMessage(group, presentStudents);
-      await sendTelegramMessageToChat(group.telegram_chat_id, scoresMessage);
+      await sendTelegramMessageToChat(currentChatId, scoresMessage);
     }
     
     console.log(`✅ Attendance summary and scores sent to group ${group.name}`);
   } catch (error) {
     console.error('Error sending attendance summary:', error);
+  }
+};
+
+// Update group chat_id if group was upgraded to supergroup
+export const updateGroupChatId = async (groupId, oldChatId) => {
+  try {
+    const chatInfo = await getChatInfo(oldChatId);
+    if (chatInfo && chatInfo.id !== oldChatId) {
+      // Update the group with new chat_id
+      await Group.findByIdAndUpdate(groupId, { 
+        telegram_chat_id: chatInfo.id.toString() 
+      });
+      console.log(`✅ Updated group ${groupId} chat_id from ${oldChatId} to ${chatInfo.id}`);
+      return chatInfo.id;
+    }
+    return oldChatId;
+  } catch (error) {
+    console.error(`❌ Error updating group chat_id:`, error.message);
+    return oldChatId;
   }
 };
 
@@ -375,5 +529,7 @@ export default {
   sendClassReminder,
   sendAllClassReminders,
   sendAttendanceSummary,
+  getChatInfo,
+  updateGroupChatId,
   testBotConnection
 };
