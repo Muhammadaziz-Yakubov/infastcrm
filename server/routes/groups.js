@@ -210,7 +210,6 @@ router.post('/:id/send-scores', authenticate, requireAdmin, async (req, res) => 
 
     const scoresList = presentStudents.map((student, index) => {
       return `${index + 1}. <b>${student.full_name}</b>
-   📞 ${student.phone}
    🎯 <b>Ball:</b> ${student.score || 0}`;
     }).join('\n\n');
 

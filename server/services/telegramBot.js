@@ -497,8 +497,7 @@ const formatAttendanceMessage = (group, absentStudents, presentStudents) => {
 
   if (absentStudents.length > 0) {
     const absentList = absentStudents.map((student, index) => {
-      return `${index + 1}. <b>${student.full_name}</b>
-   📞 ${student.phone}`;
+      return `${index + 1}. <b>${student.full_name}</b>`;
     }).join('\n\n');
 
     message += `
@@ -527,7 +526,7 @@ const formatScoresMessage = (group, presentStudents) => {
   if (presentStudents.length > 0) {
     const scoresList = presentStudents.map((student, index) => {
       return `${index + 1}. <b>${student.full_name}</b>
-   📞 ${student.phone}
+
    🎯 <b>Ball:</b> ${student.score || 0}`;
     }).join('\n\n');
 
