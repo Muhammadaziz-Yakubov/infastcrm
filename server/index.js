@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
-import { sendDailyReminders, sendAllClassReminders, testBotConnection } from './services/telegramBot.js';
+import { sendDailyReminders, sendAllClassReminders, testBotConnection, setupWebhook, handleWebhook } from './services/telegramBot.js';
 import authRoutes from './routes/auth.js';
 import studentAuthRoutes from './routes/studentAuth.js';
 import courseRoutes from './routes/courses.js';
@@ -63,6 +63,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Telegram webhook endpoint
+app.post('/api/telegram/webhook', handleWebhook);
+
 // Database connection
 const connectDB = async () => {
   try {
@@ -91,6 +94,13 @@ setTimeout(async () => {
   const connected = await testBotConnection();
   if (connected) {
     console.log('🤖 Telegram bot successfully connected and ready!');
+    
+    // Setup webhook if WEBHOOK_URL is provided
+    if (process.env.WEBHOOK_URL) {
+      await setupWebhook();
+    } else {
+      console.log('⚠️ WEBHOOK_URL not provided, bot will use polling');
+    }
   }
 }, 3000);
 

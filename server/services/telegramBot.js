@@ -9,6 +9,91 @@ const CHAT_ID = '-5125551645';
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: false });
 
+// Webhook setup
+export const setupWebhook = async () => {
+  try {
+    const webhookUrl = process.env.WEBHOOK_URL || 'https://infastcrm-0b2r.onrender.com/api/telegram/webhook';
+    
+    await bot.setWebHook(webhookUrl);
+    console.log(`✅ Telegram webhook set to: ${webhookUrl}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Error setting webhook:', error.message);
+    return false;
+  }
+};
+
+// Webhook endpoint handler
+export const handleWebhook = async (req, res) => {
+  try {
+    const update = req.body;
+    
+    if (update.message) {
+      const msg = update.message;
+      const chatId = msg.chat.id;
+      const chatType = msg.chat.type;
+      
+      console.log(`📱 Webhook message from chat ID: ${chatId} (type: ${chatType})`);
+      
+      // Handle /start command
+      if (msg.text === '/start') {
+        let responseMessage = '';
+        
+        if (chatType === 'private') {
+          responseMessage = `🚫 <b>Xatolik!</b>
+
+🤖 Bu bot faqat guruhda ishlaydi va siz boshqara olmaysiz!
+
+📝 <b>Izoh:</b>
+• Bot faqat InFast CRM tizimi uchun mo'ljallangan
+• Guruhga avtomatik eslatmalar yuborish uchun ishlatiladi
+• Shaxsiy chatlarda ishlamaydi
+
+👥 <b>To'g'ri foydalanish:</b>
+• Guruh adminiga murojaat qiling
+• Botni guruhga qo'shishni so'rang
+• Admin guruhni tizimga ulaydi
+
+📚 <b>InFast CRM</b> - O'quv markazi uchun zamonaviy boshqaruv tizimi`;
+        } else {
+          responseMessage = `✅ <b>Bot guruhga muvaffaqiyatli qo'shildi!</b>
+
+🤖 InFast CRM bot endi bu guruhda ishlamoqda!
+
+📋 <b>Bot funksiyalari:</b>
+• 📅 Kunlik dars eslatmalari (7:00)
+• 💰 To'lov eslatmalari (12:00)  
+• 📊 Davomat xulosalari (darsdan 1 soat keyin)
+• 🎯 Dars ballari xabarlari
+
+⚙️ <b>Sozlash uchun:</b>
+• Guruh ma'lumotlarini InFast CRM tizimida yangilang
+• Telegram Chat ID ni to'g'ri kiriting
+
+🎉 <b>Tayyor!</b> Endi guruhga avtomatik xabarlar keladi!`;
+        }
+        
+        await bot.sendMessage(chatId, responseMessage, {
+          parse_mode: 'HTML',
+          disable_web_page_preview: true
+        });
+      }
+      
+      // Log all group messages to help find new chat_id
+      if (chatType !== 'private') {
+        console.log(`📢 Webhook message from group chat ID: ${chatId} (type: ${chatType})`);
+        console.log(`👥 Group name: ${msg.chat.title || 'No title'}`);
+        console.log(`📝 Update your .env file with: TELEGRAM_CHAT_ID=${chatId}`);
+      }
+    }
+    
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('❌ Webhook error:', error);
+    res.status(500).send('Error');
+  }
+};
+
 // Send message to Telegram group
 const sendTelegramMessage = async (message) => {
   try {
@@ -147,67 +232,7 @@ export const sendPaymentDueReminder = async (studentId) => {
   }
 };
 
-// Handle /start command
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  const chatType = msg.chat.type;
-  
-  console.log(`📱 Message from chat ID: ${chatId} (type: ${chatType})`);
-  
-  let responseMessage = '';
-  
-  if (chatType === 'private') {
-    responseMessage = `🚫 <b>Xatolik!</b>
-
-🤖 Bu bot faqat guruhda ishlaydi va siz boshqara olmaysiz!
-
-📝 <b>Izoh:</b>
-• Bot faqat InFast CRM tizimi uchun mo'ljallangan
-• Guruhga avtomatik eslatmalar yuborish uchun ishlatiladi
-• Shaxsiy chatlarda ishlamaydi
-
-👥 <b>To'g'ri foydalanish:</b>
-• Guruh adminiga murojaat qiling
-• Botni guruhga qo'shishni so'rang
-• Admin guruhni tizimga ulaydi
-
-📚 <b>InFast CRM</b> - O'quv markazi uchun zamonaviy boshqaruv tizimi`;
-  } else {
-    responseMessage = `✅ <b>Bot guruhga muvaffaqiyatli qo'shildi!</b>
-
-🤖 InFast CRM bot endi bu guruhda ishlamoqda!
-
-📋 <b>Bot funksiyalari:</b>
-• 📅 Kunlik dars eslatmalari (7:00)
-• 💰 To'lov eslatmalari (12:00)  
-• 📊 Davomat xulosalari (darsdan 1 soat keyin)
-• 🎯 Dars ballari xabarlari
-
-⚙️ <b>Sozlash uchun:</b>
-• Guruh ma'lumotlarini InFast CRM tizimida yangilang
-• Telegram Chat ID ni to'g'ri kiriting
-
-🎉 <b>Tayyor!</b> Endi guruhga avtomatik xabarlar keladi!`;
-  }
-  
-  bot.sendMessage(chatId, responseMessage, {
-    parse_mode: 'HTML',
-    disable_web_page_preview: true
-  });
-});
-
-// Listen for any message to detect new chat_id
-bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
-  const chatType = msg.chat.type;
-  
-  // Log all messages to help find new chat_id
-  if (chatType !== 'private') {
-    console.log(`📢 Message from group chat ID: ${chatId} (type: ${chatType})`);
-    console.log(`👥 Group name: ${msg.chat.title || 'No title'}`);
-    console.log(`📝 Update your .env file with: TELEGRAM_CHAT_ID=${chatId}`);
-  }
-});
+// Note: Polling listeners removed - using webhook instead
 
 // Test bot connection
 let connectionTested = false;
