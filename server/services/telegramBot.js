@@ -5,9 +5,9 @@ import Group from '../models/Group.js';
 
 // Telegram Bot configuration
 const BOT_TOKEN = '8317971016:AAFQeb5Gx8ALmOiADCDYqcYRXcccZlEttcw';
-const CHAT_ID = '-5125551645';
+const CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-5125551645';
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: false });
+const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
 // Webhook setup
 export const setupWebhook = async () => {
@@ -232,7 +232,75 @@ export const sendPaymentDueReminder = async (studentId) => {
   }
 };
 
-// Note: Polling listeners removed - using webhook instead
+// Handle /start command (for polling)
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  const chatType = msg.chat.type;
+  
+  console.log(`📱 Message from chat ID: ${chatId} (type: ${chatType})`);
+  
+  let responseMessage = '';
+  
+  if (chatType === 'private') {
+    responseMessage = `🚫 <b>Xatolik!</b>
+
+🤖 Bu bot faqat guruhda ishlaydi va siz boshqara olmaysiz!
+
+📝 <b>Izoh:</b>
+• Bot faqat InFast CRM tizimi uchun mo'ljallangan
+• Guruhga avtomatik eslatmalar yuborish uchun ishlatiladi
+• Shaxsiy chatlarda ishlamaydi
+
+👥 <b>To'g'ri foydalanish:</b>
+• Guruh adminiga murojaat qiling
+• Botni guruhga qo'shishni so'rang
+• Admin guruhni tizimga ulaydi
+
+📚 <b>InFast CRM</b> - O'quv markazi uchun zamonaviy boshqaruv tizimi`;
+  } else {
+    responseMessage = `✅ <b>Bot guruhga muvaffaqiyatli qo'shildi!</b>
+
+🤖 InFast CRM bot endi bu guruhda ishlamoqda!
+
+📋 <b>Bot funksiyalari:</b>
+• 📅 Kunlik dars eslatmalari (7:00)
+• 💰 To'lov eslatmalari (12:00)  
+• 📊 Davomat xulosalari (darsdan 1 soat keyin)
+• 🎯 Dars ballari xabarlari
+
+⚙️ <b>Sozlash uchun:</b>
+• Guruh ma'lumotlarini InFast CRM tizimida yangilang
+• Telegram Chat ID ni to'g'ri kiriting
+
+🎉 <b>Tayyor!</b> Endi guruhga avtomatik xabarlar keladi!`;
+  }
+  
+  bot.sendMessage(chatId, responseMessage, {
+    parse_mode: 'HTML',
+    disable_web_page_preview: true
+  });
+});
+
+// Listen for any message to detect new chat_id (for polling)
+bot.on('message', (msg) => {
+  const chatId = msg.chat.id;
+  const chatType = msg.chat.type;
+  
+  // Log all messages to help find new chat_id
+  if (chatType !== 'private') {
+    console.log(`📢 Message from group chat ID: ${chatId} (type: ${chatType})`);
+    console.log(`👥 Group name: ${msg.chat.title || 'No title'}`);
+    console.log(`📝 NEW CHAT_ID FOUND: ${chatId}`);
+    console.log(`🔧 Update your environment variable: TELEGRAM_CHAT_ID=${chatId}`);
+    
+    // Auto-update CHAT_ID if it's different from current
+    if (chatId !== CHAT_ID) {
+      console.log(`🔄 Auto-updating CHAT_ID from ${CHAT_ID} to ${chatId}`);
+      // Note: This won't persist across restarts, but helps for immediate testing
+      process.env.TELEGRAM_CHAT_ID = chatId;
+    }
+  }
+});
 
 // Test bot connection
 let connectionTested = false;
