@@ -586,6 +586,8 @@ export const sendAttendanceSummary = async (groupId, date) => {
       )
     );
 
+    console.log(`📊 Attendance stats: Total students: ${allStudents.length}, Present: ${presentStudents.length}, Absent: ${absentStudents.length}`);
+
     // Send attendance summary (absent students)
     let currentChatId = group.telegram_chat_id;
     console.log(`📤 Attempting to send to chat_id: ${currentChatId}`);
@@ -594,11 +596,11 @@ export const sendAttendanceSummary = async (groupId, date) => {
     
     // If sending failed due to supergroup upgrade, try to update chat_id
     if (!attendanceSent) {
-      console.log(`🔄 Failed to send, trying to update chat_id...`);
+      console.log(`🔄 Failed to send attendance message, trying to update chat_id...`);
       const newChatId = await updateGroupChatId(group._id, currentChatId);
       if (newChatId !== currentChatId) {
         currentChatId = newChatId;
-        console.log(`📤 Retrying with new chat_id: ${currentChatId}`);
+        console.log(`📤 Retrying attendance message with new chat_id: ${currentChatId}`);
         attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
       }
     }
