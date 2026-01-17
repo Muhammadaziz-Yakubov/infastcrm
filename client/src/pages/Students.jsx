@@ -607,17 +607,35 @@ export default function Students() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Qo'shilgan sana
+                    Manba
                   </label>
-                  <div className="relative">
-                    <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="date"
-                      value={formData.joined_date}
-                      onChange={(e) => setFormData({ ...formData, joined_date: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                    />
-                  </div>
+                  <select
+                    value={formData.lead_source}
+                    onChange={(e) => setFormData({ ...formData, lead_source: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                  >
+                    <option value="Instagram">Instagram</option>
+                    <option value="Telegram">Telegram</option>
+                    <option value="Tanishlar">Tanishlar</option>
+                    <option value="Reklama">Reklama</option>
+                    <option value="Veb-sayt">Veb-sayt</option>
+                    <option value="Boshqa">Boshqa</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Qo'shilgan sana
+                </label>
+                <div className="relative">
+                  <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="date"
+                    value={formData.joined_date}
+                    onChange={(e) => setFormData({ ...formData, joined_date: e.target.value })}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                  />
                 </div>
               </div>
 
