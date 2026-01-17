@@ -21,7 +21,8 @@ import {
   Bell,
   AlertCircle,
   Wallet,
-  Banknote
+  Banknote,
+  MessageSquare
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -33,6 +34,8 @@ export default function Students() {
   const [editingStudent, setEditingStudent] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchParams] = useSearchParams();
   const statusFilter = searchParams.get('status');
   const groupFilter = searchParams.get('group_id');
@@ -167,6 +170,48 @@ export default function Students() {
     }
   };
 
+  const handleShowMessageModal = async () => {
+    if (!groupFilter) {
+      alert('Iltimos, avval guruhni tanlang');
+      return;
+    }
+    
+    try {
+      const groupResponse = await api.get(`/groups/${groupFilter}`);
+      setSelectedGroup(groupResponse.data);
+      setShowMessageModal(true);
+    } catch (error) {
+      console.error('Error fetching group:', error);
+      alert('Guruh ma\'lumotlarini olishda xatolik');
+    }
+  };
+
+  const handleSendMessage = async (messageType) => {
+    if (!selectedGroup) return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (messageType === 'attendance') {
+        await api.post(`/groups/${selectedGroup._id}/send-attendance`, {
+          date: today
+        });
+        alert('Davomat xabari yuborildi!');
+      } else if (messageType === 'scores') {
+        await api.post(`/groups/${selectedGroup._id}/send-scores`, {
+          date: today
+        });
+        alert('Ballar xabari yuborildi!');
+      }
+      
+      setShowMessageModal(false);
+      setSelectedGroup(null);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Xabar yuborishda xatolik yuz berdi');
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       full_name: '',
@@ -249,17 +294,29 @@ export default function Students() {
           </div>
 
           {isAdmin && (
-            <button
-              onClick={() => {
-                setEditingStudent(null);
-                resetForm();
-                setShowModal(true);
-              }}
-              className="btn-primary flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold whitespace-nowrap"
-            >
-              <Plus size={20} />
-              Yangi o'quvchi
-            </button>
+            <>
+              <button
+                onClick={() => {
+                  setEditingStudent(null);
+                  resetForm();
+                  setShowModal(true);
+                }}
+                className="btn-primary flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold whitespace-nowrap"
+              >
+                <Plus size={20} />
+                Yangi o'quvchi
+              </button>
+              
+              {groupFilter && (
+                <button
+                  onClick={handleShowMessageModal}
+                  className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-xl font-semibold whitespace-nowrap hover:from-green-500 hover:to-emerald-600 transition-all"
+                >
+                  <MessageSquare size={20} />
+                  Guruhga xabar
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -706,6 +763,51 @@ export default function Students() {
                 </button>
               </div>
         </form>
+      </Modal>
+
+      {/* Message Modal */}
+      <Modal
+        isOpen={showMessageModal && !!selectedGroup}
+        onClose={() => {
+          setShowMessageModal(false);
+          setSelectedGroup(null);
+        }}
+        title="Guruhga xabar yuborish"
+        size="sm"
+      >
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl mb-4">
+          <p className="text-green-700 dark:text-green-300">
+            <strong>{selectedGroup?.name}</strong> guruhiga xabar yuborish
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Qaysi turdagi xabarni yubormoqchisiz?
+          </p>
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <button
+            onClick={() => handleSendMessage('attendance')}
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-400 to-orange-500 text-white rounded-xl font-medium shadow-lg hover:from-red-500 hover:to-orange-600 transition-all"
+          >
+            📋 Davomat xabari
+          </button>
+          <button
+            onClick={() => handleSendMessage('scores')}
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-400 to-indigo-500 text-white rounded-xl font-medium shadow-lg hover:from-blue-500 hover:to-indigo-600 transition-all"
+          >
+            🎯 Ballar xabari
+          </button>
+        </div>
+
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            <strong>Davomat xabari:</strong> Bugun kelmagan o'quvchilar ro'yxati<br/>
+            <strong>Ballar xabari:</strong> Bugun kelgan o'quvchilar va ularning ballari
+          </p>
+        </div>
       </Modal>
     </div>
   );

@@ -360,7 +360,7 @@ export default function Groups() {
                         <Edit size={18} />
                       </button>
                       <button
-                        onClick={() => setShowMessageModal(group)}
+                        onClick={() => handleShowMessageModal(group)}
                         className="p-2 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                         title="Guruhga xabar yuborish"
                       >
