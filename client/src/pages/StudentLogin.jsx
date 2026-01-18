@@ -18,11 +18,26 @@ export default function StudentLogin() {
     setError('');
     setLoading(true);
 
+    // Basic validation
+    if (!login.trim()) {
+      setError('Login maydoni to\'ldirilishi shart');
+      setLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError('Parol maydoni to\'ldirilishi shart');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await api.post('/student-auth/login', { login, password });
+      const response = await api.post('/student-auth/login', { login: login.trim(), password });
       const { token, student } = response.data;
 
       studentLogin(token, student);
+
+      // Navigate to student dashboard
       navigate('/student');
     } catch (err) {
       setError(err.response?.data?.message || 'Xatolik yuz berdi');

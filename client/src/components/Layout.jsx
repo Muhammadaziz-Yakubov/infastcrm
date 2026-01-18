@@ -20,7 +20,8 @@ import {
   Trophy,
   TrendingUp,
   FileText,
-  Target
+  Target,
+  Award
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -44,6 +45,7 @@ export default function Layout() {
     { path: '/payments', icon: CreditCard, label: 'To\'lovlar' },
     { path: '/attendance', icon: ClipboardCheck, label: 'Davomat' },
     { path: '/rating', icon: Trophy, label: 'Reyting' },
+    { path: '/certificates', icon: Award, label: 'Sertifikatlar', adminOnly: true },
     { path: '/staff', icon: UserCog, label: 'Xodimlar', adminOnly: true },
   ];
 

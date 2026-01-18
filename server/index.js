@@ -22,6 +22,8 @@ import taskRoutes from './routes/tasks.js';
 import examRoutes from './routes/exams.js';
 import studentExamRoutes from './routes/studentExams.js';
 import publicRoutes from './routes/public.js';
+import badgeRoutes from './routes/badges.js';
+import certificateRoutes from './routes/certificates.js';
 import { authenticate, requireAdmin } from './middleware/auth.js';
 import User from './models/User.js';
 
@@ -412,6 +414,8 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/student/exams', studentExamRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/badges', badgeRoutes);
+app.use('/api/certificates', certificateRoutes);
 
 // Global error handler
 app.use((error, req, res, next) => {

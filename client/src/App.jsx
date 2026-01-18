@@ -7,6 +7,8 @@ import StudentDashboard from './pages/StudentDashboard';
 import StudentTasks from './pages/StudentTasks';
 import StudentCodeEditor from './pages/StudentCodeEditor';
 import StudentRating from './pages/StudentRating';
+import StudentProfile from './pages/StudentProfile';
+import Classmates from './pages/Classmates';
 import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
 import Groups from './pages/Groups';
@@ -20,6 +22,7 @@ import AdminTasks from './pages/AdminTasks';
 import Rating from './pages/Rating';
 import Exams from './pages/Exams';
 import StudentExams from './pages/StudentExams';
+import Certificates from './pages/Certificates';
 import Layout from './components/Layout';
 
 // PrivateRoute komponenti endi ishlatilmaydi, chunki AppRoutes buni boshqaradi
@@ -49,6 +52,9 @@ function AppRoutes() {
         <Route path="/student/code-editor/:taskId" element={<StudentCodeEditor />} />
         <Route path="/student/rating" element={<StudentRating />} />
         <Route path="/student/exams" element={<StudentExams />} />
+        <Route path="/student/profile" element={<StudentProfile />} />
+        <Route path="/student/profile/:id" element={<StudentProfile />} />
+        <Route path="/student/classmates" element={<Classmates />} />
 
         {/* Protected Admin Routes */}
         <Route path="/" element={<Layout />}>
@@ -64,6 +70,7 @@ function AppRoutes() {
           <Route path="staff" element={<Staff />} />
           <Route path="tasks" element={<AdminTasks />} />
           <Route path="rating" element={<Rating />} />
+          <Route path="certificates" element={<Certificates />} />
         </Route>
 
         {/* Catch all - redirect to appropriate dashboard */}
@@ -79,7 +86,10 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/student-login" element={<StudentLogin />} />
 
-      {/* Redirect all routes to login if not authenticated */}
+      {/* Redirect student routes to student-login */}
+      <Route path="/student/*" element={<Navigate to="/student-login" replace />} />
+      
+      {/* Redirect all other routes to admin login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

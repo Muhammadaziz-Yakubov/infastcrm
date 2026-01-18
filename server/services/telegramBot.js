@@ -716,6 +716,63 @@ export const sendTelegramMessageToChat = async (chatId, message) => {
   }
 };
 
+// Send photo with caption to specific chat
+export const sendTelegramPhotoToChat = async (chatId, photoDataUrl, caption) => {
+  try {
+    console.log(`📤 Attempting to send photo to chat ${chatId}...`);
+    
+    // Check if bot is connected
+    const botInfo = await bot.getMe();
+    console.log(`✅ Bot connected as: @${botInfo.username}`);
+
+    // Convert data URL to buffer
+    let photoBuffer;
+    if (photoDataUrl.startsWith('data:')) {
+      const base64Data = photoDataUrl.split(',')[1];
+      photoBuffer = Buffer.from(base64Data, 'base64');
+    } else {
+      // If it's a URL, fetch it first
+      const https = await import('https');
+      const http = await import('http');
+      
+      return new Promise((resolve, reject) => {
+        const url = new URL(photoDataUrl);
+        const client = url.protocol === 'https:' ? https : http;
+        
+        client.get(photoDataUrl, (res) => {
+          const chunks = [];
+          res.on('data', chunk => chunks.push(chunk));
+          res.on('end', async () => {
+            photoBuffer = Buffer.concat(chunks);
+            try {
+              await bot.sendPhoto(chatId, photoBuffer, {
+                caption: caption,
+                parse_mode: 'HTML'
+              });
+              console.log(`✅ Photo sent successfully to chat ${chatId}`);
+              resolve(true);
+            } catch (sendError) {
+              console.error(`❌ Error sending photo:`, sendError.message);
+              reject(sendError);
+            }
+          });
+        }).on('error', reject);
+      });
+    }
+
+    await bot.sendPhoto(chatId, photoBuffer, {
+      caption: caption,
+      parse_mode: 'HTML'
+    });
+    console.log(`✅ Photo sent successfully to chat ${chatId}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending photo to chat ${chatId}:`, error.message);
+    console.error('Full error details:', error);
+    return false;
+  }
+};
+
 // Send class reminders for all groups (runs at 7:00 AM)
 export const sendAllClassReminders = async () => {
   try {
@@ -906,5 +963,6 @@ export default {
   getChatInfo,
   updateGroupChatId,
   testBotConnection,
-  startPolling
+  startPolling,
+  sendTelegramPhotoToChat
 };

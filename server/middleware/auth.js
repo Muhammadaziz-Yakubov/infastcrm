@@ -69,8 +69,16 @@ export const authenticateStudent = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     
+    // Check token type
+    if (decoded.type !== 'student') {
+      return res.status(401).json({ message: 'Noto\'g\'ri token turi' });
+    }
+    
     // Check if student still exists and is active
-    const student = await Student.findById(decoded.studentId);
+    const student = await Student.findById(decoded.studentId).populate({
+      path: 'group_id',
+      populate: { path: 'course_id' }
+    });
     if (!student) {
       return res.status(401).json({ message: 'O\'quvchi topilmadi' });
     }

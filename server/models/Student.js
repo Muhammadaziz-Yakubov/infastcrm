@@ -16,6 +16,10 @@ const studentSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  profile_image: {
+    type: String,
+    default: '' // Profile rasmi (base64 yoki URL)
+  },
   // Login credentials for student cabinet
   login: {
     type: String,
@@ -59,6 +63,42 @@ const studentSchema = new mongoose.Schema({
   conversion_date: {
     type: Date,
     default: Date.now
+  },
+
+  // Gamification fields
+  gamification: {
+    total_xp: {
+      type: Number,
+      default: 0
+    },
+    level: {
+      type: Number,
+      default: 1
+    },
+    current_level_xp: {
+      type: Number,
+      default: 0
+    },
+    next_level_xp: {
+      type: Number,
+      default: 100
+    },
+    streak_days: {
+      type: Number,
+      default: 0
+    },
+    last_activity_date: {
+      type: Date,
+      default: Date.now
+    },
+    weekly_xp: {
+      type: Number,
+      default: 0
+    },
+    monthly_xp: {
+      type: Number,
+      default: 0
+    }
   }
 }, {
   timestamps: true

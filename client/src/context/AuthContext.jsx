@@ -13,35 +13,51 @@ export function AuthProvider({ children }) {
     const studentToken = localStorage.getItem('studentToken');
     const studentData = localStorage.getItem('studentData');
 
-    if (adminToken) {
-      // Decode admin token to get user info
+    const initializeAuth = async () => {
       try {
-        const payload = JSON.parse(atob(adminToken.split('.')[1]));
-        setUser({
-          id: payload.userId,
-          email: payload.email,
-          role: payload.role
-        });
-      } catch (e) {
-        // If token decode fails, try to get user from API
-        fetchUser();
-        return;
-      }
-    }
+        // Handle admin authentication
+        if (adminToken) {
+          try {
+            const payload = JSON.parse(atob(adminToken.split('.')[1]));
+            setUser({
+              id: payload.userId,
+              email: payload.email,
+              role: payload.role
+            });
+          } catch (e) {
+            await fetchUser();
+            return;
+          }
+        }
 
-    if (studentToken && studentData) {
-      // Set student data from localStorage
-      try {
-        const studentInfo = JSON.parse(studentData);
-        setStudent(studentInfo);
-      } catch (e) {
-        // If parsing fails, clear student data
-        localStorage.removeItem('studentToken');
-        localStorage.removeItem('studentData');
+        // Handle student authentication
+        if (studentToken && studentData) {
+          try {
+            const studentInfo = JSON.parse(studentData);
+            setStudent(studentInfo);
+          } catch (e) {
+            // Clear corrupted data
+            localStorage.removeItem('studentToken');
+            localStorage.removeItem('studentData');
+          }
+        } else if (studentToken) {
+          // Fetch student data from API
+          try {
+            const response = await api.get('/student-auth/profile');
+            setStudent(response.data);
+            localStorage.setItem('studentData', JSON.stringify(response.data));
+          } catch (error) {
+            // Clear invalid token
+            localStorage.removeItem('studentToken');
+            localStorage.removeItem('studentData');
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    setLoading(false);
+    initializeAuth();
   }, []);
 
   const fetchUser = async () => {
@@ -91,18 +107,48 @@ export function AuthProvider({ children }) {
   };
 
   const studentLogin = (token, studentData) => {
-    localStorage.setItem('studentToken', token);
-    localStorage.setItem('studentData', JSON.stringify(studentData));
-    setStudent(studentData);
+    try {
+      // Clear any existing data first
+      localStorage.removeItem('studentToken');
+      localStorage.removeItem('studentData');
+
+      // Save new data
+      localStorage.setItem('studentToken', token);
+      localStorage.setItem('studentData', JSON.stringify(studentData));
+
+      // Update context state
+      setStudent(studentData);
+    } catch (error) {
+      console.error('Error saving student data:', error);
+      // Clear any corrupted data
+      localStorage.removeItem('studentToken');
+      localStorage.removeItem('studentData');
+      setStudent(null);
+    }
   };
 
+  const contextValue = {
+    user,
+    student,
+    login,
+    studentLogin,
+    logout,
+    studentLogout,
+    loading
+  };
+
+
   return (
-    <AuthContext.Provider value={{ user, student, login, studentLogin, logout, studentLogout, loading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }

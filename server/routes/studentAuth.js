@@ -4,6 +4,7 @@ import Student from '../models/Student.js';
 import Payment from '../models/Payment.js';
 import Attendance from '../models/Attendance.js';
 import Group from '../models/Group.js';
+import { authenticateStudent } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -11,11 +12,28 @@ const router = express.Router();
 router.post('/login', async (req, res) => {
   try {
     const { login, password } = req.body;
-    console.log('📧 Student login attempt for:', login);
-    
-    const student = await Student.findOne({ login }).select('+password').populate('group_id');
+
+    // Input validation
+    if (!login || !password) {
+      return res.status(400).json({ message: 'Login va parol talab etiladi' });
+    }
+
+    if (typeof login !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ message: 'Noto\'g\'ri ma\'lumotlar formati' });
+    }
+
+    const trimmedLogin = login.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedLogin || !trimmedPassword) {
+      return res.status(400).json({ message: 'Login va parol bo\'sh bo\'lishi mumkin emas' });
+    }
+
+    console.log('📧 Student login attempt for:', trimmedLogin);
+
+    const student = await Student.findOne({ login: trimmedLogin }).select('+password').populate('group_id');
     if (!student) {
-      console.log('❌ Student not found:', login);
+      console.log('❌ Student not found:', trimmedLogin);
       return res.status(401).json({ message: 'Login yoki parol noto\'g\'ri' });
     }
 
@@ -23,7 +41,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Parol o\'rnatilmagan' });
     }
 
-    const isMatch = await student.comparePassword(password);
+    const isMatch = await student.comparePassword(trimmedPassword);
     console.log('🔐 Password match:', isMatch);
     if (!isMatch) {
       return res.status(401).json({ message: 'Login yoki parol noto\'g\'ri' });
@@ -35,51 +53,23 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    console.log('🎉 Student login successful for:', login);
-    res.json({ 
-      token, 
-      student: { 
-        id: student._id, 
-        full_name: student.full_name, 
+    console.log('🎉 Student login successful for:', trimmedLogin);
+    res.json({
+      token,
+      student: {
+        id: student._id,
+        full_name: student.full_name,
         login: student.login,
         group: student.group_id,
         status: student.status,
         next_payment_date: student.next_payment_date
-      } 
+      }
     });
   } catch (error) {
     console.error('❌ Student login error:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server xatosi' });
   }
 });
-
-// Student Auth Middleware
-const authenticateStudent = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: 'Kirish talab etiladi' });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    if (decoded.type !== 'student') {
-      return res.status(401).json({ message: 'Noto\'g\'ri token turi' });
-    }
-
-    const student = await Student.findById(decoded.studentId).populate({
-      path: 'group_id',
-      populate: { path: 'course_id' }
-    });
-    if (!student) {
-      return res.status(401).json({ message: 'O\'quvchi topilmadi' });
-    }
-
-    req.student = student;
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Token yaroqsiz' });
-  }
-};
 
 // Get student dashboard
 router.get('/dashboard', authenticateStudent, async (req, res) => {
@@ -92,9 +82,9 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
       .limit(10);
 
     // Get attendance history
-    const attendances = await Attendance.find({ 
+    const attendances = await Attendance.find({
       student_id: student._id,
-      group_id: student.group_id._id 
+      group_id: student.group_id._id
     })
       .sort({ date: -1 })
       .limit(30);
@@ -136,8 +126,8 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
           present: presentCount,
           absent: absentCount,
           late: lateCount,
-          percentage: totalAttendances > 0 
-            ? Math.round((presentCount / totalAttendances) * 100) 
+          percentage: totalAttendances > 0
+            ? Math.round((presentCount / totalAttendances) * 100)
             : 0
         }
       }
@@ -154,11 +144,91 @@ router.get('/profile', authenticateStudent, async (req, res) => {
       id: req.student._id,
       full_name: req.student.full_name,
       phone: req.student.phone,
+      profile_image: req.student.profile_image || '',
       login: req.student.login,
       group: req.student.group_id,
       status: req.student.status,
       next_payment_date: req.student.next_payment_date
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update student profile
+router.put('/profile', authenticateStudent, async (req, res) => {
+  try {
+    const { phone, profile_image } = req.body;
+
+    console.log('📝 Profile update request:', {
+      studentId: req.student._id,
+      phone,
+      hasImage: !!profile_image,
+      imageLength: profile_image ? profile_image.length : 0
+    });
+
+    const updateData = {};
+
+    if (phone !== undefined) updateData.phone = phone;
+    if (profile_image !== undefined) updateData.profile_image = profile_image;
+
+    const student = await Student.findByIdAndUpdate(
+      req.student._id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('group_id');
+
+    res.json({
+      id: student._id,
+      full_name: student.full_name,
+      phone: student.phone,
+      profile_image: student.profile_image || '',
+      login: student.login,
+      group: student.group_id,
+      status: student.status
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get student by ID (for viewing other students' profiles - no phone)
+router.get('/view/:id', authenticateStudent, async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id).populate('group_id');
+    if (!student) {
+      return res.status(404).json({ message: 'O\'quvchi topilmadi' });
+    }
+
+    // Don't show phone for other students
+    res.json({
+      id: student._id,
+      full_name: student.full_name,
+      profile_image: student.profile_image || '',
+      group: student.group_id,
+      status: student.status,
+      joined_date: student.joined_date
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get classmates (students in same group)
+router.get('/classmates', authenticateStudent, async (req, res) => {
+  try {
+    const students = await Student.find({
+      group_id: req.student.group_id._id,
+      _id: { $ne: req.student._id } // Exclude current student
+    }).populate('group_id').select('-phone -password -login');
+
+    res.json(students.map(s => ({
+      id: s._id,
+      full_name: s.full_name,
+      profile_image: s.profile_image || '',
+      group: s.group_id,
+      status: s.status
+    })));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -178,9 +248,9 @@ router.get('/payments', authenticateStudent, async (req, res) => {
 // Get student attendance
 router.get('/attendance', authenticateStudent, async (req, res) => {
   try {
-    const attendances = await Attendance.find({ 
+    const attendances = await Attendance.find({
       student_id: req.student._id,
-      group_id: req.student.group_id._id 
+      group_id: req.student.group_id._id
     })
       .sort({ date: -1 });
     res.json(attendances);
@@ -196,7 +266,7 @@ import TaskSubmission from '../models/TaskSubmission.js';
 // Get tasks for student's group
 router.get('/tasks', authenticateStudent, async (req, res) => {
   try {
-    const tasks = await Task.find({ 
+    const tasks = await Task.find({
       group_id: req.student.group_id._id,
       status: 'ACTIVE'
     })
@@ -204,8 +274,8 @@ router.get('/tasks', authenticateStudent, async (req, res) => {
       .sort({ createdAt: -1 });
 
     // Get student's submissions
-    const submissions = await TaskSubmission.find({ 
-      student_id: req.student._id 
+    const submissions = await TaskSubmission.find({
+      student_id: req.student._id
     });
 
     // Add submission status to each task
@@ -267,7 +337,7 @@ router.post('/tasks/:id/submit', authenticateStudent, async (req, res) => {
   try {
     const { code, description } = req.body;
     const task = await Task.findById(req.params.id);
-    
+
     if (!task) {
       return res.status(404).json({ message: 'Vazifa topilmadi' });
     }
@@ -321,14 +391,14 @@ router.get('/submissions', authenticateStudent, async (req, res) => {
 router.get('/my-rating', authenticateStudent, async (req, res) => {
   try {
     // Get all graded submissions for this student
-    const submissions = await TaskSubmission.find({ 
+    const submissions = await TaskSubmission.find({
       student_id: req.student._id,
       status: 'GRADED'
     });
     const taskScores = submissions.map(s => s.score).filter(s => s !== null);
 
     // Get attendance scores
-    const attendances = await Attendance.find({ 
+    const attendances = await Attendance.find({
       student_id: req.student._id,
       score: { $ne: null }
     });
@@ -343,13 +413,13 @@ router.get('/my-rating', authenticateStudent, async (req, res) => {
     // Get rank among all students
     const allStudents = await Student.find({ status: { $in: ['ACTIVE', 'DEBTOR'] } });
     const allRatings = await Promise.all(allStudents.map(async (student) => {
-      const subs = await TaskSubmission.find({ 
-        student_id: student._id, 
-        status: 'GRADED' 
+      const subs = await TaskSubmission.find({
+        student_id: student._id,
+        status: 'GRADED'
       });
-      const atts = await Attendance.find({ 
-        student_id: student._id, 
-        score: { $ne: null } 
+      const atts = await Attendance.find({
+        student_id: student._id,
+        score: { $ne: null }
       });
       const scores = [...subs.map(s => s.score), ...atts.map(a => a.score)].filter(s => s !== null);
       return {
