@@ -18,6 +18,10 @@ services:
         sync: false  # Kuchli secret key
       - key: FRONTEND_URL
         sync: false  # Frontend URL (CORS uchun)
+      - key: WEBHOOK_URL
+        sync: false  # Telegram webhook URL (https://your-service-name.onrender.com/api/telegram/webhook)
+      - key: TELEGRAM_CHAT_ID
+        sync: false  # Telegram chat ID for group notifications
 
   # Frontend Static Site
   - type: web

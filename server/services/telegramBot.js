@@ -7,16 +7,33 @@ import Group from '../models/Group.js';
 const BOT_TOKEN = '8317971016:AAFQeb5Gx8ALmOiADCDYqcYRXcccZlEttcw';
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-5125551645';
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+// Initialize bot with polling only in development, use webhooks in production
+const isProduction = process.env.NODE_ENV === 'production' || process.env.WEBHOOK_URL;
+const bot = new TelegramBot(BOT_TOKEN, {
+  polling: !isProduction  // Disable polling in production (use webhooks instead)
+});
 
 // Webhook setup
 export const setupWebhook = async () => {
   try {
     const webhookUrl = process.env.WEBHOOK_URL || 'https://infastcrm-0b2r.onrender.com/api/telegram/webhook';
-    
+
+    // Delete any existing webhook first
+    await bot.deleteWebHook();
+
+    // Set new webhook
     await bot.setWebHook(webhookUrl);
     console.log(`✅ Telegram webhook set to: ${webhookUrl}`);
-    return true;
+
+    // Verify webhook was set
+    const webhookInfo = await bot.getWebHookInfo();
+    if (webhookInfo.url === webhookUrl) {
+      console.log('✅ Webhook verification successful');
+      return true;
+    } else {
+      console.error('❌ Webhook verification failed');
+      return false;
+    }
   } catch (error) {
     console.error('❌ Error setting webhook:', error.message);
     return false;

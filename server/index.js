@@ -129,12 +129,19 @@ setTimeout(async () => {
   const connected = await testBotConnection();
   if (connected) {
     console.log('🤖 Telegram bot successfully connected and ready!');
-    
-    // Setup webhook if WEBHOOK_URL is provided
-    if (process.env.WEBHOOK_URL) {
-      await setupWebhook();
+
+    // Setup webhook if in production or WEBHOOK_URL is provided
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.WEBHOOK_URL;
+    if (isProduction) {
+      console.log('🔄 Setting up Telegram webhook for production...');
+      const webhookSet = await setupWebhook();
+      if (webhookSet) {
+        console.log('✅ Telegram webhook setup completed');
+      } else {
+        console.log('❌ Telegram webhook setup failed');
+      }
     } else {
-      console.log('⚠️ WEBHOOK_URL not provided, bot will use polling');
+      console.log('⚠️ Running in development mode, bot will use polling');
     }
   }
 }, 3000);
