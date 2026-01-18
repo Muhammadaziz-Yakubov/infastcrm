@@ -58,16 +58,16 @@ const getFileUrl = (filePath) => {
     return filePath;
   }
   
-  // Always use the production URL since we're on Render.com
-  const baseUrl = 'https://infastcrm-0b2r.onrender.com';
+  // Use environment variable for base URL, fallback to hardcoded production URL
+  const baseUrl = process.env.API_URL || process.env.RENDER_EXTERNAL_URL || 'https://infastcrm-0b2r.onrender.com';
   
   // Ensure path starts with /uploads
   let cleanPath = filePath.startsWith('/') ? filePath : '/' + filePath;
-  // Remove double slashes if any
+  // Remove double slashes if any (but keep http:// or https://)
   cleanPath = cleanPath.replace(/([^:]\/)\/+/g, '$1');
   const fullUrl = `${baseUrl}${cleanPath}`;
   
-  console.log(`🔗 getFileUrl: ${filePath} -> ${fullUrl}`);
+  console.log(`🔗 getFileUrl: ${filePath} -> ${fullUrl} (baseUrl: ${baseUrl})`);
   return fullUrl;
 };
 

@@ -86,10 +86,12 @@ app.use(cors({
 app.use(express.json());
 
 // Serve static files from uploads directory with debug logging
+// Use absolute path for production compatibility
 app.use('/uploads', (req, res, next) => {
   console.log(`📁 Uploads access: ${req.method} ${req.url}`);
+  console.log(`📁 Uploads dir: ${uploadsDir}`);
   next();
-}, express.static('uploads'));
+}, express.static(uploadsDir));
 
 // Telegram webhook endpoint
 app.post('/api/telegram/webhook', handleWebhook);
