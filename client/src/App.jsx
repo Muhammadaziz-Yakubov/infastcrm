@@ -80,14 +80,15 @@ function AppRoutes() {
     );
   }
 
-  // If not authenticated, redirect to login
+  // If not authenticated, show login pages
   return (
     <Routes>
       {/* Login pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/student-login" element={<StudentLogin />} />
 
-      {/* Redirect all routes to login if not authenticated */}
+      {/* Redirect root to login, but allow student-login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
