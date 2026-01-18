@@ -251,135 +251,186 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center pt-20 pb-32 overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 mesh-bg"></div>
-        <div className="absolute inset-0 bg-pattern opacity-30"></div>
+        {/* Premium Background */}
+        <div className="absolute inset-0 premium-bg"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-blue-900/10 to-purple-900/20"></div>
 
-        {/* Floating Shapes */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary-400/30 to-primary-600/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-secondary-400/20 to-primary-500/20 rounded-full blur-3xl animate-float animate-delay-1000"></div>
-        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-br from-amber-300/20 to-orange-400/20 rounded-full blur-3xl animate-pulse-slow"></div>
+        {/* Floating Premium Elements */}
+        <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-600/15 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute bottom-20 right-10 w-[32rem] h-[32rem] bg-gradient-to-br from-emerald-400/15 to-blue-500/10 rounded-full blur-3xl animate-float-slow animate-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/4 w-80 h-80 bg-gradient-to-br from-rose-300/20 to-pink-400/15 rounded-full blur-3xl animate-float-slow animate-delay-1000"></div>
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-amber-300/25 to-orange-400/15 rounded-full blur-3xl animate-pulse-glow"></div>
 
-        {/* Decorative Elements */}
-        <div className="absolute top-32 right-20 w-20 h-20 border-4 border-primary-200 rounded-2xl rotate-12 animate-spin-slow opacity-50"></div>
-        <div className="absolute bottom-40 left-20 w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl rotate-45 animate-bounce-slow opacity-30"></div>
+        {/* Premium Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full animate-particle-1"></div>
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-purple-400 rounded-full animate-particle-2"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-emerald-400 rounded-full animate-particle-3"></div>
+          <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-pink-400 rounded-full animate-particle-4"></div>
+          <div className="absolute bottom-1/3 right-1/2 w-2 h-2 bg-amber-400 rounded-full animate-particle-5"></div>
+        </div>
+
+        {/* Decorative Geometric Shapes */}
+        <div className="absolute top-32 right-20 w-24 h-24 border-2 border-white/10 rounded-3xl rotate-12 animate-spin-slow opacity-30"></div>
+        <div className="absolute bottom-40 left-20 w-20 h-20 bg-gradient-to-br from-blue-400/30 to-purple-600/20 rounded-2xl rotate-45 animate-bounce-slow opacity-40"></div>
+        <div className="absolute top-3/4 right-10 w-16 h-16 border border-white/20 rounded-full animate-pulse-slow opacity-50"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-primary-100 shadow-lg mb-8 animate-fade-in-down">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
-              </span>
-              <span className="text-sm font-medium text-gray-700">Yangi guruhlar ochilmoqda!</span>
+            {/* Premium Badge */}
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 shadow-2xl mb-10 animate-fade-in-down">
+              <div className="relative">
+                <div className="w-3 h-3 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full animate-ping opacity-75"></div>
+              </div>
+              <span className="text-sm font-semibold text-white/90 tracking-wide">PREMIUM IT TA'LIM MARKAZI</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-white/70">Andijon 2024</span>
+              </div>
             </div>
 
-            {/* Main Heading */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 mb-6 animate-fade-in-up leading-tight">
-              <span className="gradient-text">IT kasbini</span> o'rganing
+            {/* Premium Main Heading */}
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white mb-8 animate-fade-in-up leading-none">
+              <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent drop-shadow-2xl">
+                IT kasbini
+              </span>
               <br />
-              <span className="text-gray-800">kelajakni quring</span>
+              <span className="bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-transparent drop-shadow-lg">
+                premium tarzda
+              </span>
+              <br />
+              <span className="text-white drop-shadow-2xl">o'rganing</span>
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto animate-fade-in-up animate-delay-200 leading-relaxed">
-              Andijon viloyatidagi <span className="font-semibold text-primary-600">yetakchi IT ta'lim markazi</span>.
-              Zamonaviy kasblarni professional ustozlardan o'rganing va
-              <span className="font-semibold"> muvaffaqiyatli karyera</span> boshlang!
+            {/* Premium Subtitle */}
+            <p className="text-xl sm:text-2xl text-white/80 mb-12 max-w-3xl mx-auto animate-fade-in-up animate-delay-300 leading-relaxed font-light">
+              Andijon viloyatidagi <span className="font-semibold text-white">eng zamonaviy IT ta'lim markazi</span>.
+              Premium kurslar, individual yondashuv va
+              <span className="font-semibold text-blue-200"> 100% ishga joylashish</span> kafolati.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animate-delay-300">
-              <Link to="/courses" className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2 group">
-                <span>Kurslarni ko'rish</span>
+            {/* Premium CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up animate-delay-500">
+              <Link to="/courses" className="premium-btn-primary text-lg px-10 py-5 inline-flex items-center justify-center gap-3 group">
+                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <span>Premium Kurslarni Ko'rish</span>
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </Link>
               <button
                 onClick={() => setShowRegistrationModal(true)}
-                className="btn-secondary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+                className="premium-btn-secondary text-lg px-10 py-5 inline-flex items-center justify-center gap-3"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
-                <span>Kursga yozilish</span>
+                <span>Bepul Konsultatsiya</span>
               </button>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="mt-16 animate-fade-in-up animate-delay-500">
-              <p className="text-sm text-gray-500 mb-4">Bizga ishonishadi:</p>
-              <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-                <div className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-sm">
-                    IT
-                  </div>
-                  <span className="font-medium">IT Park</span>
+            {/* Premium Stats */}
+            <div className="mt-20 animate-fade-in-up animate-delay-700">
+              <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+                <div className="text-center">
+                  <div className="text-4xl font-black text-white mb-2 drop-shadow-lg">500+</div>
+                  <div className="text-sm text-white/70 font-medium">Bitiruvchilar</div>
                 </div>
-                <div className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-sm">
-                    UD
-                  </div>
-                  <span className="font-medium">Udevs</span>
+                <div className="text-center">
+                  <div className="text-4xl font-black text-white mb-2 drop-shadow-lg">95%</div>
+                  <div className="text-sm text-white/70 font-medium">Ishga joylashish</div>
                 </div>
-                <div className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-sm">
-                    EX
-                  </div>
-                  <span className="font-medium">Exadel</span>
+                <div className="text-center">
+                  <div className="text-4xl font-black text-white mb-2 drop-shadow-lg">4.9</div>
+                  <div className="text-sm text-white/70 font-medium">Reyting</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-gray-300 rounded-full flex justify-center pt-2">
-            <div className="w-1 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+        {/* Premium Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce-slow">
+          <div className="w-8 h-14 border-2 border-white/30 rounded-full flex justify-center pt-3 backdrop-blur-sm bg-white/5">
+            <div className="w-1 h-3 bg-white/60 rounded-full animate-pulse"></div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_50%,rgba(249,115,22,0.3),transparent_50%)]"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_50%,rgba(239,68,68,0.2),transparent_50%)]"></div>
-        </div>
+      {/* Premium Stats Section */}
+      <section className="py-24 bg-gradient-to-br from-slate-900 via-gray-900 to-black relative overflow-hidden">
+        {/* Premium Background */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.15),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(147,51,234,0.1),transparent_50%)]"></div>
+
+        {/* Floating Elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 border border-white/5 rounded-full animate-float-slow"></div>
+        <div className="absolute bottom-10 right-10 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-xl animate-pulse-slow"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+              Bizning <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">muvaffaqiyatlarimiz</span>
+            </h2>
+            <p className="text-xl text-white/70 max-w-2xl mx-auto">
+              Minglab o'quvchilarni muvaffaqiyatli karyeraga yo'l oldik
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div className="text-4xl mb-3">{stat.icon}</div>
-                <div className="text-5xl lg:text-6xl font-black text-white mb-2 group-hover:scale-110 transition-transform">
-                  {stat.value}
+              <div key={index} className="text-center group relative">
+                {/* Premium Card Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 rounded-3xl backdrop-blur-xl border border-white/10 group-hover:border-white/20 transition-all duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                <div className="relative p-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-white/10">
+                    <stat.icon className="h-8 w-8 text-blue-400" />
+                  </div>
+                  <div className="text-5xl lg:text-6xl font-black text-white mb-3 group-hover:scale-110 transition-transform drop-shadow-lg">
+                    {stat.value}
+                  </div>
+                  <div className="text-white/70 font-medium text-lg">{stat.label}</div>
+
+                  {/* Shine Effect */}
+                  <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shine"></div>
                 </div>
-                <div className="text-gray-400 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Courses Section */}
-      <section className="py-24 bg-gray-50 relative">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent"></div>
+      {/* Premium Courses Section */}
+      <section className="py-32 bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50/30 relative overflow-hidden">
+        {/* Premium Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-white via-white/50 to-transparent"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23e0f2fe" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
-              O'quv dasturlari
+        {/* Floating Elements */}
+        <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute bottom-20 left-20 w-48 h-48 bg-gradient-to-br from-emerald-200/15 to-blue-200/15 rounded-full blur-3xl animate-float-slow animate-delay-1000"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-20">
+            <span className="inline-block px-6 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-bold mb-6 shadow-lg border border-blue-200/50">
+              ✨ Premium Kurslar
             </span>
-            <h2 className="section-title">
-              Bizning <span className="gradient-text">Kurslar</span>
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Premium ta'lim
+              </span>
+              <br />
+              <span className="text-gray-800">sizning kelajagingiz uchun</span>
             </h2>
-            <p className="section-subtitle">
-              Sizga mos keladigan yo'nalishni tanlang va professional mutaxassis bo'ling
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Har bir kurs individual yondashuv, premium materiallar va
+              <span className="font-semibold text-blue-600"> 100% amaliy mashg'ulotlar</span> bilan
             </p>
           </div>
 
@@ -387,56 +438,86 @@ export default function Landing() {
             {courses.map((course, index) => (
               <div
                 key={course.id}
-                className="group bg-white rounded-2xl p-8 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 border border-gray-100 relative overflow-hidden"
+                className="group relative"
               >
-                {/* Hover Gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${course.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+                {/* Premium Card Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-gray-50 rounded-3xl shadow-2xl group-hover:shadow-3xl transition-all duration-700 group-hover:-translate-y-4 border border-white/50 backdrop-blur-xl"></div>
+                <div className={`absolute inset-0 bg-gradient-to-br ${course.color} opacity-0 group-hover:opacity-10 transition-all duration-700 rounded-3xl`}></div>
 
-                <div className="relative">
-                  {/* Icon */}
-                  <div className={`${course.iconBg} w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
-                    <course.icon className="w-8 h-8" />
+                {/* Shine Effect */}
+                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine-slow"></div>
+
+                <div className="relative p-10">
+                  {/* Premium Icon */}
+                  <div className="relative mb-8">
+                    <div className={`${course.iconBg} w-20 h-20 rounded-3xl flex items-center justify-center text-white shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border-4 border-white/20`}>
+                      <course.icon className="w-10 h-10" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-white text-xs font-bold">★</span>
+                    </div>
+                  </div>
+
+                  {/* Premium Badge */}
+                  <div className="inline-block px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-xs font-bold mb-4 border border-blue-200/50">
+                    Premium
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-500">
                     {course.title}
                   </h3>
-                  <p className="text-gray-600 mb-6 line-clamp-2">{course.description}</p>
+                  <p className="text-gray-600 mb-8 leading-relaxed group-hover:text-gray-700 transition-colors">{course.description}</p>
 
-                  {/* Meta Info */}
-                  <div className="flex items-center gap-4 mb-6 text-sm">
-                    <div className="flex items-center gap-1.5 text-gray-500">
-                      <Clock className="w-4 h-4" />
-                      <span>{course.duration}</span>
+                  {/* Premium Features */}
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                      <span className="text-gray-700 font-medium">Individual mentor</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-500">
-                      <Users className="w-4 h-4" />
-                      <span>Amaliy</span>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full"></div>
+                      <span className="text-gray-700 font-medium">Real loyihalar</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                      <span className="text-gray-700 font-medium">Sertifikat</span>
                     </div>
                   </div>
 
-                  {/* CTA */}
+                  {/* Meta Info */}
+                  <div className="flex items-center justify-between mb-8 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl border border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-blue-600" />
+                      <span className="text-gray-700 font-semibold">{course.duration}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-emerald-600" />
+                      <span className="text-gray-700 font-semibold">Amaliy</span>
+                    </div>
+                  </div>
+
+                  {/* Premium CTA */}
                   <button
                     onClick={() => {
                       setRegistrationData({...registrationData, course: course.id});
                       setShowRegistrationModal(true);
                     }}
-                    className="inline-flex items-center gap-2 text-primary-600 font-semibold group-hover:gap-3 transition-all"
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-500 font-bold text-lg shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 group/btn"
                   >
-                    <span>Batafsil ma'lumot</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Kursga yozilish</span>
+                    <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* View All Button */}
-          <div className="text-center mt-12">
-            <Link to="/courses" className="btn-primary inline-flex items-center gap-2 px-8 py-4">
-              <span>Barcha kurslarni ko'rish</span>
-              <ArrowRight className="w-5 h-5" />
+          {/* Premium CTA */}
+          <div className="text-center mt-20">
+            <Link to="/courses" className="premium-btn-secondary inline-flex items-center gap-3 px-10 py-5 text-lg font-bold">
+              <span>Barcha premium kurslarni ko'rish</span>
+              <ArrowRight className="w-6 h-6" />
             </Link>
           </div>
         </div>
@@ -686,57 +767,119 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900"></div>
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_30%,rgba(249,115,22,0.4),transparent_40%)]"></div>
-          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_70%,rgba(239,68,68,0.3),transparent_40%)]"></div>
+      {/* Premium CTA Section */}
+      <section className="py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-black"></div>
+
+        {/* Premium Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.1),transparent_70%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(147,51,234,0.08),transparent_60%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(16,185,129,0.06),transparent_60%)]"></div>
+
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-purple-500/8 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute bottom-20 right-20 w-[28rem] h-[28rem] bg-gradient-to-br from-emerald-500/8 to-blue-500/6 rounded-full blur-3xl animate-float-slow animate-delay-2000"></div>
+
+        {/* Premium Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-particle-1 opacity-60"></div>
+          <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full animate-particle-2 opacity-60"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-2.5 h-2.5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-particle-3 opacity-60"></div>
+          <div className="absolute top-2/3 right-1/4 w-1.5 h-1.5 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full animate-particle-4 opacity-60"></div>
+          <div className="absolute bottom-1/3 right-1/2 w-3 h-3 bg-gradient-to-r from-rose-400 to-pink-400 rounded-full animate-particle-5 opacity-60"></div>
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-sm font-medium text-white/90">Yangi guruhlar tez orada boshlanadi</span>
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Premium Status Badge */}
+          <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl rounded-full border border-white/20 mb-12 shadow-2xl">
+            <div className="relative">
+              <div className="w-4 h-4 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full animate-pulse"></div>
+              <div className="absolute inset-0 w-4 h-4 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full animate-ping opacity-75"></div>
+            </div>
+            <span className="text-sm font-bold text-white tracking-wider">PREMIUM KURSGA YOZILISH</span>
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-white/70 bg-white/10 px-2 py-1 rounded-full">LIMITED</span>
+            </div>
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
-            IT karyerangizni <span className="text-primary-400">bugun</span> boshlang!
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-tight">
+            Premium IT karyerangizni
+            <br />
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              bugun boshlang!
+            </span>
           </h2>
-          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
-            Hoziroq ro'yxatdan o'ting va bepul konsultatsiya oling.
-            Biz sizning muvaffaqiyatingiz uchun barcha sharoitlarni yaratamiz.
+
+          <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-4xl mx-auto leading-relaxed font-light">
+            Hoziroq premium kursga yoziling va <span className="font-semibold text-white">bepul konsultatsiya</span> oling.
+            Biz sizning muvaffaqiyatingiz uchun eng yaxshi sharoitlarni yaratamiz.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Premium CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
             <button
               onClick={() => setShowRegistrationModal(true)}
-              className="btn-primary text-lg px-10 py-5 inline-flex items-center justify-center gap-2 group"
+              className="premium-btn-primary text-xl px-12 py-6 inline-flex items-center justify-center gap-4 group shadow-2xl hover:shadow-blue-500/25"
             >
-              <span>Kursga yozilish</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-white group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+              </div>
+              <span>Premium kursga yozilish</span>
+              <svg className="w-6 h-6 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
             </button>
+
             <a
               href="tel:+998937435225"
-              className="btn-outline text-lg px-10 py-5 inline-flex items-center justify-center gap-2"
+              className="premium-btn-outline text-xl px-12 py-6 inline-flex items-center justify-center gap-4"
             >
-              <Phone className="w-5 h-5" />
-              <span>Qo'ng'iroq qiling</span>
+              <Phone className="w-6 h-6" />
+              <span>Shaxsiy konsultatsiya</span>
             </a>
           </div>
 
-          {/* Contact Info */}
-          <div className="mt-12 flex flex-wrap justify-center gap-8 text-gray-400">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              <span>Andijon, Buloqboshi tumani</span>
+          {/* Premium Contact Info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 hover:transform hover:scale-105">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+                <MapPin className="w-8 h-8 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Manzil</h3>
+              <p className="text-white/70 leading-relaxed">
+                Andijon viloyati<br />
+                Buloqboshi tumani<br />
+                Yangi Hokimiyat binosi
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Phone className="w-5 h-5" />
-              <span>+998 93 743 52 25</span>
+
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 hover:transform hover:scale-105">
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+                <Phone className="w-8 h-8 text-emerald-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Telefon</h3>
+              <div className="text-white/70 space-y-1">
+                <a href="tel:+998937435225" className="block hover:text-white transition-colors font-medium">
+                  +998 93 743 52 25
+                </a>
+                <a href="tel:+998902570100" className="block hover:text-white transition-colors font-medium">
+                  +998 90 257 01 00
+                </a>
+              </div>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 hover:transform hover:scale-105">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+                <Clock className="w-8 h-8 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Ish vaqti</h3>
+              <p className="text-white/70 leading-relaxed">
+                Dushanba - Shanba<br />
+                <span className="font-semibold text-white">9:00 - 18:00</span><br />
+                <span className="text-sm text-white/60">Yakshanba: Dam olish</span>
+              </p>
             </div>
           </div>
         </div>
@@ -818,22 +961,27 @@ export default function Landing() {
         </div>
       </footer>
 
-      {/* Registration Modal */}
+      {/* Premium Registration Modal */}
       {showRegistrationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <GraduationCap className="h-8 w-8 text-white" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[95vh] overflow-hidden border border-white/20">
+            {/* Premium Header */}
+            <div className="relative p-8 text-center bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white overflow-hidden">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+              <div className="relative">
+                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/30">
+                  <GraduationCap className="h-10 w-10 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Kursga yozilish</h3>
-                <p className="text-gray-600">Ma'lumotlaringizni kiriting va tez orada siz bilan bog'lanamiz</p>
+                <h3 className="text-3xl font-bold mb-3">Premium kursga yozilish</h3>
+                <p className="text-white/90 font-light">Ma'lumotlaringizni kiriting va bepul konsultatsiya oling</p>
               </div>
+            </div>
 
+            {/* Form Content */}
+            <div className="p-8">
               <form onSubmit={handleRegistration} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">
                     Ism va familiya *
                   </label>
                   <input
@@ -841,13 +989,13 @@ export default function Landing() {
                     required
                     value={registrationData.name}
                     onChange={(e) => setRegistrationData({...registrationData, name: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500 font-medium"
                     placeholder="Masalan: Azizbek Tursunov"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">
                     Telefon raqam *
                   </label>
                   <input
@@ -855,20 +1003,20 @@ export default function Landing() {
                     required
                     value={registrationData.phone}
                     onChange={(e) => setRegistrationData({...registrationData, phone: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 placeholder-gray-500 font-medium"
                     placeholder="+998 XX XXX XX XX"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">
                     Qiziqishgan kurs *
                   </label>
                   <select
                     required
                     value={registrationData.course}
                     onChange={(e) => setRegistrationData({...registrationData, course: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 font-medium"
                   >
                     <option value="">Kursni tanlang</option>
                     {courses.map(course => (
@@ -878,38 +1026,56 @@ export default function Landing() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">
                     Dasturlash tajribasi
                   </label>
                   <select
                     value={registrationData.experience}
                     onChange={(e) => setRegistrationData({...registrationData, experience: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm text-gray-900 font-medium"
                   >
                     <option value="">Tajribani tanlang</option>
-                    <option value="beginner">Boshlovchi (hech narsa bilmayman)</option>
+                    <option value="beginner">Boshlang'ich (hech narsa bilmayman)</option>
                     <option value="basic">Asosiy (HTML/CSS bilaman)</option>
                     <option value="intermediate">O'rta (bir nechta til bilaman)</option>
                     <option value="advanced">Yuqori (professional darajada)</option>
                   </select>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-4 pt-6">
                   <button
                     type="button"
                     onClick={() => setShowRegistrationModal(false)}
-                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                    className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-semibold hover:scale-105 transform"
                   >
                     Bekor qilish
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg"
+                    className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-xl hover:shadow-blue-500/25 hover:scale-105 transform"
                   >
-                    Yuborish
+                    Premium kursga yozilish
                   </button>
                 </div>
               </form>
+
+              {/* Premium Trust Indicators */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Bepul konsultatsiya</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span>Individual yondashuv</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                    <span>Premium ta'lim</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
