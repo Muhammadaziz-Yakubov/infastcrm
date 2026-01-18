@@ -115,12 +115,46 @@ app.post('/api/telegram/webhook', (req, res, next) => {
 
 // Test endpoint for webhook accessibility
 app.get('/api/telegram/webhook-test', (req, res) => {
-  console.log('🧪 Webhook test endpoint accessed');
+  console.log('🧪 Webhook test endpoint accessed from:', req.ip, req.headers['user-agent']);
   res.json({
     status: 'ok',
     message: 'Webhook endpoint is accessible',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    webhook_url: process.env.WEBHOOK_URL || 'https://infastcrm-0b2r.onrender.com/api/telegram/webhook'
   });
+});
+
+// Test bot connectivity
+app.get('/api/telegram/bot-test', async (req, res) => {
+  try {
+    console.log('🧪 Testing bot connectivity...');
+    const botInfo = await bot.getMe();
+    const webhookInfo = await bot.getWebHookInfo();
+
+    res.json({
+      status: 'ok',
+      bot_info: {
+        id: botInfo.id,
+        username: botInfo.username,
+        first_name: botInfo.first_name
+      },
+      webhook_info: {
+        url: webhookInfo.url || 'none',
+        has_custom_certificate: webhookInfo.has_custom_certificate,
+        pending_update_count: webhookInfo.pending_update_count,
+        last_error_message: webhookInfo.last_error_message
+      },
+      is_polling: bot.isPolling(),
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Bot test failed:', error.message);
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Database connection
@@ -154,24 +188,34 @@ setTimeout(async () => {
 
     // Setup webhook if in production or WEBHOOK_URL is provided
     const isProduction = process.env.NODE_ENV === 'production' || process.env.WEBHOOK_URL;
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔗 Webhook URL configured: ${process.env.WEBHOOK_URL ? 'yes' : 'no'}`);
+    console.log(`🎯 Bot mode: ${isProduction ? 'production (webhook + polling fallback)' : 'development (polling only)'}`);
+
     if (isProduction) {
       console.log('🔄 Setting up Telegram webhook for production...');
       const webhookSet = await setupWebhook();
       if (webhookSet) {
         console.log('✅ Telegram webhook setup completed');
+        console.log('📡 Bot is now using webhook mode (with polling as backup if needed)');
       } else {
         console.log('❌ Telegram webhook setup failed - falling back to polling');
         // Fallback to polling if webhook fails
         const pollingStarted = await startPolling();
         if (pollingStarted) {
-          console.log('✅ Polling fallback successful');
+          console.log('✅ Polling fallback successful - bot is running in polling mode');
         } else {
-          console.error('❌ Polling fallback also failed');
+          console.error('❌ Polling fallback also failed - bot may not work properly');
         }
       }
     } else {
       console.log('⚠️ Running in development mode, starting polling...');
-      await startPolling();
+      const pollingStarted = await startPolling();
+      if (pollingStarted) {
+        console.log('✅ Development polling started successfully');
+      } else {
+        console.error('❌ Development polling failed to start');
+      }
     }
   }
 }, 3000);

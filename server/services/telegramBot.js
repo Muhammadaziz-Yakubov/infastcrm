@@ -12,79 +12,191 @@ const bot = new TelegramBot(BOT_TOKEN, {
   polling: false  // Start without polling, we'll enable it if needed
 });
 
+// Add event listeners for debugging
+bot.on('polling_error', (error) => {
+  console.error('🚨 Polling error:', error);
+});
+
+bot.on('webhook_error', (error) => {
+  console.error('🚨 Webhook error:', error);
+});
+
+bot.on('message', (msg) => {
+  console.log('📨 Bot received message:', {
+    chat_id: msg.chat.id,
+    chat_type: msg.chat.type,
+    text: msg.text ? msg.text.substring(0, 50) + '...' : 'no text',
+    from: msg.from ? msg.from.username || msg.from.first_name : 'unknown'
+  });
+});
+
+bot.on('callback_query', (query) => {
+  console.log('🔘 Bot received callback query:', {
+    id: query.id,
+    data: query.data,
+    from: query.from.username || query.from.first_name
+  });
+});
+
 // Function to start polling as fallback
 export const startPolling = async () => {
   try {
     console.log('🔄 Starting Telegram polling...');
-    await bot.processUpdate([]);
-    console.log('✅ Telegram polling started successfully');
-    return true;
+
+    // Check if bot is already polling
+    if (bot.isPolling()) {
+      console.log('ℹ️ Bot is already polling, skipping...');
+      return true;
+    }
+
+    // Start polling
+    bot.startPolling({
+      restart: true,
+      polling: {
+        interval: 300, // Poll every 300ms
+        timeout: 10,   // Timeout after 10 seconds
+        limit: 100,    // Get up to 100 updates at once
+        allowed_updates: ['message', 'callback_query']
+      }
+    });
+
+    // Wait a moment to ensure polling starts
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    if (bot.isPolling()) {
+      console.log('✅ Telegram polling started successfully');
+      return true;
+    } else {
+      console.log('⚠️ Polling may not have started properly');
+      return false;
+    }
   } catch (error) {
     console.error('❌ Error starting polling:', error.message);
+    console.error('Full polling error:', error);
     return false;
   }
 };
 
-// Webhook setup
-export const setupWebhook = async () => {
-  try {
-    const webhookUrl = process.env.WEBHOOK_URL || 'https://infastcrm-0b2r.onrender.com/api/telegram/webhook';
-    console.log(`🔄 Attempting to set webhook to: ${webhookUrl}`);
+// Webhook setup with retry logic
+export const setupWebhook = async (retries = 3) => {
+  const webhookUrl = process.env.WEBHOOK_URL || 'https://infastcrm-0b2r.onrender.com/api/telegram/webhook';
+  console.log(`🔄 Attempting to set webhook to: ${webhookUrl}`);
 
-    // Delete any existing webhook first
+  for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      await bot.deleteWebHook();
-      console.log('🧹 Existing webhook deleted');
-    } catch (deleteError) {
-      console.log('⚠️ Could not delete existing webhook (might not exist):', deleteError.message);
+      console.log(`🔄 Webhook setup attempt ${attempt}/${retries}`);
+
+      // First, check current webhook status
+      const initialInfo = await bot.getWebHookInfo();
+      console.log(`📊 Initial webhook status:`, {
+        url: initialInfo.url || 'none',
+        pending_updates: initialInfo.pending_update_count,
+        last_error: initialInfo.last_error_message
+      });
+
+      // Delete any existing webhook first
+      try {
+        await bot.deleteWebHook();
+        console.log('🧹 Existing webhook deleted');
+      } catch (deleteError) {
+        console.log('⚠️ Could not delete existing webhook:', deleteError.message);
+      }
+
+      // Wait a bit after deleting
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Set new webhook with certificate parameter (even though we don't have one)
+      const setWebhookResult = await bot.setWebHook(webhookUrl, {
+        max_connections: 100,
+        allowed_updates: ['message', 'callback_query']
+      });
+      console.log(`📤 setWebHook result:`, setWebhookResult);
+
+      // Wait longer for webhook to propagate
+      console.log('⏳ Waiting for webhook propagation...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Verify webhook was set - try multiple times
+      let verificationSuccess = false;
+      for (let verifyAttempt = 1; verifyAttempt <= 3; verifyAttempt++) {
+        try {
+          const webhookInfo = await bot.getWebHookInfo();
+          console.log(`🔍 Verification attempt ${verifyAttempt}:`, {
+            url: webhookInfo.url || 'empty',
+            has_custom_certificate: webhookInfo.has_custom_certificate,
+            pending_update_count: webhookInfo.pending_update_count,
+            last_error_date: webhookInfo.last_error_date,
+            last_error_message: webhookInfo.last_error_message
+          });
+
+          if (webhookInfo.url === webhookUrl) {
+            console.log('✅ Webhook verification successful!');
+            verificationSuccess = true;
+            break;
+          } else if (webhookInfo.url && webhookInfo.url !== webhookUrl) {
+            console.log(`⚠️ Webhook URL mismatch. Expected: ${webhookUrl}, Got: ${webhookInfo.url}`);
+          } else {
+            console.log(`⚠️ Webhook URL is empty, retrying verification...`);
+          }
+        } catch (verifyError) {
+          console.error(`❌ Verification attempt ${verifyAttempt} failed:`, verifyError.message);
+        }
+
+        if (!verificationSuccess && verifyAttempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      if (verificationSuccess) {
+        return true;
+      }
+
+      console.log(`❌ Attempt ${attempt} failed, ${retries - attempt} attempts remaining`);
+
+    } catch (error) {
+      console.error(`❌ Webhook setup attempt ${attempt} failed:`, error.message);
+      console.error('Full error details:', error);
+
+      // If it's a network error or rate limit, wait longer before retry
+      if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT' || error.response?.status === 429) {
+        console.log('🌐 Network issue detected, waiting longer before retry...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
     }
 
-    // Set new webhook
-    await bot.setWebHook(webhookUrl);
-    console.log(`✅ Telegram webhook set to: ${webhookUrl}`);
-
-    // Wait a moment for webhook to propagate
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Verify webhook was set
-    const webhookInfo = await bot.getWebHookInfo();
-    console.log(`🔍 Webhook info received:`, {
-      url: webhookInfo.url,
-      has_custom_certificate: webhookInfo.has_custom_certificate,
-      pending_update_count: webhookInfo.pending_update_count,
-      last_error_date: webhookInfo.last_error_date,
-      last_error_message: webhookInfo.last_error_message
-    });
-
-    if (webhookInfo.url === webhookUrl) {
-      console.log('✅ Webhook verification successful');
-      return true;
-    } else {
-      console.error('❌ Webhook verification failed - URL mismatch');
-      console.error(`Expected: ${webhookUrl}`);
-      console.error(`Actual: ${webhookInfo.url}`);
-      return false;
+    // Wait between attempts
+    if (attempt < retries) {
+      console.log(`⏳ Waiting before next attempt...`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
-  } catch (error) {
-    console.error('❌ Error setting webhook:', error.message);
-    console.error('Full error:', error);
-    return false;
   }
+
+  console.error(`❌ All ${retries} webhook setup attempts failed`);
+  return false;
 };
 
 // Webhook endpoint handler
 export const handleWebhook = async (req, res) => {
   try {
-    console.log('🔗 Webhook received:', {
+    console.log('🔗 Webhook received at:', new Date().toISOString());
+    console.log('📊 Request details:', {
       method: req.method,
-      headers: req.headers,
-      body: req.body
+      url: req.url,
+      contentType: req.headers['content-type'],
+      userAgent: req.headers['user-agent'],
+      ip: req.ip || req.connection.remoteAddress,
+      bodySize: JSON.stringify(req.body || {}).length
     });
+
+    // Log if this is from Telegram
+    if (req.headers['user-agent'] && req.headers['user-agent'].includes('Telegram')) {
+      console.log('✅ Request confirmed from Telegram');
+    }
 
     const update = req.body;
 
     if (!update) {
-      console.log('❌ No update in webhook request');
+      console.log('❌ No update in webhook request body');
       return res.status(400).send('No update');
     }
 
