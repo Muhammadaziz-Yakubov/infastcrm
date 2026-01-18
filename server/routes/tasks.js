@@ -61,9 +61,11 @@ const getFileUrl = (filePath) => {
   // Always use the production URL since we're on Render.com
   const baseUrl = 'https://infastcrm-0b2r.onrender.com';
   
-  // Remove leading slash to avoid double slash
-  const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
-  const fullUrl = `${baseUrl}/${cleanPath}`;
+  // Ensure path starts with /uploads
+  let cleanPath = filePath.startsWith('/') ? filePath : '/' + filePath;
+  // Remove double slashes if any
+  cleanPath = cleanPath.replace(/([^:]\/)\/+/g, '$1');
+  const fullUrl = `${baseUrl}${cleanPath}`;
   
   console.log(`🔗 getFileUrl: ${filePath} -> ${fullUrl}`);
   return fullUrl;
@@ -200,7 +202,13 @@ ${task.description}
       }
     }
     
-    res.status(201).json(task);
+    // Convert image_url to full URL
+    const taskWithFullUrl = {
+      ...task.toObject(),
+      image_url: task.image_url ? getFileUrl(task.image_url) : null
+    };
+    
+    res.status(201).json(taskWithFullUrl);
   } catch (error) {
     console.error('Error creating task:', error);
     res.status(500).json({ message: error.message });
@@ -234,7 +242,13 @@ router.put('/:id', authenticate, requireAdmin, upload.single('image'), async (re
       return res.status(404).json({ message: 'Task not found' });
     }
     
-    res.json(task);
+    // Convert image_url to full URL
+    const taskWithFullUrl = {
+      ...task.toObject(),
+      image_url: task.image_url ? getFileUrl(task.image_url) : null
+    };
+    
+    res.json(taskWithFullUrl);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

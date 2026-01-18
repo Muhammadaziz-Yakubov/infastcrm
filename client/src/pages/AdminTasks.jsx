@@ -130,7 +130,9 @@ export default function AdminTasks() {
     if (url.startsWith('http')) return url;
     // Production da backend URL dan foydalanamiz
     const backendUrl = import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com';
-    return `${backendUrl}${url.startsWith('/') ? url : '/' + url}`;
+    // URL to'g'ri formatda bo'lishi kerak: /uploads/tasks/filename.jpg
+    const cleanUrl = url.startsWith('/') ? url : '/' + url;
+    return `${backendUrl}${cleanUrl}`;
   };
 
   const resetTaskForm = () => {
