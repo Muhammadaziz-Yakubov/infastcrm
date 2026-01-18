@@ -40,7 +40,7 @@ export default function Dashboard() {
       return;
     }
     fetchDashboard();
-  }, [user, navigate]);
+  }, [user]);
 
   const fetchDashboard = async () => {
     try {

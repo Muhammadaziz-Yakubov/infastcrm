@@ -42,7 +42,7 @@ export default function StudentDashboard() {
       return;
     }
     fetchDashboard();
-  }, [navigate]);
+  }, []);
 
   const fetchDashboard = async () => {
     try {

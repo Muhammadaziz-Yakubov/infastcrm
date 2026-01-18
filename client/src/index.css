@@ -5,26 +5,12 @@
 @tailwind utilities;
 
 :root {
-  --gradient-primary: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  --gradient-secondary: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   --gradient-warning: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
   --gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
   --gradient-dark: linear-gradient(135deg, #232526 0%, #414345 100%);
-  --primary-50: #fff7ed;
-  --primary-100: #ffedd5;
-  --primary-200: #fed7aa;
-  --primary-300: #fdba74;
-  --primary-400: #fb923c;
-  --primary-500: #f97316;
-  --primary-600: #ea580c;
-  --primary-700: #c2410c;
-  --primary-800: #9a3412;
-  --primary-900: #7c2d12;
-  --secondary-400: #fb923c;
-  --secondary-500: #f97316;
-  --dark-800: #1f2937;
-  --dark-900: #111827;
 }
 
 * {
@@ -55,12 +41,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%);
 }
 
 /* Glass Effect */
@@ -92,34 +78,30 @@ body {
 
 /* Gradient Text */
 .gradient-text {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: #f97316; /* Fallback for browsers that don't support background-clip */
 }
 
 /* Button Styles */
 .btn-primary {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
-  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(251, 146, 60, 0.4);
-  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
 }
 
 .btn-success {
@@ -306,15 +288,15 @@ body {
 }
 
 .input-focus:focus {
-  border-color: #f97316;
-  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
 /* Sidebar Active Link */
 .sidebar-link-active {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 /* Table Styles */
@@ -323,11 +305,11 @@ body {
 }
 
 .table-row-hover:hover {
-  background: linear-gradient(90deg, rgba(249, 115, 22, 0.05) 0%, rgba(234, 88, 12, 0.05) 100%);
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
 }
 
 .dark .table-row-hover:hover {
-  background: linear-gradient(90deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.1) 100%);
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
 }
 
 /* Modal Overlay */
@@ -443,7 +425,7 @@ body {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
 .dark .stats-card {
@@ -499,7 +481,7 @@ body {
 
 /* Premium Button Styles */
 .premium-btn-primary {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -507,7 +489,7 @@ body {
   font-weight: 600;
   font-size: 1.125rem;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 25px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
@@ -515,8 +497,7 @@ body {
 
 .premium-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(249, 115, 22, 0.5);
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
 }
 
 .premium-btn-secondary {
