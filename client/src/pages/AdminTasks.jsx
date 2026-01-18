@@ -350,10 +350,14 @@ export default function AdminTasks() {
               {task.image_url && (
                 <div className="h-48 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 relative overflow-hidden">
                   <img
-                    src={task.image_url.startsWith('http') ? task.image_url : `http://localhost:5000${task.image_url}`}
+                    src={task.image_url}
                     alt={task.title}
                     className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                    onClick={() => setPreviewImage(task.image_url.startsWith('http') ? task.image_url : `http://localhost:5000${task.image_url}`)}
+                    onClick={() => setPreviewImage(task.image_url)}
+                    onError={(e) => {
+                      console.log('Image load error:', task.image_url);
+                      e.target.style.display = 'none';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 </div>
@@ -590,10 +594,10 @@ export default function AdminTasks() {
       {/* Submissions Modal */}
       {showSubmissionsModal && selectedTask && (
         <Modal isOpen={showSubmissionsModal} onClose={() => setShowSubmissionsModal(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 max-w-4xl lg:max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                   {selectedTask.title} - Yuborilganlar
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -620,15 +624,15 @@ export default function AdminTasks() {
             ) : (
               <div className="space-y-4">
                 {submissions.map((submission, index) => (
-                  <div key={submission._id} className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                  <div key={submission._id} className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-600">
                     {/* Student Info Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-4">
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                           {index + 1}
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white text-base md:text-lg">
                             {submission.student_id?.full_name || 'Noma\'lum talaba'}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -687,9 +691,15 @@ export default function AdminTasks() {
                             >
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                                  {file.mime_type.startsWith('image/') ? (
-                                    <ImageIcon size={20} className="text-blue-600 dark:text-blue-400" />
-                                  ) : file.mime_type.startsWith('video/') ? (
+                                  {file.mime_type?.startsWith('image/') ? (
+                                    <img 
+                                      src={file.file_path} 
+                                      alt={file.original_name}
+                                      className="w-6 h-6 object-cover rounded"
+                                      onClick={() => setPreviewImage(file.file_path)}
+                                      style={{ cursor: 'pointer' }}
+                                    />
+                                  ) : file.mime_type?.startsWith('video/') ? (
                                     <Video size={20} className="text-purple-600 dark:text-purple-400" />
                                   ) : (
                                     <File size={20} className="text-gray-600 dark:text-gray-400" />
@@ -705,8 +715,10 @@ export default function AdminTasks() {
                                 </div>
                               </div>
                               <a
-                                href={file.file_path.startsWith('http') ? file.file_path : `http://localhost:5000${file.file_path}`}
+                                href={file.file_path}
                                 download={file.original_name}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                 title="Yuklab olish"
                               >
@@ -736,7 +748,7 @@ export default function AdminTasks() {
                         <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3">
                           📊 Baholash:
                         </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Ball (0-{selectedTask.max_score})
@@ -757,7 +769,7 @@ export default function AdminTasks() {
                               placeholder="Ballni kiriting"
                             />
                           </div>
-                          <div className="md:col-span-2">
+                          <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Fikr-mulohaza (ixtiyoriy)
                             </label>

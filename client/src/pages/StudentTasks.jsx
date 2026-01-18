@@ -229,91 +229,65 @@ export default function StudentTasks() {
                       <span>Jarayonda</span>
                     </div>
                   )}
-                </div>
+          />
+        </div>
+      </div>
+    </div>
 
-                {/* Card Image */}
-                <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 relative">
-                  {task.image_url ? (
-                    <img
-                      src={task.image_url.startsWith('http') ? task.image_url : `http://localhost:5000${task.image_url}`}
-                      alt={task.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-                      <FileText className="w-16 h-16 text-white/50" />
-                    </div>
-                  )}
-                  {/* Gradient Overlay for Text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
-                  
-                  {/* Deadline on Image */}
-                  <div className="absolute bottom-4 left-4 text-white text-xs font-medium flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
-                    <Calendar size={12} />
-                    {format(new Date(task.deadline), 'dd MMM, HH:mm', { locale: uz })}
+    <main className="max-w-5xl mx-auto px-4 py-6">
+      {filteredTasks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-xl shadow-gray-200/50 dark:shadow-none mb-6">
+            <Archive className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Hech narsa topilmadi</h3>
+          <p className="text-gray-500 text-sm mt-1">Hozircha vazifalar ro'yxati bo'sh</p>
+        </div>
+      ) : (
+        <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+          {filteredTasks.map((task) => (
+            <div
+              key={task._id}
+              onClick={() => handleTaskClick(task)}
+              className="group relative bg-white dark:bg-gray-800 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-white dark:border-gray-700 overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-300"
+            >
+              {/* Status Badge - Floating */}
+              <div className="absolute top-4 left-4 z-10">
+                {task.submitted ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/90 backdrop-blur-md text-white text-xs font-bold shadow-lg shadow-green-500/20">
+                    <CheckCircle size={12} strokeWidth={3} />
+                    <span>Yuborildi</span>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md text-gray-700 dark:text-gray-200 text-xs font-bold shadow-lg">
+                    <Clock size={12} className="text-indigo-500" strokeWidth={2.5} />
+                    <span>Jarayonda</span>
+                  </div>
+                )}
+              </div>
 
-                {/* Content */}
-                <div className="p-5">
-                  <div className="flex justify-between items-start gap-4 mb-3">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2">
-                      {task.title}
-                    </h3>
+              {/* Card Image */}
+              <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 relative">
+                {task.image_url ? (
+                  <img
+                    src={task.image_url.startsWith('http') ? task.image_url : `/api${task.image_url}`}
+                    alt={task.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+                    <FileText className="w-16 h-16 text-white/50" />
                   </div>
-                  
-                  <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4 leading-relaxed">
-                    {task.description}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 border border-white dark:border-gray-600 shadow-sm">
-                           <Target size={14} />
-                        </div>
-                        <span className="text-xs text-gray-500 font-medium">Topshiriq</span>
-                     </div>
-                     
-                     {task.submission?.score ? (
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-bold">
-                          <Star size={14} fill="currentColor" className="text-indigo-500" />
-                          {task.submission.score} ball
-                        </div>
-                     ) : (
-                        <div className="text-xs font-semibold text-gray-400 bg-gray-50 dark:bg-gray-700/50 px-3 py-1 rounded-lg">
-                          Max: {task.max_score} ball
-                        </div>
-                     )}
-                  </div>
+                )}
+                {/* Gradient Overlay for Text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                
+                {/* Deadline on Image */}
+                <div className="absolute bottom-4 left-4 text-white text-xs font-medium flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
+                  <Calendar size={12} />
+                  {format(new Date(task.deadline), 'dd MMM, HH:mm', { locale: uz })}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </main>
-
-      {/* Modern Modal (Bottom Sheet style on mobile) */}
-      {showTaskModal && selectedTask && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-          <div 
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
-            onClick={() => setShowTaskModal(false)}
-          />
-          <div className="relative bg-white dark:bg-gray-800 w-full sm:max-w-2xl sm:rounded-3xl rounded-t-[2rem] shadow-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 sm:fade-in sm:zoom-in-95 duration-300">
-            
-            {/* Modal Header Image */}
-            <div className="relative h-64 shrink-0">
-               {selectedTask.image_url ? (
-                  <img
-                    src={selectedTask.image_url.startsWith('http') ? selectedTask.image_url : `http://localhost:5000${selectedTask.image_url}`}
-                    alt={selectedTask.title}
-                    className="w-full h-full object-cover"
-                    onClick={() => setPreviewImage(selectedTask.image_url.startsWith('http') ? selectedTask.image_url : `http://localhost:5000${selectedTask.image_url}`)}
-                  />
-               ) : (
-                  <div className="w-full h-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
-                    <Target className="text-white/30 w-32 h-32" />
-                  </div>
                )}
                
                <button
