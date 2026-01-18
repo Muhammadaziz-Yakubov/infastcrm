@@ -127,7 +127,8 @@ export default function AdminTasks() {
 
   const getImageUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
+    // Support data URLs (base64) and http URLs - return as is
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
     // Production da backend URL dan foydalanamiz
     const backendUrl = import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com';
     // URL to'g'ri formatda bo'lishi kerak: /uploads/tasks/filename.jpg

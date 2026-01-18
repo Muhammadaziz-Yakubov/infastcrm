@@ -14,26 +14,13 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '..', 'uploads', 'tasks');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-      console.log(`📁 Created directory: ${uploadDir}`);
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Configure multer for file uploads - using memory storage for database storage
+const storage = multer.memoryStorage();
 
 const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 5 * 1024 * 1024 // 5MB limit for base64 storage (to keep database size reasonable)
   },
   fileFilter: (req, file, cb) => {
     // Allow images and documents
@@ -49,12 +36,19 @@ const upload = multer({
   }
 });
 
-// Helper function to get full URL for files
+// Helper function to convert buffer to base64 data URL
+const bufferToDataUrl = (buffer, mimeType) => {
+  if (!buffer) return null;
+  const base64 = buffer.toString('base64');
+  return `data:${mimeType};base64,${base64}`;
+};
+
+// Helper function to get file URL - supports both base64 data URLs and regular URLs
 const getFileUrl = (filePath) => {
   if (!filePath) return null;
   
-  // If it's already a full URL, return as is
-  if (filePath.startsWith('http')) {
+  // If it's already a full URL or data URL, return as is
+  if (filePath.startsWith('http') || filePath.startsWith('data:')) {
     return filePath;
   }
   
@@ -183,7 +177,16 @@ router.post('/', authenticate, requireAdmin, upload.single('image'), async (req,
     }
     
     if (req.file) {
-      taskData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
+      // Convert image to base64 data URL for database storage
+      const isImage = req.file.mimetype.startsWith('image/');
+      if (isImage && req.file.size <= 5 * 1024 * 1024) {
+        // Store as base64 data URL for images under 5MB
+        taskData.image_url = bufferToDataUrl(req.file.buffer, req.file.mimetype);
+        console.log(`✅ Task image stored as base64 (${req.file.size} bytes)`);
+      } else {
+        // For larger files or non-images, still use URL (fallback)
+        taskData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
+      }
     }
     
     const task = new Task(taskData);
@@ -242,7 +245,16 @@ router.put('/:id', authenticate, requireAdmin, upload.single('image'), async (re
     if (status) updateData.status = status;
     
     if (req.file) {
-      updateData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
+      // Convert image to base64 data URL for database storage
+      const isImage = req.file.mimetype.startsWith('image/');
+      if (isImage && req.file.size <= 5 * 1024 * 1024) {
+        // Store as base64 data URL for images under 5MB
+        updateData.image_url = bufferToDataUrl(req.file.buffer, req.file.mimetype);
+        console.log(`✅ Task image updated as base64 (${req.file.size} bytes)`);
+      } else {
+        // For larger files or non-images, still use URL (fallback)
+        updateData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
+      }
     }
     
     const task = await Task.findByIdAndUpdate(
@@ -321,13 +333,25 @@ router.post('/:id/submit', authenticateStudent, upload.array('files', 5), async 
     // Handle both array and object cases
     const filesArray = Array.isArray(req.files) ? req.files : [req.files];
     
-    const submittedFiles = filesArray.map(file => ({
-      filename: file.filename,
-      original_name: file.originalname,
-      file_path: getFileUrl(`/uploads/tasks/${file.filename}`),
-      file_size: file.size,
-      mime_type: file.mimetype
-    }));
+    const submittedFiles = filesArray.map(file => {
+      const fileData = {
+        filename: file.filename || `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        original_name: file.originalname,
+        file_size: file.size,
+        mime_type: file.mimetype
+      };
+      
+      // For images under 5MB, store as base64. For others, use URL (fallback)
+      const isImage = file.mimetype.startsWith('image/');
+      if (isImage && file.size <= 5 * 1024 * 1024 && file.buffer) {
+        fileData.file_path = bufferToDataUrl(file.buffer, file.mimetype);
+        console.log(`✅ Submission file stored as base64: ${file.originalname} (${file.size} bytes)`);
+      } else {
+        fileData.file_path = getFileUrl(`/uploads/tasks/${fileData.filename}`);
+      }
+      
+      return fileData;
+    });
     
     console.log('Processed submittedFiles:', submittedFiles);
     console.log('About to create submission with submitted_files:', submittedFiles);

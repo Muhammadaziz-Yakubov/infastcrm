@@ -236,7 +236,7 @@ export default function StudentTasks() {
                 <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 relative">
                   {task.image_url ? (
                     <img
-                      src={task.image_url.startsWith('http') ? task.image_url : `${import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com'}${task.image_url.startsWith('/') ? task.image_url : '/' + task.image_url}`}
+                      src={task.image_url.startsWith('http') || task.image_url.startsWith('data:') ? task.image_url : `${import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com'}${task.image_url.startsWith('/') ? task.image_url : '/' + task.image_url}`}
                       alt={task.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -290,7 +290,7 @@ export default function StudentTasks() {
             <div className="relative h-64 bg-gray-200 dark:bg-gray-700">
               {selectedTask.image_url ? (
                 <img
-                  src={selectedTask.image_url.startsWith('http') ? selectedTask.image_url : `${import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com'}${selectedTask.image_url.startsWith('/') ? selectedTask.image_url : '/' + selectedTask.image_url}`}
+                  src={selectedTask.image_url.startsWith('http') || selectedTask.image_url.startsWith('data:') ? selectedTask.image_url : `${import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com'}${selectedTask.image_url.startsWith('/') ? selectedTask.image_url : '/' + selectedTask.image_url}`}
                   alt={selectedTask.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
