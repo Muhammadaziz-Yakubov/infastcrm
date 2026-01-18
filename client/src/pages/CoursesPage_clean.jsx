@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 
 export default function Courses() {
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const courses = [
     {
@@ -224,38 +224,38 @@ export default function Courses() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25"></div>
-                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl blur opacity-25"></div>
+                <div className="relative bg-gradient-to-r from-orange-600 to-orange-500 p-2 rounded-xl">
                   <GraduationCap className="h-6 w-6 text-white" />
                 </div>
               </div>
               <div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
                   InFast Academy
                 </span>
-                <p className="text-xs text-gray-500">IT Ta'lim Markazi</p>
+                <p className="text-xs text-gray-700 font-medium">IT Ta'lim Markazi</p>
               </div>
             </div>
 
             <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Asosiy</Link>
-              <Link to="/courses" className="text-blue-600 font-bold transition-colors">Kurslar</Link>
-              <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Biz haqimizda</Link>
-              <Link to="/team" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">O'qituvchilar</Link>
-              <Link to="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Blog</Link>
-              <Link to="/contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Aloqa</Link>
+              <Link to="/" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Asosiy</Link>
+              <Link to="/courses" className="text-orange-600 font-bold transition-colors">Kurslar</Link>
+              <Link to="/about" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Biz haqimizda</Link>
+              <Link to="/team" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">O'qituvchilar</Link>
+              <Link to="/blog" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Blog</Link>
+              <Link to="/contact" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Aloqa</Link>
             </nav>
 
             <div className="flex items-center space-x-3">
               <Link
                 to="/login"
-                className="hidden sm:inline-flex px-4 py-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="hidden sm:inline-flex px-4 py-2 text-orange-600 hover:text-orange-700 font-semibold transition-colors"
               >
                 Admin
               </Link>
               <Link
                 to="/student-login"
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+                className="px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:from-orange-700 hover:to-orange-600 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
               >
                 Kirish
               </Link>
@@ -270,7 +270,7 @@ export default function Courses() {
             <h1 className="text-5xl font-bold text-gray-900 mb-4">
               Bizning <span className="gradient-text">Kurslar</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto font-medium">
               Sizga mos keladigan yo'nalishni tanlang va professional bo'ling.
               Har bir kurs amaliy loyihalar va real vazifalarga asoslangan.
             </p>
@@ -287,15 +287,15 @@ export default function Courses() {
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Davomiyligi:</span>
-                    <span className="font-semibold text-primary-600">{course.duration}</span>
+                    <span className="font-semibold text-orange-600">{course.duration}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Narxi:</span>
-                    <span className="font-semibold text-primary-600">{course.price}</span>
+                    <span className="text-gray-600 font-medium">Narxi:</span>
+                    <span className="font-semibold text-orange-600">{course.price}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Daraja:</span>
-                    <span className="font-semibold text-primary-600">{course.level}</span>
+                    <span className="text-gray-600 font-medium">Daraja:</span>
+                    <span className="font-semibold text-orange-600">{course.level}</span>
                   </div>
                 </div>
                 <button className="w-full btn-primary">
@@ -313,7 +313,7 @@ export default function Courses() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center mb-4">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl mr-3">
+                <div className="bg-gradient-to-r from-orange-600 to-orange-500 p-2 rounded-xl mr-3">
                   <GraduationCap className="h-6 w-6 text-white" />
                 </div>
                 <span className="text-2xl font-bold">InFast Academy</span>

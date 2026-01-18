@@ -51,8 +51,8 @@ export default function Landing() {
         </svg>
       ),
       description: 'Zamonaviy veb-saytlar va web-ilovalar yaratishni o\'rganing',
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50',
+      color: 'from-orange-500 to-orange-600',
+      bgColor: 'bg-orange-50',
       topics: [
         'HTML5 & CSS3 asoslari',
         'JavaScript (ES6+)',
@@ -164,8 +164,8 @@ export default function Landing() {
         </svg>
       ),
       description: 'Professional video montaj va mobilografiya san\'ati',
-      color: 'from-indigo-500 to-blue-500',
-      bgColor: 'bg-indigo-50',
+      color: 'from-orange-400 to-orange-600',
+      bgColor: 'bg-orange-50',
       topics: [
         'Mobile photography basics',
         'Video editing (CapCut, VN)',
@@ -286,38 +286,38 @@ export default function Landing() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25"></div>
-                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-500 rounded-xl blur opacity-25"></div>
+                <div className="relative bg-gradient-to-r from-orange-600 to-orange-500 p-2 rounded-xl">
                   <GraduationCap className="h-6 w-6 text-white" />
                 </div>
               </div>
               <div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
                   InFast Academy
                 </span>
-                <p className="text-xs text-gray-500">IT Ta'lim Markazi</p>
+                <p className="text-xs text-gray-600 font-medium">IT Ta'lim Markazi</p>
               </div>
             </div>
 
             {/* Desktop Menu */}
             <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/courses" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Kurslar</Link>
-              <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Biz haqimizda</Link>
-              <Link to="/team" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">O'qituvchilar</Link>
-              <Link to="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Blog</Link>
-              <Link to="/contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Aloqa</Link>
+              <Link to="/courses" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Kurslar</Link>
+              <Link to="/about" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Biz haqimizda</Link>
+              <Link to="/team" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">O'qituvchilar</Link>
+              <Link to="/blog" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Blog</Link>
+              <Link to="/contact" className="text-gray-800 hover:text-orange-600 font-semibold transition-colors">Aloqa</Link>
             </nav>
 
             <div className="flex items-center space-x-3">
               <Link
                 to="/login"
-                className="hidden sm:inline-flex px-4 py-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="hidden sm:inline-flex px-4 py-2 text-orange-600 hover:text-orange-700 font-semibold transition-colors"
               >
                 Admin
               </Link>
               <Link
                 to="/student-login"
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+                className="px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-lg hover:from-orange-700 hover:to-orange-600 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
               >
                 Kirish
               </Link>
@@ -336,14 +336,14 @@ export default function Landing() {
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-200">
               <nav className="flex flex-col space-y-3">
-                <Link to="/courses" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Kurslar</Link>
-                <Link to="/about" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Biz haqimizda</Link>
-                <Link to="/team" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>O'qituvchilar</Link>
-                <Link to="/blog" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
-                <Link to="/contact" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Aloqa</Link>
+                <Link to="/courses" className="text-left text-gray-800 hover:text-orange-600 font-semibold transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Kurslar</Link>
+                <Link to="/about" className="text-left text-gray-800 hover:text-orange-600 font-semibold transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Biz haqimizda</Link>
+                <Link to="/team" className="text-left text-gray-800 hover:text-orange-600 font-semibold transition-colors py-2" onClick={() => setIsMenuOpen(false)}>O'qituvchilar</Link>
+                <Link to="/blog" className="text-left text-gray-800 hover:text-orange-600 font-semibold transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
+                <Link to="/contact" className="text-left text-gray-800 hover:text-orange-600 font-semibold transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Aloqa</Link>
                 <Link
                   to="/login"
-                  className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"
+                  className="text-left text-gray-800 hover:text-orange-600 font-semibold transition-colors py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Admin Login
@@ -361,21 +361,21 @@ export default function Landing() {
         <div className="absolute inset-0 bg-pattern opacity-30"></div>
 
         {/* Floating Shapes */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary-400/30 to-primary-600/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-secondary-400/20 to-primary-500/20 rounded-full blur-3xl animate-float animate-delay-1000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-orange-400/30 to-orange-600/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-orange-400/20 to-orange-500/20 rounded-full blur-3xl animate-float animate-delay-1000"></div>
         <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-br from-amber-300/20 to-orange-400/20 rounded-full blur-3xl animate-pulse-slow"></div>
 
         {/* Decorative Elements */}
-        <div className="absolute top-32 right-20 w-20 h-20 border-4 border-primary-200 rounded-2xl rotate-12 animate-spin-slow opacity-50"></div>
-        <div className="absolute bottom-40 left-20 w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl rotate-45 animate-bounce-slow opacity-30"></div>
+        <div className="absolute top-32 right-20 w-20 h-20 border-4 border-orange-200 rounded-2xl rotate-12 animate-spin-slow opacity-50"></div>
+        <div className="absolute bottom-40 left-20 w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl rotate-45 animate-bounce-slow opacity-30"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-primary-100 shadow-lg mb-8 animate-fade-in-down">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-orange-100 shadow-lg mb-8 animate-fade-in-down">
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
               </span>
               <span className="text-sm font-medium text-gray-700">Yangi guruhlar ochilmoqda!</span>
             </div>
@@ -388,10 +388,10 @@ export default function Landing() {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto animate-fade-in-up animate-delay-200 leading-relaxed">
-              Andijon viloyatidagi <span className="font-semibold text-primary-600">yetakchi IT ta'lim markazi</span>.
+            <p className="text-lg sm:text-xl text-gray-700 mb-10 max-w-2xl mx-auto animate-fade-in-up animate-delay-200 leading-relaxed font-medium">
+              Andijon viloyatidagi <span className="font-bold text-orange-600">yetakchi IT ta'lim markazi</span>.
               Zamonaviy kasblarni professional ustozlardan o'rganing va
-              <span className="font-semibold"> muvaffaqiyatli karyera</span> boshlang!
+              <span className="font-bold text-gray-900"> muvaffaqiyatli karyera</span> boshlang!
             </p>
 
             {/* CTA Buttons */}
@@ -474,7 +474,7 @@ export default function Landing() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold mb-4">
               O'quv dasturlari
             </span>
             <h2 className="section-title">
@@ -501,7 +501,7 @@ export default function Landing() {
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
                     {course.name}
                   </h3>
                   <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
@@ -525,7 +525,7 @@ export default function Landing() {
                   {/* CTA */}
                   <Link
                     to="/courses"
-                    className="inline-flex items-center gap-2 text-primary-600 font-semibold group-hover:gap-3 transition-all"
+                    className="inline-flex items-center gap-2 text-orange-600 font-semibold group-hover:gap-3 transition-all hover:text-orange-700"
                   >
                     <span>Batafsil ma'lumot</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -568,7 +568,7 @@ export default function Landing() {
             {testimonials.map((testimonial, index) => (
               <div key={index} className="bg-white rounded-2xl p-8 shadow-card hover:shadow-card-hover transition-all duration-500 relative">
                 {/* Quote Icon */}
-                <div className="absolute top-6 right-6 text-primary-100">
+                <div className="absolute top-6 right-6 text-orange-100">
                   <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                   </svg>
@@ -588,13 +588,13 @@ export default function Landing() {
 
                 {/* Author */}
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
                     {testimonial.image}
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900">{testimonial.name}</div>
                     <div className="text-sm text-gray-500">{testimonial.role}</div>
-                    <div className="text-xs text-primary-600 font-medium">{testimonial.company}</div>
+                    <div className="text-xs text-orange-600 font-medium">{testimonial.company}</div>
                   </div>
                 </div>
               </div>
@@ -605,7 +605,7 @@ export default function Landing() {
 
       {/* About Section */}
       <section className="py-24 bg-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary-50 to-transparent"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-orange-50 to-transparent"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -624,7 +624,7 @@ export default function Landing() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-start gap-4 group">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
                     <BookOpen className="w-7 h-7" />
                   </div>
                   <div>
@@ -633,7 +633,7 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="flex items-start gap-4 group">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
                     <Users className="w-7 h-7" />
                   </div>
                   <div>
@@ -642,7 +642,7 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="flex items-start gap-4 group">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
                     <Award className="w-7 h-7" />
                   </div>
                   <div>
@@ -651,7 +651,7 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="flex items-start gap-4 group">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
                     <Zap className="w-7 h-7" />
                   </div>
                   <div>
@@ -664,7 +664,7 @@ export default function Landing() {
 
             {/* Right Content - Stats Card */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-primary-500 to-secondary-500 rounded-3xl p-8 text-white relative overflow-hidden">
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-8 text-white relative overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
@@ -728,7 +728,7 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div className="text-center group">
-              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <MapPin className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4">Manzil</h3>
@@ -744,8 +744,8 @@ export default function Landing() {
               </div>
               <h3 className="text-2xl font-bold mb-4">Telefon</h3>
               <p className="text-gray-300 leading-relaxed">
-                <a href="tel:+998937435225" className="hover:text-blue-400 transition-colors">+998 93 743 52 25</a><br />
-                <a href="tel:+998902570100" className="hover:text-blue-400 transition-colors">+998 90 257 01 00</a>
+                <a href="tel:+998937435225" className="hover:text-orange-400 transition-colors font-medium">+998 93 743 52 25</a><br />
+                <a href="tel:+998902570100" className="hover:text-orange-400 transition-colors font-medium">+998 90 257 01 00</a>
               </p>
             </div>
             <div className="text-center group">
@@ -754,7 +754,7 @@ export default function Landing() {
               </div>
               <h3 className="text-2xl font-bold mb-4">Email</h3>
               <p className="text-gray-300 leading-relaxed">
-                <a href="mailto:info@infast-academy.uz" className="hover:text-blue-400 transition-colors">
+                <a href="mailto:info@infast-academy.uz" className="hover:text-orange-400 transition-colors font-medium">
                   info@infast-academy.uz
                 </a>
               </p>
@@ -765,7 +765,7 @@ export default function Landing() {
           <div className="text-center">
             <button
               onClick={() => setShowRegistrationModal(true)}
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-blue-500/25"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-orange-500/25"
             >
               <MessageCircle className="h-6 w-6 mr-3" />
               Hoziroq kursga yozilish
@@ -780,7 +780,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center mb-4">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl mr-3">
+                <div className="bg-gradient-to-r from-orange-600 to-orange-500 p-2 rounded-xl mr-3">
                   <GraduationCap className="h-6 w-6 text-white" />
                 </div>
                 <span className="text-2xl font-bold">InFast Academy</span>
@@ -866,7 +866,7 @@ export default function Landing() {
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-8">
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-600 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <GraduationCap className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Kursga yozilish</h3>
@@ -914,7 +914,7 @@ export default function Landing() {
                   >
                     <option value="">Kursni tanlang</option>
                     {courses.map(course => (
-                      <option key={course.id} value={course.id}>{course.title}</option>
+                      <option key={course.id} value={course.id}>{course.name}</option>
                     ))}
                   </select>
                 </div>
@@ -946,7 +946,7 @@ export default function Landing() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all duration-300 font-medium shadow-lg"
                   >
                     Yuborish
                   </button>
