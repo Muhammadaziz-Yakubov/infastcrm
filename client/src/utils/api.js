@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Production: VITE_API_URL dan oladi, Development: /api (Vite proxy orqali)
-const baseURL = import.meta.env.VITE_API_URL || '/api';
+// Agar VITE_API_URL bo'lmasa, backend URL dan foydalanamiz
+const baseURL = import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com';
 
 const api = axios.create({
   baseURL,
