@@ -23,7 +23,7 @@ import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
 
 export default function StudentTasks() {
-  // --- MANTIQ VA STATE (O'ZGARISHSIZ QOLDI) ---
+  // --- STATE ---
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -145,8 +145,7 @@ export default function StudentTasks() {
     task.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // --- RENDERING (PREMIUM DIZAYN) ---
-
+  // --- RENDERING ---
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F2F4F8] dark:bg-gray-900">
@@ -229,91 +228,98 @@ export default function StudentTasks() {
                       <span>Jarayonda</span>
                     </div>
                   )}
-          />
-        </div>
-      </div>
-    </div>
+                </div>
 
-    <main className="max-w-5xl mx-auto px-4 py-6">
-      {filteredTasks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-xl shadow-gray-200/50 dark:shadow-none mb-6">
-            <Archive className="w-10 h-10 text-gray-300 dark:text-gray-600" />
-          </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Hech narsa topilmadi</h3>
-          <p className="text-gray-500 text-sm mt-1">Hozircha vazifalar ro'yxati bo'sh</p>
-        </div>
-      ) : (
-        <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
-          {filteredTasks.map((task) => (
-            <div
-              key={task._id}
-              onClick={() => handleTaskClick(task)}
-              className="group relative bg-white dark:bg-gray-800 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-white dark:border-gray-700 overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-300"
-            >
-              {/* Status Badge - Floating */}
-              <div className="absolute top-4 left-4 z-10">
-                {task.submitted ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/90 backdrop-blur-md text-white text-xs font-bold shadow-lg shadow-green-500/20">
-                    <CheckCircle size={12} strokeWidth={3} />
-                    <span>Yuborildi</span>
+                {/* Card Image */}
+                <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 relative">
+                  {task.image_url ? (
+                    <img
+                      src={task.image_url}
+                      alt={task.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+                      <FileText className="w-16 h-16 text-white/50" />
+                    </div>
+                  )}
+                  {/* Gradient Overlay for Text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                  
+                  {/* Deadline on Image */}
+                  <div className="absolute bottom-4 left-4 text-white text-xs font-medium flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
+                    <Calendar size={12} />
+                    {format(new Date(task.deadline), 'dd MMM, HH:mm', { locale: uz })}
                   </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md text-gray-700 dark:text-gray-200 text-xs font-bold shadow-lg">
-                    <Clock size={12} className="text-indigo-500" strokeWidth={2.5} />
-                    <span>Jarayonda</span>
-                  </div>
-                )}
-              </div>
+                </div>
 
-              {/* Card Image */}
-              <div className="h-48 w-full bg-gray-200 dark:bg-gray-700 relative">
-                {task.image_url ? (
-                  <img
-                    src={task.image_url.startsWith('http') ? task.image_url : `/api${task.image_url}`}
-                    alt={task.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-                    <FileText className="w-16 h-16 text-white/50" />
+                {/* Card Content */}
+                <div className="p-6">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    {task.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                    {task.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                      {task.max_score} ball
+                    </span>
+                    <ChevronRight size={20} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
                   </div>
-                )}
-                {/* Gradient Overlay for Text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
-                
-                {/* Deadline on Image */}
-                <div className="absolute bottom-4 left-4 text-white text-xs font-medium flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
-                  <Calendar size={12} />
-                  {format(new Date(task.deadline), 'dd MMM, HH:mm', { locale: uz })}
                 </div>
               </div>
-               )}
-               
-               <button
-                  onClick={() => setShowTaskModal(false)}
-                  className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-lg rounded-full text-white transition-all border border-white/10"
-               >
-                  <X size={20} />
-               </button>
+            ))}
+          </div>
+        )}
+      </main>
 
-               <div className="absolute -bottom-6 left-6 right-6 flex justify-between items-end">
-                  <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                     <div className="text-center">
-                        <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Muddat</p>
-                        <p className="text-sm font-bold text-gray-900 dark:text-white">
-                           {format(new Date(selectedTask.deadline), 'dd MMM', { locale: uz })}
-                        </p>
-                     </div>
-                     <div className="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
-                     <div className="text-center">
-                        <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Maksimal</p>
-                        <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-                           {selectedTask.max_score}
-                        </p>
-                     </div>
-                  </div>
-               </div>
+      {/* Task Modal */}
+      {showTaskModal && selectedTask && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/70 backdrop-blur-sm" onClick={() => setShowTaskModal(false)} />
+          <div className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            
+            {/* Modal Header with Image */}
+            <div className="relative h-64 bg-gray-200 dark:bg-gray-700">
+              {selectedTask.image_url ? (
+                <img
+                  src={selectedTask.image_url}
+                  alt={selectedTask.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+                  <FileText className="w-24 h-24 text-white/30" />
+                </div>
+              )}
+              
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+               
+              <button
+                onClick={() => setShowTaskModal(false)}
+                className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-lg rounded-full text-white transition-all border border-white/10"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="absolute -bottom-6 left-6 right-6 flex justify-between items-end">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+                   <div className="text-center">
+                      <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Muddat</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">
+                         {format(new Date(selectedTask.deadline), 'dd MMM', { locale: uz })}
+                      </p>
+                   </div>
+                   <div className="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
+                   <div className="text-center">
+                      <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Maksimal</p>
+                      <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                         {selectedTask.max_score}
+                      </p>
+                   </div>
+                </div>
+              </div>
             </div>
 
             {/* Modal Content */}
@@ -354,7 +360,7 @@ export default function StudentTasks() {
 
             {/* Footer Actions */}
             <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-               {!selectedTask.submitted ? (
+               {!selectedTask.submission ? (
                   <button
                      onClick={() => {
                         setShowTaskModal(false);
