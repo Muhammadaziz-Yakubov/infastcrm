@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GraduationCap, Eye, EyeOff, ArrowLeft, Sparkles } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
 export default function StudentLogin() {
@@ -10,6 +11,7 @@ export default function StudentLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { studentLogin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,9 +21,8 @@ export default function StudentLogin() {
     try {
       const response = await api.post('/student-auth/login', { login, password });
       const { token, student } = response.data;
-      
-      localStorage.setItem('studentToken', token);
-      localStorage.setItem('studentData', JSON.stringify(student));
+
+      studentLogin(token, student);
       navigate('/student');
     } catch (err) {
       setError(err.response?.data?.message || 'Xatolik yuz berdi');

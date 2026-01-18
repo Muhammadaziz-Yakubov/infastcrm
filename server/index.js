@@ -6,7 +6,7 @@ import cron from 'node-cron';
 import path from 'path';
 import fs from 'fs';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
-import { sendDailyReminders, sendAllClassReminders, testBotConnection, setupWebhook, handleWebhook } from './services/telegramBot.js';
+import { sendDailyReminders, sendAllClassReminders, testBotConnection, setupWebhook, handleWebhook, startPolling } from './services/telegramBot.js';
 import authRoutes from './routes/auth.js';
 import studentAuthRoutes from './routes/studentAuth.js';
 import courseRoutes from './routes/courses.js';
@@ -99,7 +99,29 @@ app.use('/uploads', (req, res, next) => {
 }, express.static(uploadsDir));
 
 // Telegram webhook endpoint
-app.post('/api/telegram/webhook', handleWebhook);
+app.post('/api/telegram/webhook', (req, res, next) => {
+  console.log('🔗 Incoming webhook request:', {
+    method: req.method,
+    url: req.url,
+    headers: {
+      'content-type': req.headers['content-type'],
+      'user-agent': req.headers['user-agent'],
+      'x-forwarded-for': req.headers['x-forwarded-for']
+    },
+    bodySize: JSON.stringify(req.body).length
+  });
+  handleWebhook(req, res, next);
+});
+
+// Test endpoint for webhook accessibility
+app.get('/api/telegram/webhook-test', (req, res) => {
+  console.log('🧪 Webhook test endpoint accessed');
+  res.json({
+    status: 'ok',
+    message: 'Webhook endpoint is accessible',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Database connection
 const connectDB = async () => {
@@ -138,10 +160,18 @@ setTimeout(async () => {
       if (webhookSet) {
         console.log('✅ Telegram webhook setup completed');
       } else {
-        console.log('❌ Telegram webhook setup failed');
+        console.log('❌ Telegram webhook setup failed - falling back to polling');
+        // Fallback to polling if webhook fails
+        const pollingStarted = await startPolling();
+        if (pollingStarted) {
+          console.log('✅ Polling fallback successful');
+        } else {
+          console.error('❌ Polling fallback also failed');
+        }
       }
     } else {
-      console.log('⚠️ Running in development mode, bot will use polling');
+      console.log('⚠️ Running in development mode, starting polling...');
+      await startPolling();
     }
   }
 }, 3000);

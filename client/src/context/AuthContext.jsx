@@ -5,18 +5,22 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Decode token to get user info
+    const adminToken = localStorage.getItem('token');
+    const studentToken = localStorage.getItem('studentToken');
+    const studentData = localStorage.getItem('studentData');
+
+    if (adminToken) {
+      // Decode admin token to get user info
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser({ 
-          id: payload.userId, 
+        const payload = JSON.parse(atob(adminToken.split('.')[1]));
+        setUser({
+          id: payload.userId,
           email: payload.email,
-          role: payload.role 
+          role: payload.role
         });
       } catch (e) {
         // If token decode fails, try to get user from API
@@ -24,6 +28,19 @@ export function AuthProvider({ children }) {
         return;
       }
     }
+
+    if (studentToken && studentData) {
+      // Set student data from localStorage
+      try {
+        const studentInfo = JSON.parse(studentData);
+        setStudent(studentInfo);
+      } catch (e) {
+        // If parsing fails, clear student data
+        localStorage.removeItem('studentToken');
+        localStorage.removeItem('studentData');
+      }
+    }
+
     setLoading(false);
   }, []);
 
@@ -70,10 +87,17 @@ export function AuthProvider({ children }) {
   const studentLogout = () => {
     localStorage.removeItem('studentToken');
     localStorage.removeItem('studentData');
+    setStudent(null);
+  };
+
+  const studentLogin = (token, studentData) => {
+    localStorage.setItem('studentToken', token);
+    localStorage.setItem('studentData', JSON.stringify(studentData));
+    setStudent(studentData);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, studentLogout, loading }}>
+    <AuthContext.Provider value={{ user, student, login, studentLogin, logout, studentLogout, loading }}>
       {children}
     </AuthContext.Provider>
   );

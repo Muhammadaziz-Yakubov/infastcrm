@@ -30,7 +30,18 @@ export default function StudentRating() {
     try {
       // Use public ratings endpoint first
       const response = await api.get('/public/ratings');
-      setRatings(response.data);
+      // Transform data to match expected format
+      const transformedData = response.data.map(item => ({
+        rank: item.rank,
+        averageScore: Math.round(item.percentage),
+        student: {
+          full_name: item.full_name,
+          group: {
+            name: item.group_name
+          }
+        }
+      }));
+      setRatings(transformedData);
     } catch (error) {
       console.error('Error fetching ratings:', error);
     } finally {
@@ -136,7 +147,7 @@ export default function StudentRating() {
             {/* 2nd Place */}
             <div className="flex flex-col items-center mt-8 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center mb-3 shadow-lg shadow-gray-400/30">
-                <span className="text-2xl font-bold text-white">2</span>
+                <Medal className="text-white" size={28} />
               </div>
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
@@ -185,7 +196,7 @@ export default function StudentRating() {
             {/* 3rd Place */}
             <div className="flex flex-col items-center mt-12 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-3 shadow-lg shadow-amber-500/30">
-                <span className="text-xl font-bold text-white">3</span>
+                <Medal className="text-white" size={24} />
               </div>
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
@@ -237,22 +248,20 @@ export default function StudentRating() {
                 {/* Student Info */}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                    {rating.full_name}
+                    {rating.student?.full_name}
                   </h3>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Users size={14} />
-                    <span className="truncate">{rating.group_name || 'Guruh yo\'q'}</span>
-                    <span>•</span>
-                    <span>{rating.completed_tasks} vazifa</span>
+                    <span className="truncate">{rating.student?.group?.name || 'Guruh yo\'q'}</span>
                   </div>
                 </div>
 
                 {/* Score */}
                 <div className="text-right">
-                  <div className={`text-2xl font-bold ${getScoreColor(rating.percentage)}`}>
-                    {rating.percentage.toFixed(1)}
+                  <div className={`text-2xl font-bold ${getScoreColor(rating.averageScore)}`}>
+                    {rating.averageScore}
                   </div>
-                  <div className="text-xs text-gray-400">%</div>
+                  <div className="text-xs text-gray-400">ball</div>
                 </div>
 
                 {/* Stars for top 3 */}

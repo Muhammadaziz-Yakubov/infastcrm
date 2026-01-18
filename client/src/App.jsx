@@ -25,7 +25,7 @@ import Layout from './components/Layout';
 // PrivateRoute komponenti endi ishlatilmaydi, chunki AppRoutes buni boshqaradi
 
 function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { user, student, loading } = useAuth();
 
   // Show loading screen while checking authentication
   if (loading) {
@@ -39,12 +39,8 @@ function AppRoutes() {
     );
   }
 
-  // Check for tokens
-  const adminToken = localStorage.getItem('token');
-  const studentToken = localStorage.getItem('studentToken');
-
   // If user is authenticated, show protected routes
-  if (adminToken || studentToken) {
+  if (user || student) {
     return (
       <Routes>
         {/* Student Routes */}
@@ -71,7 +67,7 @@ function AppRoutes() {
         </Route>
 
         {/* Catch all - redirect to appropriate dashboard */}
-        <Route path="*" element={<Navigate to={adminToken ? "/" : "/student"} replace />} />
+        <Route path="*" element={<Navigate to={user ? "/" : "/student"} replace />} />
       </Routes>
     );
   }

@@ -7,35 +7,67 @@ import Group from '../models/Group.js';
 const BOT_TOKEN = '8317971016:AAFQeb5Gx8ALmOiADCDYqcYRXcccZlEttcw';
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-5125551645';
 
-// Initialize bot with polling only in development, use webhooks in production
-const isProduction = process.env.NODE_ENV === 'production' || process.env.WEBHOOK_URL;
+// Initialize bot - we'll manage polling/webhook manually
 const bot = new TelegramBot(BOT_TOKEN, {
-  polling: !isProduction  // Disable polling in production (use webhooks instead)
+  polling: false  // Start without polling, we'll enable it if needed
 });
+
+// Function to start polling as fallback
+export const startPolling = async () => {
+  try {
+    console.log('🔄 Starting Telegram polling...');
+    await bot.processUpdate([]);
+    console.log('✅ Telegram polling started successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Error starting polling:', error.message);
+    return false;
+  }
+};
 
 // Webhook setup
 export const setupWebhook = async () => {
   try {
     const webhookUrl = process.env.WEBHOOK_URL || 'https://infastcrm-0b2r.onrender.com/api/telegram/webhook';
+    console.log(`🔄 Attempting to set webhook to: ${webhookUrl}`);
 
     // Delete any existing webhook first
-    await bot.deleteWebHook();
+    try {
+      await bot.deleteWebHook();
+      console.log('🧹 Existing webhook deleted');
+    } catch (deleteError) {
+      console.log('⚠️ Could not delete existing webhook (might not exist):', deleteError.message);
+    }
 
     // Set new webhook
     await bot.setWebHook(webhookUrl);
     console.log(`✅ Telegram webhook set to: ${webhookUrl}`);
 
+    // Wait a moment for webhook to propagate
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     // Verify webhook was set
     const webhookInfo = await bot.getWebHookInfo();
+    console.log(`🔍 Webhook info received:`, {
+      url: webhookInfo.url,
+      has_custom_certificate: webhookInfo.has_custom_certificate,
+      pending_update_count: webhookInfo.pending_update_count,
+      last_error_date: webhookInfo.last_error_date,
+      last_error_message: webhookInfo.last_error_message
+    });
+
     if (webhookInfo.url === webhookUrl) {
       console.log('✅ Webhook verification successful');
       return true;
     } else {
-      console.error('❌ Webhook verification failed');
+      console.error('❌ Webhook verification failed - URL mismatch');
+      console.error(`Expected: ${webhookUrl}`);
+      console.error(`Actual: ${webhookInfo.url}`);
       return false;
     }
   } catch (error) {
     console.error('❌ Error setting webhook:', error.message);
+    console.error('Full error:', error);
     return false;
   }
 };
@@ -43,19 +75,30 @@ export const setupWebhook = async () => {
 // Webhook endpoint handler
 export const handleWebhook = async (req, res) => {
   try {
+    console.log('🔗 Webhook received:', {
+      method: req.method,
+      headers: req.headers,
+      body: req.body
+    });
+
     const update = req.body;
-    
+
+    if (!update) {
+      console.log('❌ No update in webhook request');
+      return res.status(400).send('No update');
+    }
+
     if (update.message) {
       const msg = update.message;
       const chatId = msg.chat.id;
       const chatType = msg.chat.type;
-      
+
       console.log(`📱 Webhook message from chat ID: ${chatId} (type: ${chatType})`);
-      
+
       // Handle /start command
       if (msg.text === '/start') {
         let responseMessage = '';
-        
+
         if (chatType === 'private') {
           responseMessage = `🚫 <b>Xatolik!</b>
 
@@ -79,7 +122,7 @@ export const handleWebhook = async (req, res) => {
 
 📋 <b>Bot funksiyalari:</b>
 • 📅 Kunlik dars eslatmalari (7:00)
-• 💰 To'lov eslatmalari (12:00)  
+• 💰 To'lov eslatmalari (12:00)
 • 📊 Davomat xulosalari (darsdan 1 soat keyin)
 • 🎯 Dars ballari xabarlari
 
@@ -89,13 +132,18 @@ export const handleWebhook = async (req, res) => {
 
 🎉 <b>Tayyor!</b> Endi guruhga avtomatik xabarlar keladi!`;
         }
-        
-        await bot.sendMessage(chatId, responseMessage, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: true
-        });
+
+        try {
+          await bot.sendMessage(chatId, responseMessage, {
+            parse_mode: 'HTML',
+            disable_web_page_preview: true
+          });
+          console.log('✅ Response sent to chat:', chatId);
+        } catch (sendError) {
+          console.error('❌ Error sending message:', sendError);
+        }
       }
-      
+
       // Log all group messages to help find new chat_id
       if (chatType !== 'private') {
         console.log(`📢 Webhook message from group chat ID: ${chatId} (type: ${chatType})`);
@@ -103,11 +151,14 @@ export const handleWebhook = async (req, res) => {
         console.log(`📝 Update your .env file with: TELEGRAM_CHAT_ID=${chatId}`);
       }
     }
-    
+
+    // Always respond with 200 OK to acknowledge receipt
     res.status(200).send('OK');
   } catch (error) {
     console.error('❌ Webhook error:', error);
-    res.status(500).send('Error');
+    console.error('Full error:', error.stack);
+    // Still return 200 to prevent Telegram from retrying
+    res.status(200).send('OK');
   }
 };
 
@@ -664,5 +715,6 @@ export default {
   sendAttendanceSummary,
   getChatInfo,
   updateGroupChatId,
-  testBotConnection
+  testBotConnection,
+  startPolling
 };
