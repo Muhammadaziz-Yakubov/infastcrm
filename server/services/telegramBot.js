@@ -386,7 +386,7 @@ const formatDailyReminderMessage = (students) => {
   const studentList = students.map((student, index) => {
     const daysUntilPayment = Math.ceil((new Date(student.next_payment_date) - new Date()) / (1000 * 60 * 60 * 24));
     const urgency = daysUntilPayment <= 0 ? '🔴' : daysUntilPayment <= 3 ? '🟡' : '🟢';
-    
+
     return `${index + 1}. ${urgency} <b>${student.full_name}</b>
    📞 ${student.phone}
    📚 ${student.group_id?.name || 'Noma\'lum'}
@@ -408,7 +408,7 @@ ${studentList}
 // Format payment due reminder
 const formatPaymentDueMessage = (student) => {
   const daysUntilPayment = Math.ceil((new Date(student.next_payment_date) - new Date()) / (1000 * 60 * 60 * 24));
-  
+
   return `
 ⚠️ <b>TO'LOV ESLATMASI!</b>
 
@@ -476,11 +476,11 @@ export const sendPaymentDueReminder = async (studentId) => {
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const chatType = msg.chat.type;
-  
+
   console.log(`📱 Message from chat ID: ${chatId} (type: ${chatType})`);
-  
+
   let responseMessage = '';
-  
+
   if (chatType === 'private') {
     responseMessage = `🚫 <b>Xatolik!</b>
 
@@ -514,7 +514,7 @@ bot.onText(/\/start/, (msg) => {
 
 🎉 <b>Tayyor!</b> Endi guruhga avtomatik xabarlar keladi!`;
   }
-  
+
   bot.sendMessage(chatId, responseMessage, {
     parse_mode: 'HTML',
     disable_web_page_preview: true
@@ -525,14 +525,14 @@ bot.onText(/\/start/, (msg) => {
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const chatType = msg.chat.type;
-  
+
   // Log all messages to help find new chat_id
   if (chatType !== 'private') {
     console.log(`📢 Message from group chat ID: ${chatId} (type: ${chatType})`);
     console.log(`👥 Group name: ${msg.chat.title || 'No title'}`);
     console.log(`📝 NEW CHAT_ID FOUND: ${chatId}`);
     console.log(`🔧 Update your environment variable: TELEGRAM_CHAT_ID=${chatId}`);
-    
+
     // Auto-update CHAT_ID if it's different from current
     if (chatId !== CHAT_ID) {
       console.log(`🔄 Auto-updating CHAT_ID from ${CHAT_ID} to ${chatId}`);
@@ -546,14 +546,14 @@ bot.on('message', (msg) => {
 let connectionTested = false;
 export const testBotConnection = async () => {
   if (connectionTested) return true; // Already tested
-  
+
   try {
     const botInfo = await bot.getMe();
     console.log('🤖 Bot connected successfully:', botInfo.username);
-    
+
     // Try to send test message, if fails due to supergroup, update chat_id
     try {
-      await sendTelegramMessage('🤖 InFast CRM Bot Aktivlashitirdi va to`liq ishlamoqda ! ✅');
+      // await sendTelegramMessage('🤖 InFast CRM Bot Aktivlashitirdi va to`liq ishlamoqda ! ✅');
     } catch (error) {
       if (error.message.includes('upgraded to a supergroup')) {
         console.log('⚠️ Main group was upgraded to supergroup. Please update the main chat_id in .env file.');
@@ -562,7 +562,7 @@ export const testBotConnection = async () => {
         throw error;
       }
     }
-    
+
     connectionTested = true;
     return true;
   } catch (error) {
@@ -575,7 +575,7 @@ export const testBotConnection = async () => {
 const formatClassReminderMessage = (group, debtorStudents) => {
   const dayNames = {
     'Mon': 'Dushanba',
-    'Tue': 'Seshanba', 
+    'Tue': 'Seshanba',
     'Wed': 'Chorshanba',
     'Thu': 'Payshanba',
     'Fri': 'Juma',
@@ -652,7 +652,7 @@ export const getNewChatIdForSupergroup = async (oldChatId) => {
       console.log(`🔄 New chat_id found: ${chatInfo.id} (old: ${oldChatId})`);
       return chatInfo.id.toString();
     }
-    
+
     // If that doesn't work, we need to get the new ID manually
     console.log(`⚠️ Could not automatically get new chat_id for ${oldChatId}`);
     console.log(`📝 Please get new chat_id manually:`);
@@ -660,7 +660,7 @@ export const getNewChatIdForSupergroup = async (oldChatId) => {
     console.log(`   2. Send any message to the group`);
     console.log(`   3. Check server logs for 'message from chat ID: XXX'`);
     console.log(`   4. Update TELEGRAM_CHAT_ID in .env file`);
-    
+
     return null;
   } catch (error) {
     console.error(`❌ Error getting new chat_id:`, error.message);
@@ -720,7 +720,7 @@ export const sendTelegramMessageToChat = async (chatId, message) => {
 export const sendTelegramPhotoToChat = async (chatId, photoDataUrl, caption) => {
   try {
     console.log(`📤 Attempting to send photo to chat ${chatId}...`);
-    
+
     // Check if bot is connected
     const botInfo = await bot.getMe();
     console.log(`✅ Bot connected as: @${botInfo.username}`);
@@ -734,11 +734,11 @@ export const sendTelegramPhotoToChat = async (chatId, photoDataUrl, caption) => 
       // If it's a URL, fetch it first
       const https = await import('https');
       const http = await import('http');
-      
+
       return new Promise((resolve, reject) => {
         const url = new URL(photoDataUrl);
         const client = url.protocol === 'https:' ? https : http;
-        
+
         client.get(photoDataUrl, (res) => {
           const chunks = [];
           res.on('data', chunk => chunks.push(chunk));
@@ -777,7 +777,7 @@ export const sendTelegramPhotoToChat = async (chatId, photoDataUrl, caption) => 
 export const sendAllClassReminders = async () => {
   try {
     const today = new Date().toLocaleDateString('en-US', { weekday: 'short' });
-    
+
     // Get groups that have class today
     const groupsToday = await Group.find({
       days_of_week: today,
@@ -798,7 +798,7 @@ export const sendAllClassReminders = async () => {
 // Format attendance summary message
 const formatAttendanceMessage = (group, absentStudents, presentStudents) => {
   const today = new Date().toLocaleDateString('uz-UZ');
-  
+
   let message = `
 📋 <b>DAVOMAT XULOSASI</b>
 
@@ -832,7 +832,7 @@ ${absentList}`;
 // Format scores message
 const formatScoresMessage = (group, presentStudents) => {
   const today = new Date().toLocaleDateString('uz-UZ');
-  
+
   let message = `
 🎯 <b>BUGUNGI DARS BALLARI</b>
 
@@ -859,20 +859,20 @@ ${scoresList}`;
 export const sendAttendanceSummary = async (groupId, date) => {
   try {
     console.log(`📋 Starting attendance summary for group ${groupId}`);
-    
+
     let group = await Group.findById(groupId).populate('course_id');
     if (!group) {
       console.log(`❌ Group ${groupId} not found`);
       return;
     }
-    
+
     if (!group.telegram_chat_id) {
       console.log(`❌ Group ${group.name} has no telegram_chat_id`);
       return;
     }
-    
+
     console.log(`📋 Found group ${group.name} with chat_id: ${group.telegram_chat_id}`);
-    
+
     // Refresh group data to get latest chat_id
     group = await Group.findById(groupId).populate('course_id');
     console.log(`🔄 Refreshed group ${group.name} with chat_id: ${group.telegram_chat_id}`);
@@ -894,9 +894,9 @@ export const sendAttendanceSummary = async (groupId, date) => {
         score: record.score || 0
       }));
 
-    const absentStudents = allStudents.filter(student => 
-      !attendanceRecords.some(record => 
-        record.student_id._id.toString() === student._id.toString() && 
+    const absentStudents = allStudents.filter(student =>
+      !attendanceRecords.some(record =>
+        record.student_id._id.toString() === student._id.toString() &&
         record.status === 'PRESENT'
       )
     );
@@ -909,7 +909,7 @@ export const sendAttendanceSummary = async (groupId, date) => {
     console.log(`📤 Attempting to send to chat_id: ${currentChatId}`);
 
     let attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
-    
+
     // If sending failed due to supergroup upgrade, try to update chat_id
     if (!attendanceSent) {
       console.log(`🔄 Failed to send attendance message, trying to update chat_id...`);
@@ -920,14 +920,14 @@ export const sendAttendanceSummary = async (groupId, date) => {
         attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
       }
     }
-    
+
     // Send scores message (present students with scores)
     if (presentStudents.length > 0 && attendanceSent) {
       console.log(`📤 Sending scores message...`);
       const scoresMessage = formatScoresMessage(group, presentStudents);
       await sendTelegramMessageToChat(currentChatId, scoresMessage);
     }
-    
+
     console.log(`✅ Attendance summary and scores sent to group ${group.name}`);
   } catch (error) {
     console.error('Error sending attendance summary:', error);
@@ -940,8 +940,8 @@ export const updateGroupChatId = async (groupId, oldChatId) => {
     const chatInfo = await getChatInfo(oldChatId);
     if (chatInfo && chatInfo.id !== oldChatId) {
       // Update the group with new chat_id
-      await Group.findByIdAndUpdate(groupId, { 
-        telegram_chat_id: chatInfo.id.toString() 
+      await Group.findByIdAndUpdate(groupId, {
+        telegram_chat_id: chatInfo.id.toString()
       });
       console.log(`✅ Updated group ${groupId} chat_id from ${oldChatId} to ${chatInfo.id}`);
       return chatInfo.id;

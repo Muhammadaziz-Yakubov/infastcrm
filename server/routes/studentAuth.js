@@ -158,18 +158,21 @@ router.get('/profile', authenticateStudent, async (req, res) => {
 // Update student profile
 router.put('/profile', authenticateStudent, async (req, res) => {
   try {
-    const { phone, profile_image } = req.body;
+    const { phone, profile_image, full_name } = req.body;
 
     console.log('📝 Profile update request:', {
       studentId: req.student._id,
       phone,
       hasImage: !!profile_image,
-      imageLength: profile_image ? profile_image.length : 0
+      imageLength: profile_image ? profile_image.length : 0,
+      full_name
     });
 
     const updateData = {};
 
     if (phone !== undefined) updateData.phone = phone;
+    if (full_name !== undefined) updateData.full_name = full_name;
+    // Allow setting profile_image to null/empty string to delete it
     if (profile_image !== undefined) updateData.profile_image = profile_image;
 
     const student = await Student.findByIdAndUpdate(

@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   Users,
   Settings,
-  Save
+  Save,
+  Trash2
 } from 'lucide-react';
 
 export default function StudentProfile() {
@@ -36,6 +37,7 @@ export default function StudentProfile() {
 
   // Edit form state
   const [formData, setFormData] = useState({
+    full_name: '',
     phone: '',
     profile_image: ''
   });
@@ -54,6 +56,7 @@ export default function StudentProfile() {
 
       if (isOwnProfile) {
         setFormData({
+          full_name: res.data.full_name || '',
           phone: res.data.phone || '',
           profile_image: res.data.profile_image || ''
         });
@@ -121,6 +124,7 @@ export default function StudentProfile() {
     if (student && isOwnProfile && !editing) {
       setFormData(prev => ({
         ...prev,
+        full_name: student.full_name || '',
         phone: student.phone || '',
         profile_image: student.profile_image || ''
       }));
@@ -144,7 +148,7 @@ export default function StudentProfile() {
         setEditing(true);
         try {
           const res = await api.put('/student-auth/profile', {
-            phone: formData.phone, // keep existing phone
+            ...formData, // include other fields to avoid unsetting them if API is partial
             profile_image: base64
           });
 
@@ -168,6 +172,38 @@ export default function StudentProfile() {
     }
   };
 
+  const handleRemoveImage = async () => {
+    if (!profile.profile_image) return;
+
+    if (!window.confirm("Rostdan ham profil rasmini o'chirmoqchimisiz?")) return;
+
+    setEditing(true);
+    try {
+      // Send null or empty string to clear image
+      const res = await api.put('/student-auth/profile', {
+        ...formData,
+        profile_image: null
+      });
+
+      setProfile(res.data);
+      setImagePreview(''); // Clear local preview
+      setFormData(prev => ({ ...prev, profile_image: '' }));
+
+      if (isOwnProfile) {
+        const token = localStorage.getItem('studentToken');
+        if (token) {
+          studentLogin(token, res.data);
+        }
+      }
+      alert("Rasm o'chirildi!");
+    } catch (error) {
+      console.error('Error removing profile image:', error);
+      alert("Xatolik: " + (error.response?.data?.message || error.message));
+    } finally {
+      setEditing(false);
+    }
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -186,6 +222,7 @@ export default function StudentProfile() {
     setEditing(true);
     try {
       const res = await api.put('/student-auth/profile', {
+        full_name: formData.full_name,
         phone: formData.phone,
         profile_image: formData.profile_image
       });
@@ -201,7 +238,7 @@ export default function StudentProfile() {
       }
 
       setEditModal(false);
-      // No need to fetchProfile if we trust the response and updated context, 
+      // No need to fetchProfile if we trust the response and updated context,
       // but keeping it doesn't hurt.
       fetchProfile();
       alert('Profil muvaffaqiyatli yangilandi!');
@@ -499,6 +536,19 @@ export default function StudentProfile() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Ism Familiya
+              </label>
+              <input
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="Ism Familiya"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Telefon raqami
               </label>
               <input
@@ -514,12 +564,23 @@ export default function StudentProfile() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Profile rasmi
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              />
+              <div className="flex gap-2 items-start">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+                {imagePreview && (
+                  <button
+                    onClick={handleRemoveImage}
+                    className="p-2 text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                    title="Rasmni o'chirish"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                )}
+              </div>
               {imagePreview && (
                 <img
                   src={imagePreview}
