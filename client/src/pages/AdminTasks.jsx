@@ -128,8 +128,9 @@ export default function AdminTasks() {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http')) return url;
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    return `${backendUrl.replace('/api', '')}/${url.replace(/^\//, '')}`;
+    // Production da backend URL dan foydalanamiz
+    const backendUrl = import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com';
+    return `${backendUrl}${url.startsWith('/') ? url : '/' + url}`;
   };
 
   const resetTaskForm = () => {
