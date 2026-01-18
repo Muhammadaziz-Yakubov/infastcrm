@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
@@ -22,9 +23,12 @@ import Exams from './pages/Exams';
 import StudentExams from './pages/StudentExams';
 import Layout from './components/Layout';
 
-function PrivateRoute({ children, adminOnly = false }) {
+// PrivateRoute komponenti endi ishlatilmaydi, chunki AppRoutes buni boshqaradi
+
+function AppRoutes() {
   const { user, loading } = useAuth();
-  
+
+  // Show loading screen while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -35,79 +39,60 @@ function PrivateRoute({ children, adminOnly = false }) {
       </div>
     );
   }
-  
-  if (!user) {
-    return <Navigate to="/login" />;
+
+  // If user is authenticated, redirect to appropriate dashboard
+  const adminToken = localStorage.getItem('token');
+  const studentToken = localStorage.getItem('studentToken');
+
+  if (adminToken || studentToken) {
+    // Redirect authenticated users away from login pages
+    return (
+      <Routes>
+        {/* Redirect login pages to dashboard if already authenticated */}
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/student-login" element={<Navigate to="/student" replace />} />
+
+        {/* Student Routes */}
+        <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/tasks" element={<StudentTasks />} />
+        <Route path="/student/code-editor/:taskId" element={<StudentCodeEditor />} />
+        <Route path="/student/rating" element={<StudentRating />} />
+        <Route path="/student/exams" element={<StudentExams />} />
+
+        {/* Protected Admin Routes */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="courses" element={<Courses />} />
+          <Route path="groups" element={<Groups />} />
+          <Route path="students" element={<Students />} />
+          <Route path="leads" element={<Leads />} />
+          <Route path="marketing" element={<Marketing />} />
+          <Route path="exams" element={<Exams />} />
+          <Route path="payments" element={<Payments />} />
+          <Route path="attendance" element={<Attendance />} />
+          <Route path="staff" element={<Staff />} />
+          <Route path="tasks" element={<AdminTasks />} />
+          <Route path="rating" element={<Rating />} />
+        </Route>
+
+        {/* Catch all - redirect to appropriate dashboard */}
+        <Route path="*" element={<Navigate to={adminToken ? "/" : "/student"} replace />} />
+      </Routes>
+    );
   }
 
-  // Check admin-only routes
-  if (adminOnly && user.role !== 'ADMIN') {
-    return <Navigate to="/" />;
-  }
-  
-  return children;
-}
-
-function AppRoutes() {
+  // If not authenticated, show landing page and login routes
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Landing page as default */}
+      <Route path="/" element={<Landing />} />
+
+      {/* Login pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/student-login" element={<StudentLogin />} />
-      
-      {/* Student Routes */}
-      <Route path="/student" element={<StudentDashboard />} />
-      <Route path="/student/tasks" element={<StudentTasks />} />
-      <Route path="/student/code-editor/:taskId" element={<StudentCodeEditor />} />
-      <Route path="/student/rating" element={<StudentRating />} />
-      <Route path="/student/exams" element={<StudentExams />} />
-      
-      {/* Protected Routes */}
-      <Route
-        path="/"
-        element={
-          <PrivateRoute>
-            <Layout />
-          </PrivateRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="courses" element={
-          <PrivateRoute adminOnly>
-            <Courses />
-          </PrivateRoute>
-        } />
-        <Route path="groups" element={<Groups />} />
-        <Route path="students" element={<Students />} />
-        <Route path="leads" element={
-          <PrivateRoute adminOnly>
-            <Leads />
-          </PrivateRoute>
-        } />
-        <Route path="marketing" element={
-          <PrivateRoute adminOnly>
-            <Marketing />
-          </PrivateRoute>
-        } />
-        <Route path="exams" element={
-          <PrivateRoute adminOnly>
-            <Exams />
-          </PrivateRoute>
-        } />
-        <Route path="payments" element={<Payments />} />
-        <Route path="attendance" element={<Attendance />} />
-        <Route path="staff" element={
-          <PrivateRoute adminOnly>
-            <Staff />
-          </PrivateRoute>
-        } />
-        <Route path="tasks" element={
-          <PrivateRoute adminOnly>
-            <AdminTasks />
-          </PrivateRoute>
-        } />
-        <Route path="rating" element={<Rating />} />
-              </Route>
+
+      {/* Redirect all other routes to landing page */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
