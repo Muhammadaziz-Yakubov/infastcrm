@@ -133,7 +133,7 @@ export default function Login() {
         </div>
 
         <p className="text-center mt-6 text-white/60 text-sm">
-          © 2024 InFast CRM. Barcha huquqlar himoyalangan.
+          © 2026 InFast CRM. Barcha huquqlar himoyalangan.
         </p>
       </div>
     </div>
