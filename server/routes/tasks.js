@@ -303,26 +303,108 @@ router.put('/:id', authenticate, requireAdmin, upload.single('image'), async (re
 // Delete task
 router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const task = await Task.findByIdAndDelete(req.params.id);
-    
+    console.log(`🗑️ Admin ${req.user._id} deleting task ${req.params.id}`);
+
+    // Validate task ID
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log(`❌ Invalid task ID: ${req.params.id}`);
+      return res.status(400).json({
+        success: false,
+        message: 'Noto\'g\'ri vazifa ID'
+      });
+    }
+
+    // Check if task exists and populate for better logging
+    const task = await Task.findById(req.params.id).populate('group_id', 'name').populate('created_by', 'full_name');
     if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
+      console.log(`❌ Task ${req.params.id} not found`);
+      return res.status(404).json({
+        success: false,
+        message: 'Vazifa topilmadi'
+      });
     }
-    
-    // Delete associated submissions
-    await TaskSubmission.deleteMany({ task_id: req.params.id });
-    
-    // Delete image file if exists
-    if (task.image_url) {
-      const imagePath = path.join(process.cwd(), task.image_url);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+
+    console.log(`✅ Found task: "${task.title}" (ID: ${task._id}) in group: ${task.group_id?.name || 'Unknown'}`);
+
+    // Check if task can be safely deleted
+    const activeSubmissions = await TaskSubmission.countDocuments({
+      task_id: req.params.id,
+      status: 'GRADED'
+    });
+
+    if (activeSubmissions > 0) {
+      console.log(`⚠️ Task has ${activeSubmissions} graded submissions - allowing deletion but logging`);
+    }
+
+    // Start a database transaction-like operation (MongoDB doesn't support transactions in all versions)
+    let deletedSubmissionsCount = 0;
+    let imageDeleted = false;
+
+    try {
+      // Delete associated submissions
+      const submissionDeleteResult = await TaskSubmission.deleteMany({ task_id: req.params.id });
+      deletedSubmissionsCount = submissionDeleteResult.deletedCount;
+      console.log(`🗑️ Deleted ${deletedSubmissionsCount} submissions for task ${task.title}`);
+
+      // Delete image file if exists
+      if (task.image_url) {
+        try {
+          const imagePath = path.join(process.cwd(), task.image_url);
+          console.log(`🖼️ Checking image file: ${imagePath}`);
+
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+            imageDeleted = true;
+            console.log(`🗑️ Deleted image file: ${imagePath}`);
+          } else {
+            console.log(`ℹ️ Image file not found (might be external URL): ${imagePath}`);
+          }
+        } catch (imageError) {
+          console.error(`❌ Error deleting image file:`, imageError);
+          // Don't fail the whole operation for image deletion error
+        }
       }
+
+      // Finally delete the task
+      const deleteResult = await Task.findByIdAndDelete(req.params.id);
+      if (!deleteResult) {
+        throw new Error('Task deletion failed');
+      }
+
+      console.log(`✅ Task "${task.title}" deleted successfully by admin ${req.user.full_name || req.user.email}`);
+
+      res.json({
+        success: true,
+        message: 'Vazifa muvaffaqiyatli o\'chirildi',
+        data: {
+          taskTitle: task.title,
+          groupName: task.group_id?.name,
+          deletedSubmissions: deletedSubmissionsCount,
+          imageDeleted: imageDeleted
+        }
+      });
+
+    } catch (dbError) {
+      console.error('❌ Database error during deletion:', dbError);
+      throw dbError; // Re-throw to be caught by outer catch
     }
-    
-    res.json({ message: 'Task deleted successfully' });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('❌ Error deleting task:', error);
+
+    // Provide more specific error messages
+    let errorMessage = 'Vazifani o\'chirishda xatolik yuz berdi';
+    if (error.name === 'CastError') {
+      errorMessage = 'Noto\'g\'ri vazifa ID formati';
+    } else if (error.code === 11000) {
+      errorMessage = 'Ma\'lumotlar bazasida konflikt yuz berdi';
+    }
+
+    res.status(500).json({
+      success: false,
+      message: errorMessage,
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

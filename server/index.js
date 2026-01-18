@@ -357,6 +357,12 @@ setTimeout(async () => {
   }
 }, 3000);
 
+// Log all API requests for debugging
+app.use('/api/*', (req, res, next) => {
+  console.log(`📡 ${req.method} ${req.originalUrl} - ${req.ip}`);
+  next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/student-auth', studentAuthRoutes);
@@ -373,6 +379,25 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/student/exams', studentExamRoutes);
 app.use('/api/public', publicRoutes);
+
+// Global error handler
+app.use((error, req, res, next) => {
+  console.error('💥 Global error handler:', error);
+  res.status(500).json({
+    success: false,
+    message: 'Server xatosi yuz berdi',
+    error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  console.log(`❌ 404 - Route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    success: false,
+    message: 'Sahifa topilmadi'
+  });
+});
 
 // Daily job to check payment status (runs at 9 AM every day)
 cron.schedule('0 9 * * *', () => {
