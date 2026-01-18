@@ -43,6 +43,23 @@ const upload = multer({
   }
 });
 
+// Helper function to get full URL for files
+const getFileUrl = (filePath) => {
+  if (!filePath) return null;
+  
+  // If it's already a full URL, return as is
+  if (filePath.startsWith('http')) {
+    return filePath;
+  }
+  
+  // In production, use the server's URL
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://infastcrm-0b2r.onrender.com'
+    : 'http://localhost:5000';
+  
+  return `${baseUrl}/${filePath}`;
+};
+
 // Get all tasks for admin
 router.get('/', authenticate, requireAdmin, async (req, res) => {
   try {
@@ -129,7 +146,7 @@ router.post('/', authenticate, requireAdmin, upload.single('image'), async (req,
     }
     
     if (req.file) {
-      taskData.image_url = `/uploads/tasks/${req.file.filename}`;
+      taskData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
     }
     
     const task = new Task(taskData);
@@ -182,7 +199,7 @@ router.put('/:id', authenticate, requireAdmin, upload.single('image'), async (re
     if (status) updateData.status = status;
     
     if (req.file) {
-      updateData.image_url = `/uploads/tasks/${req.file.filename}`;
+      updateData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
     }
     
     const task = await Task.findByIdAndUpdate(
@@ -258,7 +275,7 @@ router.post('/:id/submit', authenticateStudent, upload.array('files', 5), async 
     const submittedFiles = filesArray.map(file => ({
       filename: file.filename,
       original_name: file.originalname,
-      file_path: `/uploads/tasks/${file.filename}`,
+      file_path: getFileUrl(`/uploads/tasks/${file.filename}`),
       file_size: file.size,
       mime_type: file.mimetype
     }));
