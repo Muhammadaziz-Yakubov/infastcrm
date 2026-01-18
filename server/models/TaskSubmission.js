@@ -11,6 +11,14 @@ const taskSubmissionSchema = new mongoose.Schema({
     ref: 'Student',
     required: true
   },
+  code: {
+    type: String,
+    default: ''
+  },
+  description: {
+    type: String,
+    default: ''
+  },
   submitted_files: [{
     filename: String,
     original_name: String,
@@ -18,10 +26,6 @@ const taskSubmissionSchema = new mongoose.Schema({
     file_size: Number,
     mime_type: String
   }],
-  description: {
-    type: String,
-    default: ''
-  },
   submitted_at: {
     type: Date,
     default: Date.now

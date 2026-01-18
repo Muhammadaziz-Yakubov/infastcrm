@@ -606,9 +606,10 @@ export const sendAttendanceSummary = async (groupId, date) => {
     console.log(`📊 Attendance stats: Total students: ${allStudents.length}, Present: ${presentStudents.length}, Absent: ${absentStudents.length}`);
 
     // Send attendance summary (absent students)
+    const attendanceMessage = formatAttendanceMessage(group, absentStudents, presentStudents);
     let currentChatId = group.telegram_chat_id;
     console.log(`📤 Attempting to send to chat_id: ${currentChatId}`);
-    
+
     let attendanceSent = await sendTelegramMessageToChat(currentChatId, attendanceMessage);
     
     // If sending failed due to supergroup upgrade, try to update chat_id
