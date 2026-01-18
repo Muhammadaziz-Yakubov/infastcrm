@@ -38,15 +38,35 @@ bot.on('callback_query', (query) => {
   });
 });
 
-// Function to start polling as fallback
+// Function to start polling as fallback (only for development)
 export const startPolling = async () => {
   try {
     console.log('🔄 Starting Telegram polling...');
+
+    // Check if we're in production - polling can cause conflicts
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('⚠️ Attempting to start polling in production - this may cause conflicts!');
+      console.warn('🔄 In production, webhooks should be used instead of polling');
+    }
 
     // Check if bot is already polling
     if (bot.isPolling()) {
       console.log('ℹ️ Bot is already polling, skipping...');
       return true;
+    }
+
+    // Test polling first to avoid conflicts
+    try {
+      console.log('🧪 Testing polling connection...');
+      const testUpdates = await bot.getUpdates({ offset: -1, limit: 1, timeout: 1 });
+      console.log(`📊 Polling test successful, received ${testUpdates.length} updates`);
+    } catch (testError) {
+      if (testError.response?.statusCode === 409) {
+        console.error('❌ Polling conflict detected: Another bot instance is already running');
+        console.error('🔄 In production, make sure only one instance runs, or use webhooks');
+        return false;
+      }
+      console.warn('⚠️ Polling test failed, but continuing:', testError.message);
     }
 
     // Start polling
@@ -81,6 +101,46 @@ export const startPolling = async () => {
 export const setupWebhook = async (retries = 3) => {
   const webhookUrl = process.env.WEBHOOK_URL || 'https://infastcrm-0b2r.onrender.com/api/telegram/webhook';
   console.log(`🔄 Attempting to set webhook to: ${webhookUrl}`);
+
+  // First, test if the webhook URL is accessible
+  console.log('🧪 Testing webhook URL accessibility...');
+  try {
+    const https = await import('https');
+    const url = new URL(webhookUrl.replace('/webhook', '/webhook-test'));
+
+    const testResponse = await new Promise((resolve, reject) => {
+      const req = https.get(url, { timeout: 10000 }, (res) => {
+        let data = '';
+        res.on('data', (chunk) => data += chunk);
+        res.on('end', () => {
+          try {
+            const jsonData = JSON.parse(data);
+            resolve({ statusCode: res.statusCode, data: jsonData });
+          } catch (e) {
+            resolve({ statusCode: res.statusCode, data: null });
+          }
+        });
+      });
+
+      req.on('error', reject);
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('Timeout'));
+      });
+    });
+
+    if (testResponse.statusCode === 200) {
+      console.log('✅ Webhook URL is accessible');
+    } else {
+      console.error(`❌ Webhook URL returned status ${testResponse.statusCode}`);
+      console.error('🔍 Make sure your webhook endpoint is publicly accessible');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Webhook URL test failed:', error.message);
+    console.error('🔍 Make sure your Render app is running and accessible');
+    return false;
+  }
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {

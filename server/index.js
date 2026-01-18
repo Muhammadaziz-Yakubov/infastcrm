@@ -157,6 +157,76 @@ app.get('/api/telegram/bot-test', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0'
+  });
+});
+
+// Bot diagnostic endpoint
+app.get('/api/bot/status', async (req, res) => {
+  try {
+    const diagnostics = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      webhook_url: process.env.WEBHOOK_URL || 'not set',
+      bot_status: {}
+    };
+
+    // Check bot connectivity
+    try {
+      const botInfo = await bot.getMe();
+      diagnostics.bot_status.bot_info = {
+        id: botInfo.id,
+        username: botInfo.username,
+        first_name: botInfo.first_name
+      };
+    } catch (error) {
+      diagnostics.bot_status.bot_error = error.message;
+    }
+
+    // Check webhook status
+    try {
+      const webhookInfo = await bot.getWebHookInfo();
+      diagnostics.bot_status.webhook_info = {
+        url: webhookInfo.url || 'none',
+        has_custom_certificate: webhookInfo.has_custom_certificate,
+        pending_update_count: webhookInfo.pending_update_count,
+        last_error_message: webhookInfo.last_error_message,
+        last_error_date: webhookInfo.last_error_date
+      };
+    } catch (error) {
+      diagnostics.bot_status.webhook_error = error.message;
+    }
+
+    // Check polling status
+    diagnostics.bot_status.is_polling = bot.isPolling();
+
+    // Recommendations
+    diagnostics.recommendations = [];
+    if (process.env.NODE_ENV === 'production') {
+      if (!diagnostics.bot_status.webhook_info?.url || diagnostics.bot_status.webhook_info.url === 'none') {
+        diagnostics.recommendations.push('Webhook not set - bot may not receive messages');
+      }
+      if (diagnostics.bot_status.is_polling) {
+        diagnostics.recommendations.push('Polling active in production - may cause conflicts with multiple instances');
+      }
+    }
+
+    res.json(diagnostics);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Diagnostic failed',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Database connection
 const connectDB = async () => {
   try {
@@ -186,29 +256,37 @@ setTimeout(async () => {
   if (connected) {
     console.log('🤖 Telegram bot successfully connected and ready!');
 
-    // Setup webhook if in production or WEBHOOK_URL is provided
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.WEBHOOK_URL;
+    // Setup bot based on environment
+    const isProduction = process.env.NODE_ENV === 'production';
+    const hasWebhookUrl = !!process.env.WEBHOOK_URL;
+
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔗 Webhook URL configured: ${process.env.WEBHOOK_URL ? 'yes' : 'no'}`);
-    console.log(`🎯 Bot mode: ${isProduction ? 'production (webhook + polling fallback)' : 'development (polling only)'}`);
+    console.log(`🔗 Webhook URL configured: ${hasWebhookUrl ? 'yes' : 'no'}`);
+    console.log(`🎯 Bot strategy: ${isProduction ? 'production (webhook only)' : 'development (polling only)'}`);
 
     if (isProduction) {
+      // In production, ONLY use webhooks - no polling fallback to avoid conflicts
       console.log('🔄 Setting up Telegram webhook for production...');
+
+      if (!hasWebhookUrl) {
+        console.error('❌ WEBHOOK_URL environment variable is required in production!');
+        console.error('📝 Set WEBHOOK_URL in your Render environment variables');
+        console.error('📋 Example: https://your-app-name.onrender.com/api/telegram/webhook');
+        return;
+      }
+
       const webhookSet = await setupWebhook();
       if (webhookSet) {
-        console.log('✅ Telegram webhook setup completed');
-        console.log('📡 Bot is now using webhook mode (with polling as backup if needed)');
+        console.log('✅ Telegram webhook setup completed successfully');
+        console.log('📡 Bot is now running in webhook mode');
       } else {
-        console.log('❌ Telegram webhook setup failed - falling back to polling');
-        // Fallback to polling if webhook fails
-        const pollingStarted = await startPolling();
-        if (pollingStarted) {
-          console.log('✅ Polling fallback successful - bot is running in polling mode');
-        } else {
-          console.error('❌ Polling fallback also failed - bot may not work properly');
-        }
+        console.error('❌ Telegram webhook setup failed!');
+        console.error('🔍 Check the webhook URL accessibility:');
+        console.log(`   GET ${process.env.WEBHOOK_URL.replace('/webhook', '/webhook-test')}`);
+        console.error('🔍 Bot may not receive messages until webhook is working');
       }
     } else {
+      // In development, use polling only
       console.log('⚠️ Running in development mode, starting polling...');
       const pollingStarted = await startPolling();
       if (pollingStarted) {
