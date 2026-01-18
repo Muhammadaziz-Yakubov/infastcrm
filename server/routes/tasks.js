@@ -57,8 +57,10 @@ const getFileUrl = (filePath) => {
   
   // Remove leading slash to avoid double slash
   const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+  const fullUrl = `${baseUrl}/${cleanPath}`;
   
-  return `${baseUrl}/${cleanPath}`;
+  console.log(`🔗 getFileUrl: ${filePath} -> ${fullUrl}`);
+  return fullUrl;
 };
 
 // Get all tasks for admin
@@ -328,7 +330,7 @@ router.get('/:id/submissions', authenticate, requireAdmin, async (req, res) => {
       ...submission.toObject(),
       submitted_files: submission.submitted_files.map(file => ({
         ...file,
-        file_path: getFileUrl(file.file_path)
+        file_path: file.file_path.startsWith('http') ? file.file_path : getFileUrl(file.file_path)
       }))
     }));
     

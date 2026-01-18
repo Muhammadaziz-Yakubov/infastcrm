@@ -69,8 +69,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static('uploads'));
+// Serve static files from uploads directory with debug logging
+app.use('/uploads', (req, res, next) => {
+  console.log(`📁 Uploads access: ${req.method} ${req.url}`);
+  next();
+}, express.static('uploads'));
 
 // Telegram webhook endpoint
 app.post('/api/telegram/webhook', handleWebhook);
