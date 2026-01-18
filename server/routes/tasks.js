@@ -81,10 +81,15 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
       .sort({ createdAt: -1 });
     
     // Convert image_url to full URL for existing tasks
-    const tasksWithFullUrls = tasks.map(task => ({
-      ...task.toObject(),
-      image_url: task.image_url ? getFileUrl(task.image_url) : null
-    }));
+    const tasksWithFullUrls = tasks.map(task => {
+      const taskObj = task.toObject();
+      console.log(`📋 Task ${taskObj._id}: image_url = ${taskObj.image_url ? taskObj.image_url.substring(0, 100) + '...' : 'null'}`);
+
+      return {
+        ...taskObj,
+        image_url: taskObj.image_url ? getFileUrl(taskObj.image_url) : null
+      };
+    });
     
     res.json(tasksWithFullUrls);
   } catch (error) {
@@ -123,9 +128,12 @@ router.get('/student', authenticateStudent, async (req, res) => {
         };
       }
       
+      const taskObj = task.toObject();
+      console.log(`📋 Student Task ${taskObj._id}: image_url = ${taskObj.image_url ? taskObj.image_url.substring(0, 100) + '...' : 'null'}`);
+
       return {
-        ...task.toObject(),
-        image_url: task.image_url ? getFileUrl(task.image_url) : null,
+        ...taskObj,
+        image_url: taskObj.image_url ? getFileUrl(taskObj.image_url) : null,
         submitted: !!submission,
         submission: submissionWithUrls
       };
@@ -385,7 +393,7 @@ router.post('/:id/submit', authenticateStudent, upload.array('files', 5), async 
       ...submission.toObject(),
       submitted_files: submission.submitted_files.map(file => ({
         ...file,
-        file_path: file.file_path && file.file_path.startsWith('http') ? file.file_path : getFileUrl(file.file_path || `/uploads/tasks/${file.filename}`)
+        file_path: file.file_path && (file.file_path.startsWith('http') || file.file_path.startsWith('data:')) ? file.file_path : getFileUrl(file.file_path || `/uploads/tasks/${file.filename}`)
       }))
     };
     
@@ -404,14 +412,22 @@ router.get('/:id/submissions', authenticate, requireAdmin, async (req, res) => {
       .populate('graded_by', 'name email')
       .sort({ submitted_at: -1 });
     
-    // Convert file paths to full URLs
-    const submissionsWithFullUrls = submissions.map(submission => ({
-      ...submission.toObject(),
-      submitted_files: submission.submitted_files.map(file => ({
-        ...file,
-        file_path: file.file_path.startsWith('http') ? file.file_path : getFileUrl(file.file_path)
-      }))
-    }));
+    // Convert file paths to full URLs (or return data URLs as-is)
+    const submissionsWithFullUrls = submissions.map(submission => {
+      const submissionObj = submission.toObject();
+      console.log(`📋 Submission ${submissionObj._id} files:`);
+      submissionObj.submitted_files.forEach((file, i) => {
+        console.log(`   File ${i}: ${file.original_name} -> ${file.file_path?.substring(0, 100)}...`);
+      });
+
+      return {
+        ...submissionObj,
+        submitted_files: submissionObj.submitted_files.map(file => ({
+          ...file,
+          file_path: file.file_path && (file.file_path.startsWith('http') || file.file_path.startsWith('data:')) ? file.file_path : getFileUrl(file.file_path)
+        }))
+      };
+    });
     
     res.json(submissionsWithFullUrls);
   } catch (error) {

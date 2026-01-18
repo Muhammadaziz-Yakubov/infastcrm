@@ -378,8 +378,9 @@ export default function StudentTasks() {
                               <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Yuborilgan fayllar ({selectedTask.submission.submitted_files.length}):</p>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                  {selectedTask.submission.submitted_files.map((file, index) => {
-                                    const fileUrl = file.file_path?.startsWith('http') ? file.file_path : `${import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com'}${file.file_path?.startsWith('/') ? file.file_path : '/' + file.file_path}`;
+                                    const fileUrl = file.file_path?.startsWith('http') || file.file_path?.startsWith('data:') ? file.file_path : `${import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com'}${file.file_path?.startsWith('/') ? file.file_path : '/' + file.file_path}`;
                                     const isImage = file.mime_type?.includes('image');
+                                    console.log(`📄 File ${file.original_name}: file_path = ${file.file_path?.substring(0, 100)}..., isImage = ${isImage}`);
                                     return (
                                        <div key={index} className="flex items-center gap-3 bg-white/60 dark:bg-gray-800/60 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
                                           <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
@@ -391,8 +392,11 @@ export default function StudentTasks() {
                                           </div>
                                           <div className="flex gap-2">
                                              {isImage && (
-                                                <button 
-                                                   onClick={() => setPreviewImage(fileUrl)} 
+                                                <button
+                                                   onClick={() => {
+                                                      console.log(`🖼️ Previewing image: ${fileUrl.substring(0, 100)}...`);
+                                                      setPreviewImage(fileUrl);
+                                                   }}
                                                    className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-500 hover:text-indigo-600 transition-colors"
                                                 >
                                                    <ImageIcon size={18} />

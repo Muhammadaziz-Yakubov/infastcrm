@@ -512,20 +512,27 @@ export default function AdminTasks() {
               <div className="space-y-4">
                 <h4 className="text-sm font-black uppercase text-gray-400 tracking-widest">Yuborilgan fayllar ({selectedSubmission.submitted_files?.length}):</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {selectedSubmission.submitted_files?.map((file, i) => (
-                    <div key={i} className="group p-4 bg-white dark:bg-gray-800 border-2 dark:border-gray-700 rounded-2xl flex items-center justify-between hover:border-blue-500 transition-all">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl">{file.mime_type?.includes('image') ? <ImageIcon size={24}/> : <FileIcon size={24}/>}</div>
-                        <span className="font-bold text-sm dark:text-white truncate max-w-[150px]">{file.original_name}</span>
+                  {selectedSubmission.submitted_files?.map((file, i) => {
+                    const fileUrl = getImageUrl(file.file_path);
+                    console.log(`📄 Admin File ${file.original_name}: file_path = ${file.file_path?.substring(0, 100)}..., resolved URL = ${fileUrl?.substring(0, 100)}...`);
+                    return (
+                      <div key={i} className="group p-4 bg-white dark:bg-gray-800 border-2 dark:border-gray-700 rounded-2xl flex items-center justify-between hover:border-blue-500 transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl">{file.mime_type?.includes('image') ? <ImageIcon size={24}/> : <FileIcon size={24}/>}</div>
+                          <span className="font-bold text-sm dark:text-white truncate max-w-[150px]">{file.original_name}</span>
+                        </div>
+                        <div className="flex gap-2">
+                           {file.mime_type?.includes('image') && (
+                             <button onClick={() => {
+                               console.log(`🖼️ Admin previewing image: ${fileUrl?.substring(0, 100)}...`);
+                               setPreviewImage(fileUrl);
+                             }} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-500 hover:text-blue-600"><Eye size={18}/></button>
+                           )}
+                           <a href={fileUrl} target="_blank" rel="noreferrer" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Download size={18}/></a>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                         {file.mime_type?.includes('image') && (
-                           <button onClick={() => setPreviewImage(getImageUrl(file.file_path))} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-500 hover:text-blue-600"><Eye size={18}/></button>
-                         )}
-                         <a href={getImageUrl(file.file_path)} target="_blank" rel="noreferrer" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Download size={18}/></a>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
