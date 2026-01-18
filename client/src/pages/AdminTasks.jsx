@@ -139,15 +139,21 @@ export default function AdminTasks() {
   };
 
   const handleDeleteTask = (task) => {
+    console.log('🗑️ Delete button clicked for task:', task.title, task._id);
     setTaskToDelete(task);
     setShowDeleteModal(true);
   };
 
   const confirmDeleteTask = async () => {
-    if (!taskToDelete) return;
+    if (!taskToDelete) {
+      console.error('❌ No task to delete');
+      return;
+    }
+
+    console.log(`🗑️ Starting delete process for task: ${taskToDelete._id} - ${taskToDelete.title}`);
 
     try {
-      console.log(`🗑️ Deleting task: ${taskToDelete._id}`);
+      console.log(`📡 Making DELETE request to: /tasks/${taskToDelete._id}`);
 
       const response = await api.delete(`/tasks/${taskToDelete._id}`);
       console.log('✅ Task deleted successfully:', response.data);
@@ -332,12 +338,12 @@ export default function AdminTasks() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-2">
                       <button
                         onClick={() => { setSelectedTask(task); loadSubmissions(task._id); setActiveTab('submissions'); }}
-                        className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-blue-600 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all flex items-center justify-center gap-2"
+                        className="py-3 bg-gray-100 dark:bg-gray-800 hover:bg-blue-600 hover:text-white dark:text-gray-300 rounded-[1rem] font-bold text-xs transition-all flex items-center justify-center gap-1"
                       >
-                        <Eye size={16} /> Tekshirish
+                        <Eye size={14} /> Tekshirish
                       </button>
                       <button
                          onClick={() => { setSelectedTask(task); setFormData({
@@ -348,15 +354,15 @@ export default function AdminTasks() {
                            max_score: task.max_score,
                            status: task.status
                          }); setImagePreview(getImageUrl(task.image_url)); setShowTaskModal(true); }}
-                        className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-amber-500 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all flex items-center justify-center gap-2"
+                        className="py-3 bg-gray-100 dark:bg-gray-800 hover:bg-amber-500 hover:text-white dark:text-gray-300 rounded-[1rem] font-bold text-xs transition-all flex items-center justify-center gap-1"
                       >
-                        <Edit size={16} /> Tahrirlash
+                        <Edit size={14} /> Tahrirlash
                       </button>
                       <button
                         onClick={() => handleDeleteTask(task)}
-                        className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-red-500 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all flex items-center justify-center gap-2"
+                        className="py-3 bg-gray-100 dark:bg-gray-800 hover:bg-red-500 hover:text-white dark:text-gray-300 rounded-[1rem] font-bold text-xs transition-all flex items-center justify-center gap-1"
                       >
-                        <Trash2 size={16} /> O'chirish
+                        <Trash2 size={14} /> O'chirish
                       </button>
                     </div>
                   </div>
