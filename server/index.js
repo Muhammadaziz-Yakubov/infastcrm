@@ -61,6 +61,8 @@ const createDefaultAdmin = async () => {
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'https://www.buloqboshi-tumani.uz',
+    'https://buloqboshi-tumani.uz',
     process.env.FRONTEND_URL,
   ].filter(Boolean),
   credentials: true

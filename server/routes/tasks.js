@@ -55,7 +55,10 @@ const getFileUrl = (filePath) => {
   // Always use the production URL since we're on Render.com
   const baseUrl = 'https://infastcrm-0b2r.onrender.com';
   
-  return `${baseUrl}/${filePath}`;
+  // Remove leading slash to avoid double slash
+  const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+  
+  return `${baseUrl}/${cleanPath}`;
 };
 
 // Get all tasks for admin
