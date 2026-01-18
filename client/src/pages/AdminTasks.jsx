@@ -25,6 +25,8 @@ export default function AdminTasks() {
   // Modals
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showSubmissionDetailModal, setShowSubmissionDetailModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
   // Filters & Search
@@ -133,6 +135,42 @@ export default function AdminTasks() {
       loadSubmissions(selectedTask._id);
     } catch (error) {
       alert("Xatolik");
+    }
+  };
+
+  const handleDeleteTask = (task) => {
+    setTaskToDelete(task);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return;
+
+    try {
+      console.log(`🗑️ Deleting task: ${taskToDelete._id}`);
+
+      const response = await api.delete(`/tasks/${taskToDelete._id}`);
+      console.log('✅ Task deleted successfully:', response.data);
+
+      // Refresh tasks list
+      fetchData();
+
+      // If the deleted task was selected, clear selection
+      if (selectedTask && selectedTask._id === taskToDelete._id) {
+        setSelectedTask(null);
+        setSubmissions([]);
+        setActiveTab('tasks');
+      }
+
+      setShowDeleteModal(false);
+      setTaskToDelete(null);
+
+      // Show success message
+      alert('✅ Vazifa muvaffaqiyatli o\'chirildi!');
+    } catch (error) {
+      console.error('❌ Task deletion error:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      alert("Xatolik yuz berdi: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -294,14 +332,14 @@ export default function AdminTasks() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <button 
+                    <div className="grid grid-cols-3 gap-3">
+                      <button
                         onClick={() => { setSelectedTask(task); loadSubmissions(task._id); setActiveTab('submissions'); }}
                         className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-blue-600 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all flex items-center justify-center gap-2"
                       >
-                        <Eye size={18} /> Tekshirish
+                        <Eye size={16} /> Tekshirish
                       </button>
-                      <button 
+                      <button
                          onClick={() => { setSelectedTask(task); setFormData({
                            title: task.title,
                            description: task.description || '',
@@ -310,9 +348,15 @@ export default function AdminTasks() {
                            max_score: task.max_score,
                            status: task.status
                          }); setImagePreview(getImageUrl(task.image_url)); setShowTaskModal(true); }}
-                        className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-amber-500 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all"
+                        className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-amber-500 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all flex items-center justify-center gap-2"
                       >
-                        Tahrirlash
+                        <Edit size={16} /> Tahrirlash
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task._id, task.title)}
+                        className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-red-500 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all flex items-center justify-center gap-2"
+                      >
+                        <Trash2 size={16} /> O'chirish
                       </button>
                     </div>
                   </div>
