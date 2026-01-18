@@ -30,9 +30,23 @@ export const authenticate = async (req, res, next) => {
 
 // Middleware for admin only routes
 export const requireAdmin = (req, res, next) => {
+  console.log(`🔐 Checking admin access for user:`, req.user ? {
+    id: req.user._id,
+    role: req.user.role,
+    email: req.user.email
+  } : 'no user');
+
+  if (!req.user) {
+    console.log('❌ No user in request');
+    return res.status(401).json({ message: 'Autentifikatsiya talab etiladi' });
+  }
+
   if (req.user.role !== 'ADMIN') {
+    console.log(`❌ User ${req.user._id} has role ${req.user.role}, admin required`);
     return res.status(403).json({ message: 'Admin huquqi talab etiladi' });
   }
+
+  console.log(`✅ Admin access granted for user ${req.user._id}`);
   next();
 };
 

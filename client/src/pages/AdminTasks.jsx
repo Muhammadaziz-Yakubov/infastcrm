@@ -156,6 +156,7 @@ export default function AdminTasks() {
       console.log(`📡 Making DELETE request to: /tasks/${taskToDelete._id}`);
 
       const response = await api.delete(`/tasks/${taskToDelete._id}`);
+      console.log('✅ Raw response:', response);
       console.log('✅ Task deleted successfully:', response.data);
 
       // Refresh tasks list
@@ -175,8 +176,21 @@ export default function AdminTasks() {
       alert('✅ Vazifa muvaffaqiyatli o\'chirildi!');
     } catch (error) {
       console.error('❌ Task deletion error:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      alert("Xatolik yuz berdi: " + (error.response?.data?.message || error.message));
+      console.error('Error response:', error.response);
+      console.error('Error status:', error.response?.status);
+      console.error('Error data:', error.response?.data);
+      console.error('Error message:', error.message);
+
+      let errorMessage = 'Noma\'lum xatolik';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      alert("Xatolik yuz berdi: " + errorMessage);
     }
   };
 

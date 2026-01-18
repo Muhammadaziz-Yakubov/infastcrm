@@ -24,8 +24,12 @@ api.interceptors.request.use(
 
     if (adminToken && !config.headers?.Authorization) {
       config.headers.Authorization = `Bearer ${adminToken}`;
+      console.log(`🔑 Admin token attached to ${config.method} ${config.url}`);
     } else if (studentToken && !config.headers?.Authorization) {
       config.headers.Authorization = `Bearer ${studentToken}`;
+      console.log(`🔑 Student token attached to ${config.method} ${config.url}`);
+    } else {
+      console.log(`❌ No token available for ${config.method} ${config.url}`);
     }
 
     // Remove default Content-Type for FormData requests (let browser set it)

@@ -303,16 +303,32 @@ router.put('/:id', authenticate, requireAdmin, upload.single('image'), async (re
 // Delete task
 router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    console.log(`🗑️ Admin ${req.user._id} deleting task ${req.params.id}`);
+    console.log(`🗑️ Admin ${req.user?._id || 'unknown'} deleting task ${req.params.id}`);
+    console.log(`📋 Request details:`, {
+      method: req.method,
+      url: req.url,
+      params: req.params,
+      user: req.user ? { id: req.user._id, role: req.user.role } : 'no user'
+    });
 
     // Validate task ID
-    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
-      console.log(`❌ Invalid task ID: ${req.params.id}`);
+    if (!req.params.id) {
+      console.log(`❌ Missing task ID`);
       return res.status(400).json({
         success: false,
-        message: 'Noto\'g\'ri vazifa ID'
+        message: 'Vazifa ID berilmagan'
       });
     }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log(`❌ Invalid task ID format: ${req.params.id}`);
+      return res.status(400).json({
+        success: false,
+        message: 'Noto\'g\'ri vazifa ID formati'
+      });
+    }
+
+    console.log(`✅ Task ID validation passed: ${req.params.id}`);
 
     // Check if task exists and populate for better logging
     const task = await Task.findById(req.params.id).populate('group_id', 'name').populate('created_by', 'full_name');

@@ -26,6 +26,11 @@ import User from './models/User.js';
 
 dotenv.config();
 
+console.log('🔧 Environment variables check:');
+console.log(`JWT_SECRET: ${process.env.JWT_SECRET ? 'SET' : 'NOT SET'}`);
+console.log(`MONGODB_URI: ${process.env.MONGODB_URI ? 'SET' : 'NOT SET'}`);
+console.log(`TELEGRAM_BOT_TOKEN: ${process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT SET'}`);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -164,6 +169,33 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0'
+  });
+});
+
+// Test auth endpoint
+app.get('/api/test-auth', authenticate, (req, res) => {
+  res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      email: req.user.email,
+      role: req.user.role
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Test admin endpoint
+app.get('/api/test-admin', authenticate, requireAdmin, (req, res) => {
+  res.json({
+    success: true,
+    message: 'Admin access confirmed',
+    user: {
+      id: req.user._id,
+      email: req.user.email,
+      role: req.user.role
+    },
+    timestamp: new Date().toISOString()
   });
 });
 
