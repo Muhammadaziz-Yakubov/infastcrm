@@ -47,8 +47,9 @@ const bufferToDataUrl = (buffer, mimeType) => {
 const getFileUrl = (filePath) => {
   if (!filePath) return null;
   
-  // If it's already a full URL or data URL, return as is
+  // If it's already a full URL or data URL, return as is (don't modify)
   if (filePath.startsWith('http') || filePath.startsWith('data:')) {
+    console.log(`🔗 getFileUrl: Returning as-is (${filePath.substring(0, 50)}...)`);
     return filePath;
   }
   
@@ -61,7 +62,7 @@ const getFileUrl = (filePath) => {
   cleanPath = cleanPath.replace(/([^:]\/)\/+/g, '$1');
   const fullUrl = `${baseUrl}${cleanPath}`;
   
-  console.log(`🔗 getFileUrl: ${filePath} -> ${fullUrl} (baseUrl: ${baseUrl})`);
+  console.log(`🔗 getFileUrl: Converting path -> ${fullUrl.substring(0, 100)}... (baseUrl: ${baseUrl})`);
   return fullUrl;
 };
 
@@ -178,14 +179,26 @@ router.post('/', authenticate, requireAdmin, upload.single('image'), async (req,
     
     if (req.file) {
       // Convert image to base64 data URL for database storage
-      const isImage = req.file.mimetype.startsWith('image/');
-      if (isImage && req.file.size <= 5 * 1024 * 1024) {
+      const isImage = req.file.mimetype && req.file.mimetype.startsWith('image/');
+      const hasBuffer = req.file.buffer && Buffer.isBuffer(req.file.buffer);
+      
+      console.log(`📤 Creating task with file: ${req.file.originalname}, size: ${req.file.size}, hasBuffer: ${hasBuffer}, isImage: ${isImage}`);
+      
+      if (isImage && hasBuffer && req.file.size <= 5 * 1024 * 1024) {
         // Store as base64 data URL for images under 5MB
         taskData.image_url = bufferToDataUrl(req.file.buffer, req.file.mimetype);
-        console.log(`✅ Task image stored as base64 (${req.file.size} bytes)`);
+        console.log(`✅ Task image stored as base64 (${req.file.size} bytes, data URL length: ${taskData.image_url.length})`);
       } else {
-        // For larger files or non-images, still use URL (fallback)
-        taskData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
+        // For larger files, non-images, or if buffer is missing, use URL (fallback)
+        // Note: With memory storage, this fallback shouldn't be needed, but we keep it for safety
+        if (hasBuffer) {
+          // Still convert to base64 even if larger (database will handle it)
+          taskData.image_url = bufferToDataUrl(req.file.buffer, req.file.mimetype);
+          console.log(`⚠️ Large file stored as base64 anyway (${req.file.size} bytes)`);
+        } else {
+          taskData.image_url = getFileUrl(`/uploads/tasks/${req.file.filename}`);
+          console.log(`⚠️ Buffer missing, using URL fallback: ${taskData.image_url}`);
+        }
       }
     }
     
