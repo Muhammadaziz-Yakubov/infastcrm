@@ -2,19 +2,25 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import Task from '../models/Task.js';
 import TaskSubmission from '../models/TaskSubmission.js';
 import { authenticate, requireAdmin, authenticateStudent } from '../middleware/auth.js';
 import { sendTelegramMessageToChat } from '../services/telegramBot.js';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = 'uploads/tasks';
+    const uploadDir = path.join(__dirname, '..', 'uploads', 'tasks');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
+      console.log(`📁 Created directory: ${uploadDir}`);
     }
     cb(null, uploadDir);
   },

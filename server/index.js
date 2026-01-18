@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
+import path from 'path';
+import fs from 'fs';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
 import { sendDailyReminders, sendAllClassReminders, testBotConnection, setupWebhook, handleWebhook } from './services/telegramBot.js';
 import authRoutes from './routes/auth.js';
@@ -26,6 +28,20 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(process.cwd(), 'uploads');
+const tasksDir = path.join(uploadsDir, 'tasks');
+
+if (!fs.existsSync(uploadsDir)) {
+  console.log('📁 Creating uploads directory...');
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+if (!fs.existsSync(tasksDir)) {
+  console.log('📁 Creating tasks directory...');
+  fs.mkdirSync(tasksDir, { recursive: true });
+}
 
 // Function to create default admin user
 const createDefaultAdmin = async () => {
