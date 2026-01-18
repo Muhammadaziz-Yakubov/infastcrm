@@ -84,21 +84,24 @@ export default function StudentTasks() {
     if (!selectedTask) return;
 
     setSubmitting(true);
+
+    console.log('🚀 Starting student task submission...');
+    console.log('📝 Description:', submitData.description);
+    console.log('📎 Files to upload:', submitData.files.map(f => `${f.name} (${f.size} bytes)`));
+
     try {
-      const studentToken = localStorage.getItem('studentToken');
       const formData = new FormData();
       formData.append('description', submitData.description);
-      
-      submitData.files.forEach(file => {
+
+      submitData.files.forEach((file, index) => {
         formData.append('files', file);
+        console.log(`📎 Added file ${index + 1}: ${file.name}`);
       });
 
-      await api.post(`/tasks/${selectedTask._id}/submit`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          ...(studentToken && { Authorization: `Bearer ${studentToken}` })
-        }
-      });
+      console.log(`📡 POST request to: /tasks/${selectedTask._id}/submit`);
+
+      const response = await api.post(`/tasks/${selectedTask._id}/submit`, formData);
+      console.log('✅ Student submission successful:', response.data);
 
       alert('Vazifa muvaffaqiyatli yuborildi!');
       setShowSubmitModal(false);
@@ -106,7 +109,9 @@ export default function StudentTasks() {
       setSelectedTask(null);
       fetchTasks();
     } catch (error) {
-      console.error('Error submitting task:', error);
+      console.error('❌ Student submission error:', error);
+      console.error('Error details:', error.response?.data || error.message);
+
       if (error.response?.status === 401) {
         localStorage.removeItem('studentToken');
         window.location.href = '/student-login';

@@ -77,21 +77,34 @@ export default function AdminTasks() {
   const handleTaskSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+
+    console.log('🚀 Starting task submission...');
+    console.log('📝 Form data:', formData);
+    console.log('🖼️ Image file:', imageFile ? `${imageFile.name} (${imageFile.size} bytes)` : 'No image');
+
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
-    if (imageFile) data.append('image', imageFile);
+    if (imageFile) {
+      data.append('image', imageFile);
+      console.log('📎 Added image to FormData');
+    }
 
     try {
-      if (selectedTask) {
-        await api.put(`/tasks/${selectedTask._id}`, data);
-      } else {
-        await api.post('/tasks', data);
-      }
+      const endpoint = selectedTask ? `/tasks/${selectedTask._id}` : '/tasks';
+      const method = selectedTask ? 'put' : 'post';
+
+      console.log(`📡 ${method.toUpperCase()} request to: ${endpoint}`);
+
+      const response = await api[method](endpoint, data);
+      console.log('✅ Task submission successful:', response.data);
+
       setShowTaskModal(false);
       resetTaskForm();
       fetchData();
     } catch (error) {
-      alert("Xatolik yuz berdi");
+      console.error('❌ Task submission error:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      alert("Xatolik yuz berdi: " + (error.response?.data?.message || error.message));
     } finally {
       setSubmitting(false);
     }

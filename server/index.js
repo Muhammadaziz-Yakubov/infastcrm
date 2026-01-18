@@ -80,10 +80,15 @@ app.use(cors({
     'https://www.buloqboshi-tumani.uz',
     'https://buloqboshi-tumani.uz',
     process.env.FRONTEND_URL,
+    // Vercel domains
+    /^https:\/\/.*\.vercel\.app$/,
+    /^https:\/\/infast-crm.*\.vercel\.app$/,
   ].filter(Boolean),
   credentials: true
 }));
-app.use(express.json());
+// Parse JSON and URL-encoded data
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve static files from uploads directory with debug logging
 // Use absolute path for production compatibility

@@ -1,17 +1,13 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://infastcrm-0b2r.onrender.com/api/:1"
-    },
-    {
-      "source": "/((?!api).*)",
+      "source": "/((?!api|_next/static|_next/image|favicon.ico|assets).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/((?!api|assets).*)",
+      "source": "/((?!api|assets|_next/static|_next/image).*)",
       "headers": [
         {
           "key": "Cache-Control",

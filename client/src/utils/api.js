@@ -2,7 +2,11 @@ import axios from 'axios';
 
 // Production: VITE_API_URL dan oladi, Development: /api (Vite proxy orqali)
 // Agar VITE_API_URL bo'lmasa, backend URL dan foydalanamiz
-const baseURL = import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com';
+const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://infastcrm-0b2r.onrender.com');
+
+console.log('🌐 API Base URL:', baseURL);
+console.log('🌐 Environment:', import.meta.env.DEV ? 'development' : 'production');
+console.log('🌐 VITE_API_URL:', import.meta.env.VITE_API_URL);
 
 const api = axios.create({
   baseURL,
@@ -14,10 +18,22 @@ const api = axios.create({
 // Add token to requests dynamically
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token && !config.headers?.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Check for both admin token and student token
+    const adminToken = localStorage.getItem('token');
+    const studentToken = localStorage.getItem('studentToken');
+
+    if (adminToken && !config.headers?.Authorization) {
+      config.headers.Authorization = `Bearer ${adminToken}`;
+    } else if (studentToken && !config.headers?.Authorization) {
+      config.headers.Authorization = `Bearer ${studentToken}`;
     }
+
+    // Remove default Content-Type for FormData requests (let browser set it)
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+      console.log('📤 Sending FormData request:', config.url, 'Token:', adminToken ? 'admin' : studentToken ? 'student' : 'none');
+    }
+
     return config;
   },
   (error) => {
