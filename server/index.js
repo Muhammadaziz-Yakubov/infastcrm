@@ -22,6 +22,7 @@ import taskRoutes from './routes/tasks.js';
 import examRoutes from './routes/exams.js';
 import studentExamRoutes from './routes/studentExams.js';
 import publicRoutes from './routes/public.js';
+import { authenticate, requireAdmin } from './middleware/auth.js';
 import User from './models/User.js';
 
 dotenv.config();
