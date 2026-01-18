@@ -26,6 +26,7 @@ import {
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
 export default function StudentDashboard() {
@@ -33,6 +34,7 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const { darkMode, toggleDarkMode } = useTheme();
+  const { studentLogout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,8 +64,7 @@ export default function StudentDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('studentToken');
-    localStorage.removeItem('studentData');
+    studentLogout();
     navigate('/student-login');
   };
 

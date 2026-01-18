@@ -25,7 +25,21 @@ import Layout from './components/Layout';
 // PrivateRoute komponenti endi ishlatilmaydi, chunki AppRoutes buni boshqaradi
 
 function AppRoutes() {
-  // Check tokens directly from localStorage to avoid infinite re-renders
+  const { user, loading } = useAuth();
+
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Yuklanmoqda...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check for tokens
   const adminToken = localStorage.getItem('token');
   const studentToken = localStorage.getItem('studentToken');
 

@@ -67,8 +67,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const studentLogout = () => {
+    localStorage.removeItem('studentToken');
+    localStorage.removeItem('studentData');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, studentLogout, loading }}>
       {children}
     </AuthContext.Provider>
   );
