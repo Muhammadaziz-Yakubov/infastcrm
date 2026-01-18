@@ -174,6 +174,8 @@ app.get('/api/bot/status', async (req, res) => {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       webhook_url: process.env.WEBHOOK_URL || 'not set',
+      telegram_chat_id: process.env.TELEGRAM_CHAT_ID || 'not set',
+      bot_token_configured: !!process.env.TELEGRAM_BOT_TOKEN,
       bot_status: {}
     };
 
@@ -215,6 +217,9 @@ app.get('/api/bot/status', async (req, res) => {
       if (diagnostics.bot_status.is_polling) {
         diagnostics.recommendations.push('Polling active in production - may cause conflicts with multiple instances');
       }
+      if (!diagnostics.webhook_url.includes('onrender.com')) {
+        diagnostics.recommendations.push('Webhook URL may not be accessible from Telegram servers');
+      }
     }
 
     res.json(diagnostics);
@@ -222,6 +227,60 @@ app.get('/api/bot/status', async (req, res) => {
     res.status(500).json({
       error: 'Diagnostic failed',
       message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Test message sending
+app.post('/api/bot/test-message', async (req, res) => {
+  try {
+    const { chat_id, message } = req.body;
+
+    if (!chat_id || !message) {
+      return res.status(400).json({ error: 'chat_id and message are required' });
+    }
+
+    console.log(`🧪 Testing message send to chat ${chat_id}`);
+    const success = await sendTelegramMessageToChat(chat_id, `🧪 <b>Test Message</b>\n\n${message}`);
+
+    if (success) {
+      res.json({ success: true, message: 'Test message sent successfully' });
+    } else {
+      res.status(500).json({ success: false, message: 'Failed to send test message' });
+    }
+  } catch (error) {
+    console.error('Test message error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Quick bot test with default chat ID
+app.get('/api/bot/test-send', async (req, res) => {
+  try {
+    const testChatId = process.env.TELEGRAM_CHAT_ID || '-5125551645';
+    const testMessage = `🤖 <b>Bot Test Message</b>
+
+⏰ Time: ${new Date().toISOString()}
+🌍 Environment: ${process.env.NODE_ENV || 'development'}
+🔗 Webhook: ${process.env.WEBHOOK_URL || 'not set'}
+
+This is a test message to verify bot functionality.`;
+
+    console.log(`🧪 Sending test message to chat ${testChatId}`);
+    const success = await sendTelegramMessageToChat(testChatId, testMessage);
+
+    res.json({
+      success,
+      chat_id: testChatId,
+      timestamp: new Date().toISOString(),
+      message: success ? 'Test message sent successfully' : 'Failed to send test message'
+    });
+  } catch (error) {
+    console.error('Bot test error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
       timestamp: new Date().toISOString()
     });
   }

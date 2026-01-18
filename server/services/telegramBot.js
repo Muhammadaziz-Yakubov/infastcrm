@@ -3,8 +3,8 @@ import Student from '../models/Student.js';
 import Payment from '../models/Payment.js';
 import Group from '../models/Group.js';
 
-// Telegram Bot configuration
-const BOT_TOKEN = '8317971016:AAFQeb5Gx8ALmOiADCDYqcYRXcccZlEttcw';
+// Telegram Bot configuration - use environment variables
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8317971016:AAFQeb5Gx8ALmOiADCDYqcYRXcccZlEttcw';
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID || '-5125551645';
 
 // Initialize bot - we'll manage polling/webhook manually
@@ -671,29 +671,47 @@ export const getNewChatIdForSupergroup = async (oldChatId) => {
 // Send message to specific chat
 export const sendTelegramMessageToChat = async (chatId, message) => {
   try {
+    console.log(`📤 Attempting to send message to chat ${chatId}...`);
+    console.log(`🤖 Bot token: ${BOT_TOKEN.substring(0, 10)}...`);
+    console.log(`💬 Message preview: ${message.substring(0, 100)}...`);
+
+    // Check if bot is connected
+    const botInfo = await bot.getMe();
+    console.log(`✅ Bot connected as: @${botInfo.username}`);
+
     await bot.sendMessage(chatId, message, {
       parse_mode: 'HTML',
       disable_web_page_preview: true
     });
-    console.log(`✅ Message sent to chat ${chatId}`);
+    console.log(`✅ Message sent successfully to chat ${chatId}`);
     return true;
   } catch (error) {
     console.error(`❌ Error sending message to chat ${chatId}:`, error.message);
-    
+    console.error('Full error details:', error);
+
     // If group was upgraded to supergroup, try to get new chat_id
     if (error.message.includes('upgraded to a supergroup')) {
       console.log(`⚠️ Group ${chatId} was upgraded to supergroup. Please update the chat_id.`);
-      
+
       // Try to get new chat info
       const chatInfo = await getChatInfo(chatId);
       if (chatInfo && chatInfo.id !== chatId) {
         console.log(`🔄 New chat_id found: ${chatInfo.id}`);
         console.log(`📝 Please update group telegram_chat_id from ${chatId} to ${chatInfo.id}`);
       }
-      
+
       return false;
     }
-    
+
+    // Check for common errors
+    if (error.message.includes('chat not found')) {
+      console.error(`❌ Chat ${chatId} not found. Make sure the bot is added to the group.`);
+    } else if (error.message.includes('bot was kicked')) {
+      console.error(`❌ Bot was kicked from chat ${chatId}. Please re-add the bot to the group.`);
+    } else if (error.message.includes('not enough rights')) {
+      console.error(`❌ Bot doesn't have permission to send messages in chat ${chatId}.`);
+    }
+
     return false;
   }
 };

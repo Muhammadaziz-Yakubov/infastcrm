@@ -84,20 +84,39 @@ router.post('/', authenticate, async (req, res) => {
     
     // Schedule attendance summary after 10 minutes
     console.log(`🔍 Checking group ${attendance.group_id.name} for telegram_chat_id: ${attendance.group_id.telegram_chat_id}`);
-    
+
     if (attendance.group_id.telegram_chat_id) {
+      // Send immediate test message first
+      setTimeout(async () => {
+        try {
+          console.log(`🚀 Sending immediate test message to group ${attendance.group_id.name}...`);
+          const testMessage = `📊 <b>Test Message</b>
+
+Group: ${attendance.group_id.name}
+Time: ${new Date().toISOString()}
+Status: Testing bot connectivity
+
+This message will be followed by attendance summary in 10 minutes.`;
+          await sendTelegramMessageToChat(attendance.group_id.telegram_chat_id, testMessage);
+        } catch (error) {
+          console.error('Error sending test message:', error);
+        }
+      }, 5000); // 5 seconds
+
       setTimeout(async () => {
         try {
           console.log(`⏰ Sending attendance summary for group ${attendance.group_id.name} now...`);
           await sendAttendanceSummary(attendance.group_id._id, attendance.date);
         } catch (error) {
           console.error('Error sending scheduled attendance summary:', error);
+          console.error('Full error details:', error);
         }
       }, 10 * 60 * 1000); // 10 minutes in milliseconds
-      
+
       console.log(`⏰ Attendance summary scheduled for group ${attendance.group_id.name} in 10 minutes`);
     } else {
       console.log(`⚠️ Group ${attendance.group_id.name} has no telegram_chat_id, skipping attendance summary`);
+      console.log(`💡 To enable Telegram notifications, set telegram_chat_id in Groups settings`);
     }
     
     res.status(201).json(attendance);
