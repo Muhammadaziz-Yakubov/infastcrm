@@ -4,6 +4,7 @@ O'quv markazlar uchun CRM tizimi - **Muhammadaziz Yakubov** tomonidan yaratilgan
 
 ## 🚀 Xususiyatlar
 
+### CRM Tizimi
 - 📊 **Dashboard** - Umumiy statistika va ko'rsatkichlar
 - 📚 **Kurslar** - Kurslarni boshqarish
 - 👥 **Guruhlar** - Guruhlarni yaratish va boshqarish
@@ -12,6 +13,17 @@ O'quv markazlar uchun CRM tizimi - **Muhammadaziz Yakubov** tomonidan yaratilgan
 - 📋 **Davomat** - Davomatni belgilash
 - 🏆 **Reyting** - O'quvchilar reytingi
 - 👨‍💼 **Xodimlar** - Xodimlarni boshqarish
+- 📝 **Vazifalar** - O'quvchilarga vazifa berish
+- 📊 **Imtihonlar** - Testlar va imtihonlar
+
+### Landing Page
+- 🏠 **Asosiy sahifa** - InFast Academy taqdimoti
+- 📚 **Kurslar** - Barcha kurslar batafsil ma'lumoti
+- 👨‍🏫 **O'qituvchilar** - Mentorlar jamoasi
+- ℹ️ **Biz haqimizda** - Akademiya haqida ma'lumot
+- 📞 **Aloqa** - Bog'lanish uchun forma
+- 📰 **Blog** - IT yangiliklari va maqolalar
+- 📱 **Responsive** - Barcha qurilmalar uchun mos
 
 ## 🛠 Texnologiyalar
 
@@ -47,15 +59,32 @@ npm run install-all
 
 **Server (.env fayl yarating `server/` papkasida):**
 ```env
+NODE_ENV=production
 MONGODB_URI=mongodb://localhost:27017/infast-crm
 JWT_SECRET=your-super-secret-key
 PORT=5000
 FRONTEND_URL=http://localhost:3000
+API_URL=https://your-backend-domain.onrender.com
+
+# Telegram Bot (kursga yozilish uchun bildirishnomalar)
+# BotFather'dan token oling: https://t.me/BotFather
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 ```
 
 **Client (.env fayl yarating `client/` papkasida - ixtiyoriy):**
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000
+VITE_TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+```
+
+**Production uchun (Vercel + Render):**
+```env
+# Backend (.env)
+API_URL=https://your-backend-domain.onrender.com
+
+# Frontend (.env)
+VITE_API_URL=https://your-backend-domain.onrender.com
+VITE_TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 ```
 
 ### 4. Loyihani ishga tushirish
@@ -64,6 +93,31 @@ npm run dev
 ```
 
 Bu buyruq backend (port 5000) va frontend (port 3000) ni bir vaqtda ishga tushiradi.
+
+## 🎨 Landing Page
+
+Loyiha endi professional landing page bilan keladi:
+
+### Sahifalar:
+- **/** - Asosiy landing page
+- **/courses** - Kurslar katalogi
+- **/about** - Biz haqimizda
+- **/team** - O'qituvchilar jamoasi
+- **/contact** - Aloqa formasi
+- **/blog** - Yangiliklar va maqolalar
+
+### Kursga yozilish:
+- Landing page'dan to'g'ridan-to'g'ri kursga yozilish
+- Telegram bot orqali avtomatik bildirishnoma
+- `-5148910044` guruhiga xabar yuboriladi
+
+### Features:
+- Modern, responsive dizayn
+- Course registration form
+- Team profiles
+- Blog system
+- Contact forms
+- SEO optimized
 
 ## 🌐 Deployment
 

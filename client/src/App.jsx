@@ -2,6 +2,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Landing from './pages/Landing';
+import CoursesPage from './pages/CoursesPage';
+import AboutPage from './pages/AboutPage';
+import TeamPage from './pages/TeamPage';
+import ContactPage from './pages/ContactPage';
+import BlogPage from './pages/BlogPage';
 import Login from './pages/Login';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
@@ -81,11 +86,18 @@ function AppRoutes() {
     );
   }
 
-  // If not authenticated, show landing page and login routes
+  // If not authenticated, show public pages
   return (
     <Routes>
       {/* Landing page as default */}
       <Route path="/" element={<Landing />} />
+
+      {/* Public pages */}
+      <Route path="/courses" element={<CoursesPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/team" element={<TeamPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/blog" element={<BlogPage />} />
 
       {/* Login pages */}
       <Route path="/login" element={<Login />} />
