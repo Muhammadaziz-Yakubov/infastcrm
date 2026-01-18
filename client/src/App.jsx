@@ -1,12 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Landing from './pages/Landing';
-import CoursesPage from './pages/CoursesPage';
-import AboutPage from './pages/AboutPage';
-import TeamPage from './pages/TeamPage';
-import ContactPage from './pages/ContactPage';
-import BlogPage from './pages/BlogPage';
 import Login from './pages/Login';
 import StudentLogin from './pages/StudentLogin';
 import StudentDashboard from './pages/StudentDashboard';
@@ -86,25 +80,15 @@ function AppRoutes() {
     );
   }
 
-  // If not authenticated, show public pages
+  // If not authenticated, redirect to login
   return (
     <Routes>
-      {/* Landing page as default */}
-      <Route path="/" element={<Landing />} />
-
-      {/* Public pages */}
-      <Route path="/courses" element={<CoursesPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/team" element={<TeamPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/blog" element={<BlogPage />} />
-
       {/* Login pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/student-login" element={<StudentLogin />} />
 
-      {/* Redirect all other routes to landing page */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Redirect all routes to login if not authenticated */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
