@@ -52,10 +52,8 @@ const getFileUrl = (filePath) => {
     return filePath;
   }
   
-  // In production, use the server's URL
-  const baseUrl = process.env.NODE_ENV === 'production' 
-    ? 'https://infastcrm-0b2r.onrender.com'
-    : 'http://localhost:5000';
+  // Always use the production URL since we're on Render.com
+  const baseUrl = 'https://infastcrm-0b2r.onrender.com';
   
   return `${baseUrl}/${filePath}`;
 };
@@ -74,7 +72,13 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
       .populate('created_by', 'name email')
       .sort({ createdAt: -1 });
     
-    res.json(tasks);
+    // Convert image_url to full URL for existing tasks
+    const tasksWithFullUrls = tasks.map(task => ({
+      ...task.toObject(),
+      image_url: task.image_url ? getFileUrl(task.image_url) : null
+    }));
+    
+    res.json(tasksWithFullUrls);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -100,6 +104,7 @@ router.get('/student', authenticateStudent, async (req, res) => {
       const submission = submissions.find(s => s.task_id._id.toString() === task._id.toString());
       return {
         ...task.toObject(),
+        image_url: task.image_url ? getFileUrl(task.image_url) : null,
         submitted: !!submission,
         submission: submission || null
       };
@@ -122,7 +127,13 @@ router.get('/:id', authenticate, async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
     
-    res.json(task);
+    // Convert image_url to full URL
+    const taskWithFullUrl = {
+      ...task.toObject(),
+      image_url: task.image_url ? getFileUrl(task.image_url) : null
+    };
+    
+    res.json(taskWithFullUrl);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -309,7 +320,16 @@ router.get('/:id/submissions', authenticate, requireAdmin, async (req, res) => {
       .populate('graded_by', 'name email')
       .sort({ submitted_at: -1 });
     
-    res.json(submissions);
+    // Convert file paths to full URLs
+    const submissionsWithFullUrls = submissions.map(submission => ({
+      ...submission.toObject(),
+      submitted_files: submission.submitted_files.map(file => ({
+        ...file,
+        file_path: getFileUrl(file.file_path)
+      }))
+    }));
+    
+    res.json(submissionsWithFullUrls);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
