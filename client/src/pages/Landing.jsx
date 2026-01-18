@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   GraduationCap,
   Users,
@@ -175,9 +175,9 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-xl shadow-lg sticky top-0 z-50 border-b border-white/20">
+    <div className="min-h-screen bg-white overflow-hidden">
+      {/* Navbar */}
+      <nav className="bg-white/90 backdrop-blur-xl shadow-lg sticky top-0 z-50 border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
@@ -196,13 +196,13 @@ export default function Landing() {
             </div>
 
             {/* Desktop Menu */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <button onClick={() => navigate('/courses')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Kurslar</button>
-              <button onClick={() => navigate('/about')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Biz haqimizda</button>
-              <button onClick={() => navigate('/team')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">O'qituvchilar</button>
-              <button onClick={() => navigate('/blog')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Blog</button>
-              <button onClick={() => navigate('/contact')} className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Aloqa</button>
-            </nav>
+            <div className="hidden md:flex items-center space-x-8">
+              <Link to="/courses" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Kurslar</Link>
+              <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Biz haqimizda</Link>
+              <Link to="/team" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">O'qituvchilar</Link>
+              <Link to="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Blog</Link>
+              <Link to="/contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Aloqa</Link>
+            </div>
 
             <div className="flex items-center space-x-3">
               <button
@@ -231,117 +231,135 @@ export default function Landing() {
           {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-200">
-              <nav className="flex flex-col space-y-3">
-                <button onClick={() => { navigate('/courses'); setIsMenuOpen(false); }} className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Kurslar</button>
-                <button onClick={() => { navigate('/about'); setIsMenuOpen(false); }} className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Biz haqimizda</button>
-                <button onClick={() => { navigate('/team'); setIsMenuOpen(false); }} className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">O'qituvchilar</button>
-                <button onClick={() => { navigate('/blog'); setIsMenuOpen(false); }} className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Blog</button>
-                <button onClick={() => { navigate('/contact'); setIsMenuOpen(false); }} className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Aloqa</button>
+              <div className="flex flex-col space-y-3">
+                <Link to="/courses" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Kurslar</Link>
+                <Link to="/about" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Biz haqimizda</Link>
+                <Link to="/team" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>O'qituvchilar</Link>
+                <Link to="/blog" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
+                <Link to="/contact" className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Aloqa</Link>
                 <button
                   onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
                   className="text-left text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"
                 >
                   Admin Login
                 </button>
-              </nav>
+              </div>
             </div>
           )}
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative min-h-screen flex items-center justify-center pt-20 pb-32 overflow-hidden">
         {/* Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5"></div>
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 mesh-bg"></div>
+        <div className="absolute inset-0 bg-pattern opacity-30"></div>
 
-        <div className="relative max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-8">
-            <Zap className="h-4 w-4 mr-2" />
-            500+ dan ortiq bitiruvchi muvaffaqiyatga erishdi
-          </div>
+        {/* Floating Shapes */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary-400/30 to-primary-600/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-secondary-400/20 to-primary-500/20 rounded-full blur-3xl animate-float animate-delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-br from-amber-300/20 to-orange-400/20 rounded-full blur-3xl animate-pulse-slow"></div>
 
-          <h1 className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Kelajagingizni
-            </span>
-            <br />
-            <span className="text-gray-900">Biz bilan quring!</span>
-          </h1>
+        {/* Decorative Elements */}
+        <div className="absolute top-32 right-20 w-20 h-20 border-4 border-primary-200 rounded-2xl rotate-12 animate-spin-slow opacity-50"></div>
+        <div className="absolute bottom-40 left-20 w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl rotate-45 animate-bounce-slow opacity-30"></div>
 
-          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
-            InFast IT-Academy - zamonaviy texnologiyalar va professional ta'lim bilan sizni
-            <span className="font-semibold text-blue-600"> IT sohasida muvaffaqiyatli karyeraga</span> tayyorlaymiz.
-          </p>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-primary-100 shadow-lg mb-8 animate-fade-in-down">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
+              </span>
+              <span className="text-sm font-medium text-gray-700">Yangi guruhlar ochilmoqda!</span>
+            </div>
 
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <button
-              onClick={() => document.getElementById('courses').scrollIntoView({ behavior: 'smooth' })}
-              className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-blue-500/25 flex items-center gap-3 hover:scale-105 transform"
-            >
-              Kurslarni ko'rish
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            {/* Main Heading */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 mb-6 animate-fade-in-up leading-tight">
+              <span className="gradient-text">IT kasbini</span> o'rganing
+              <br />
+              <span className="text-gray-800">kelajakni quring</span>
+            </h1>
 
-            <button
-              onClick={() => setShowRegistrationModal(true)}
-              className="px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-all duration-300 font-bold text-lg hover:scale-105 transform"
-            >
-              Kursga yozilish
-            </button>
+            {/* Subtitle */}
+            <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto animate-fade-in-up animate-delay-200 leading-relaxed">
+              Andijon viloyatidagi <span className="font-semibold text-primary-600">yetakchi IT ta'lim markazi</span>.
+              Zamonaviy kasblarni professional ustozlardan o'rganing va
+              <span className="font-semibold"> muvaffaqiyatli karyera</span> boshlang!
+            </p>
 
-            <button
-              onClick={() => navigate('/student-login')}
-              className="px-8 py-4 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transform border border-gray-200"
-            >
-              Kirish
-            </button>
-          </div>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animate-delay-300">
+              <Link to="/courses" className="btn-primary text-lg px-8 py-4 inline-flex items-center justify-center gap-2 group">
+                <span>Kurslarni ko'rish</span>
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+              <button
+                onClick={() => setShowRegistrationModal(true)}
+                className="btn-secondary text-lg px-8 py-4 inline-flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                </svg>
+                <span>Kursga yozilish</span>
+              </button>
+            </div>
 
-          {/* Video Preview */}
-          <div className="mt-16 relative">
-            <div className="relative mx-auto max-w-4xl">
-              <div className="aspect-video bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl shadow-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 group">
-                    <Play className="h-8 w-8 text-white ml-1 group-hover:scale-110 transition-transform" />
-                  </button>
+            {/* Trust Indicators */}
+            <div className="mt-16 animate-fade-in-up animate-delay-500">
+              <p className="text-sm text-gray-500 mb-4">Bizga ishonishadi:</p>
+              <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+                <div className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-sm">
+                    IT
+                  </div>
+                  <span className="font-medium">IT Park</span>
                 </div>
-                <div className="absolute bottom-6 left-6 text-white">
-                  <p className="text-sm font-medium opacity-80">Bizning akademiyamiz haqida</p>
-                  <p className="text-lg font-bold">Video prezentatsiya</p>
+                <div className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-sm">
+                    UD
+                  </div>
+                  <span className="font-medium">Udevs</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-sm">
+                    EX
+                  </div>
+                  <span className="font-medium">Exadel</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-gray-300 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+          </div>
+        </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Bizning <span className="text-blue-600">natijalarimiz</span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Minglab o'quvchilarni muvaffaqiyatli karyeraga yo'l oldik
-            </p>
-          </div>
+      <section className="py-20 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_50%,rgba(249,115,22,0.3),transparent_50%)]"></div>
+          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_50%,rgba(239,68,68,0.2),transparent_50%)]"></div>
+        </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center group">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                  <div className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2">
-                    <stat.icon className={`h-12 w-12 mx-auto mb-4 ${stat.color}`} />
-                    <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                    <div className="text-gray-600 font-medium">{stat.label}</div>
-                  </div>
+                <div className="text-4xl mb-3">{stat.icon}</div>
+                <div className="text-5xl lg:text-6xl font-black text-white mb-2 group-hover:scale-110 transition-transform">
+                  {stat.value}
                 </div>
+                <div className="text-gray-400 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -349,301 +367,452 @@ export default function Landing() {
       </section>
 
       {/* Courses Section */}
-      <section id="courses" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50/30">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-24 bg-gray-50 relative">
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Bizning <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Kurslar</span>
+            <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
+              O'quv dasturlari
+            </span>
+            <h2 className="section-title">
+              Bizning <span className="gradient-text">Kurslar</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Har bir kurs professional mentorlar tomonidan zamonaviy usullar bilan o'tiladi.
-              <span className="font-semibold text-blue-600"> Real loyihalar</span> va
-              <span className="font-semibold text-purple-600"> amaliy mashg'ulotlar</span> bilan.
+            <p className="section-subtitle">
+              Sizga mos keladigan yo'nalishni tanlang va professional mutaxassis bo'ling
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {courses.map((course) => (
-              <div key={course.id} className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                <div className="relative bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 group-hover:-translate-y-2 border border-white/50">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div className={`p-4 rounded-2xl bg-gradient-to-r ${course.color} shadow-lg`}>
-                      <course.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">{course.price}</div>
-                      <div className="text-sm text-gray-500">so'm</div>
-                    </div>
+            {courses.map((course, index) => (
+              <div
+                key={course.id}
+                className="group bg-white rounded-2xl p-8 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 border border-gray-100 relative overflow-hidden"
+              >
+                {/* Hover Gradient */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${course.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+
+                <div className="relative">
+                  {/* Icon */}
+                  <div className={`${course.iconBg} w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
+                    <course.icon className="w-8 h-8" />
                   </div>
 
                   {/* Content */}
-                  <div className="mb-6">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{course.title}</h3>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{course.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Target className="h-4 w-4" />
-                        <span>Amaliy</span>
-                      </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                    {course.title}
+                  </h3>
+                  <p className="text-gray-600 mb-6 line-clamp-2">{course.description}</p>
+
+                  {/* Meta Info */}
+                  <div className="flex items-center gap-4 mb-6 text-sm">
+                    <div className="flex items-center gap-1.5 text-gray-500">
+                      <Clock className="w-4 h-4" />
+                      <span>{course.duration}</span>
                     </div>
-                    <p className="text-gray-600 leading-relaxed">{course.description}</p>
+                    <div className="flex items-center gap-1.5 text-gray-500">
+                      <Users className="w-4 h-4" />
+                      <span>Amaliy</span>
+                    </div>
                   </div>
 
-                  {/* Features */}
-                  <ul className="space-y-3 mb-8">
-                    {course.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-sm text-gray-700">
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Button */}
+                  {/* CTA */}
                   <button
                     onClick={() => {
                       setRegistrationData({...registrationData, course: course.id});
                       setShowRegistrationModal(true);
                     }}
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group-hover:scale-105 transform"
+                    className="inline-flex items-center gap-2 text-primary-600 font-semibold group-hover:gap-3 transition-all"
                   >
-                    Kursga yozilish
-                    <ArrowRight className="h-5 w-5" />
+                    <span>Batafsil ma'lumot</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* View All Button */}
+          <div className="text-center mt-12">
+            <Link to="/courses" className="btn-primary inline-flex items-center gap-2 px-8 py-4">
+              <span>Barcha kurslarni ko'rish</span>
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary-50 to-transparent"></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <div>
+              <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
+                Afzalliklarimiz
+              </span>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                Nima uchun <br/><span className="gradient-text">InFast Academy</span>?
+              </h2>
+              <p className="text-lg text-gray-600 mb-8">
+                Biz sizning muvaffaqiyatingiz uchun eng yaxshi sharoitlarni yaratamiz.
+                4 yillik tajriba va 500+ bitiruvchi - bu bizning ishonchliligimiz kafolati.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex items-start gap-4 group">
+                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                    <BookOpen className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Amaliy loyihalar</h3>
+                    <p className="text-sm text-gray-600">Har bir kursda real loyihalar ustida ishlaysiz va portfolio yaratasiz</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 group">
+                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                    <Users className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Malakali mentorlar</h3>
+                    <p className="text-sm text-gray-600">Sohaning eng yaxshi mutaxassislaridan individual yordam olasiz</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 group">
+                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                    <Award className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Ishga joylashish</h3>
+                    <p className="text-sm text-gray-600">Bitiruvchilarni hamkor kompaniyalarga ishga joylashtiramiz</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 group">
+                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 flex-shrink-0">
+                    <Zap className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Zamonaviy dastur</h3>
+                    <p className="text-sm text-gray-600">Eng so'ngi texnologiyalar va metodikalar asosida o'qitamiz</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Content - Stats Card */}
+            <div className="relative">
+              <div className="bg-gradient-to-br from-primary-500 to-secondary-500 rounded-3xl p-8 text-white relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                </div>
+
+                <div className="relative">
+                  <div className="text-center mb-8">
+                    <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                      <Award className="w-12 h-12 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">Sifat kafolati</h3>
+                    <p className="text-white/80">Har bir o'quvchi uchun individual yondashuv</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                      <div className="text-3xl font-bold mb-1">95%</div>
+                      <div className="text-sm text-white/80">Ishga joylashish</div>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                      <div className="text-3xl font-bold mb-1">4.9</div>
+                      <div className="text-sm text-white/80">O'rtacha baho</div>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                      <div className="text-3xl font-bold mb-1">500+</div>
+                      <div className="text-sm text-white/80">Bitiruvchilar</div>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
+                      <div className="text-3xl font-bold mb-1">50+</div>
+                      <div className="text-sm text-white/80">Hamkorlar</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Card */}
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 animate-float">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Sertifikat</div>
+                  <div className="text-sm text-gray-500">Rasmiy hujjat</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 bg-white">
+      <section className="py-24 bg-gray-50 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Bitiruvchilarimiz <span className="text-blue-600">sharhlari</span>
+            <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
+              Fikrlar
+            </span>
+            <h2 className="section-title">
+              Bitiruvchilar <span className="gradient-text">nima deydi?</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Minglab o'quvchilarimiz muvaffaqiyatga erishdi va o'z karyerasini o'zgartirdi
+            <p className="section-subtitle">
+              Bizning o'quvchilarimiz muvaffaqiyat hikoyalari
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
+              <div key={index} className="bg-white rounded-2xl p-8 shadow-card hover:shadow-card-hover transition-all duration-500 relative">
+                {/* Quote Icon */}
+                <div className="absolute top-6 right-6 text-primary-100">
+                  <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                  </svg>
+                </div>
+
+                {/* Rating */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating || 5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-amber-400 fill-current" />
+                  ))}
+                </div>
+
+                {/* Text */}
+                <p className="text-gray-600 mb-6 leading-relaxed">"{testimonial.content}"</p>
+
+                {/* Author */}
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
                     {testimonial.avatar}
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                    <p className="text-xs text-blue-600 font-medium">{testimonial.company}</p>
+                    <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                    <div className="text-sm text-gray-500">{testimonial.role}</div>
+                    <div className="text-xs text-primary-600 font-medium">{testimonial.company}</div>
                   </div>
                 </div>
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-700 leading-relaxed italic">"{testimonial.content}"</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+      {/* Learning Process Section */}
+      <section className="py-24 bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Biz haqimizda</h2>
-            <p className="text-xl opacity-90 max-w-3xl mx-auto leading-relaxed">
-              InFast IT-Academy - bu sizning kelajagingiz uchun sarmoya. Biz nafaqat dasturlashni, balki
-              to'g'ri fikrlash, muammo hal qilish va jamoada ishlash ko'nikmalarini ham o'rgatamiz.
+            <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
+              O'quv jarayoni
+            </span>
+            <h2 className="section-title">
+              Qanday <span className="gradient-text">o'qitamiz?</span>
+            </h2>
+            <p className="section-subtitle">
+              4 bosqichli zamonaviy va samarali ta'lim metodikasi
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <BookOpen className="h-10 w-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Zamonaviy Ta'lim</h3>
-              <p className="text-white/80 leading-relaxed">
-                Eng so'nggi texnologiyalar va industry standartlariga asosan o'qituvchi mentorlar
-                tomonidan professional ta'lim.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Users className="h-10 w-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Kichik Guruhlar</h3>
-              <p className="text-white/80 leading-relaxed">
-                Har bir o'quvchi individual e'tiborga ega. 10-15 kishilik guruhlar mentor bilan
-                yaqindan ishlash imkonini beradi.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Award className="h-10 w-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Sertifikat</h3>
-              <p className="text-white/80 leading-relaxed">
-                Kursni muvaffaqiyatli tugatgan barcha bitiruvchilarga xalqaro tan olingan sertifikat
-                beriladi.
-              </p>
+          <div className="relative">
+            {/* Connection Line */}
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary-200 via-primary-400 to-primary-200 -translate-y-1/2"></div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[
+                { step: '01', title: 'Asoslar', desc: 'Dastlabki bosqichda asosiy tushunchalar va nazariy bilimlarni o\'rganasiz', icon: '📖' },
+                { step: '02', title: 'Amaliyot', desc: 'Ko\'p mashqlar va real vazifalar orqali bilimlarni mustahkamlaysiz', icon: '💻' },
+                { step: '03', title: 'Loyiha', desc: 'Portfolioni to\'ldirish uchun real loyihalar ustida ishlaysiz', icon: '🚀' },
+                { step: '04', title: 'Karyera', desc: 'Ishga joylashish uchun resume tayyorlash va intervyuga tayyorgarlik', icon: '💼' }
+              ].map((item, index) => (
+                <div key={index} className="relative group">
+                  <div className="bg-white rounded-2xl p-8 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 relative z-10">
+                    {/* Step Number */}
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                      {item.icon}
+                    </div>
+
+                    <div className="text-sm font-bold text-primary-500 mb-2">BOSQICH {item.step}</div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                    <p className="text-gray-600 text-sm">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-20 bg-gray-900 text-white">
+      {/* Partners Section */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Biz bilan bog'laning</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Savollaringiz bormi? Biz sizga yordam beramiz! Tez orada javob beramiz.
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Bizning <span className="gradient-text">hamkorlarimiz</span>
+            </h2>
+            <p className="text-gray-600">
+              Bitiruvchilarimiz ishlaydigan kompaniyalar
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="text-center group">
-              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <MapPin className="h-8 w-8 text-white" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {[
+              { name: 'IT Park', logo: 'IT' },
+              { name: 'Udevs', logo: 'UD' },
+              { name: 'Exadel', logo: 'EX' },
+              { name: 'EPAM', logo: 'EP' },
+              { name: 'Softline', logo: 'SL' },
+              { name: 'DataArt', logo: 'DA' }
+            ].map((partner, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl p-6 flex flex-col items-center justify-center h-28 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
+              >
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-400 group-hover:bg-primary-100 group-hover:text-primary-600 transition-all duration-300 mb-2">
+                  {partner.logo}
+                </div>
+                <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">{partner.name}</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4">Manzil</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Buloqboshi tumani<br />
-                Yangi hokimiyat binosi<br />
-                2-qavat, 201-xona
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Phone className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Telefon</h3>
-              <p className="text-gray-300 leading-relaxed">
-                <a href="tel:+998937435225" className="hover:text-blue-400 transition-colors">+998 93 743 52 25</a><br />
-                <a href="tel:+998902570100" className="hover:text-blue-400 transition-colors">+998 90 257 01 00</a>
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <Mail className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4">Email</h3>
-              <p className="text-gray-300 leading-relaxed">
-                <a href="mailto:info@infast-academy.uz" className="hover:text-blue-400 transition-colors">
-                  info@infast-academy.uz
-                </a>
-              </p>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900"></div>
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_30%,rgba(249,115,22,0.4),transparent_40%)]"></div>
+          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_70%,rgba(239,68,68,0.3),transparent_40%)]"></div>
+        </div>
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-8">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-sm font-medium text-white/90">Yangi guruhlar tez orada boshlanadi</span>
           </div>
 
-          {/* CTA */}
-          <div className="text-center">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
+            IT karyerangizni <span className="text-primary-400">bugun</span> boshlang!
+          </h2>
+          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
+            Hoziroq ro'yxatdan o'ting va bepul konsultatsiya oling.
+            Biz sizning muvaffaqiyatingiz uchun barcha sharoitlarni yaratamiz.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => setShowRegistrationModal(true)}
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-blue-500/25"
+              className="btn-primary text-lg px-10 py-5 inline-flex items-center justify-center gap-2 group"
             >
-              <MessageCircle className="h-6 w-6 mr-3" />
-              Hoziroq kursga yozilish
+              <span>Kursga yozilish</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
+            <a
+              href="tel:+998937435225"
+              className="btn-outline text-lg px-10 py-5 inline-flex items-center justify-center gap-2"
+            >
+              <Phone className="w-5 h-5" />
+              <span>Qo'ng'iroq qiling</span>
+            </a>
+          </div>
+
+          {/* Contact Info */}
+          <div className="mt-12 flex flex-wrap justify-center gap-8 text-gray-400">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              <span>Andijon, Buloqboshi tumani</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Phone className="w-5 h-5" />
+              <span>+998 93 743 52 25</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl mr-3">
-                  <GraduationCap className="h-6 w-6 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            <div className="md:col-span-2">
+              <div className="flex items-center mb-6">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl mr-4">
+                  <GraduationCap className="h-8 w-8 text-white" />
                 </div>
-                <span className="text-2xl font-bold">InFast Academy</span>
+                <div>
+                  <span className="text-2xl font-bold">InFast Academy</span>
+                  <p className="text-gray-400 text-sm">IT Ta'lim Markazi</p>
+                </div>
               </div>
-              <p className="text-gray-400 leading-relaxed">
+              <p className="text-gray-400 leading-relaxed mb-6 max-w-md">
                 Zamonaviy IT ta'limi bilan kelajagingizni yarating. Professional mentorlar
                 bilan real loyihalarda tajriba orttiring.
               </p>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-bold mb-4">Sahifalar</h4>
-              <ul className="space-y-2">
-                <li><button onClick={() => navigate('/courses')} className="text-gray-400 hover:text-white transition-colors">Kurslar</button></li>
-                <li><button onClick={() => navigate('/about')} className="text-gray-400 hover:text-white transition-colors">Biz haqimizda</button></li>
-                <li><button onClick={() => navigate('/team')} className="text-gray-400 hover:text-white transition-colors">O'qituvchilar</button></li>
-                <li><button onClick={() => navigate('/blog')} className="text-gray-400 hover:text-white transition-colors">Blog</button></li>
-                <li><button onClick={() => navigate('/contact')} className="text-gray-400 hover:text-white transition-colors">Aloqa</button></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-bold mb-4">Kurslar</h4>
-              <ul className="space-y-2">
-                <li><button onClick={() => navigate('/courses')} className="text-gray-400 hover:text-white transition-colors">Frontend Development</button></li>
-                <li><button onClick={() => navigate('/courses')} className="text-gray-400 hover:text-white transition-colors">Backend Development</button></li>
-                <li><button onClick={() => navigate('/courses')} className="text-gray-400 hover:text-white transition-colors">Cyber Security</button></li>
-                <li><button onClick={() => navigate('/courses')} className="text-gray-400 hover:text-white transition-colors">SMM Marketing</button></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-bold mb-4">Aloqa</h4>
-              <ul className="space-y-2">
-                <li className="flex items-center text-gray-400">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Buloqboshi tumani
-                </li>
-                <li className="flex items-center text-gray-400">
-                  <Phone className="h-4 w-4 mr-2" />
-                  +998 93 743 52 25
-                </li>
-                <li className="flex items-center text-gray-400">
-                  <Mail className="h-4 w-4 mr-2" />
-                  info@infast-academy.uz
-                </li>
-              </ul>
-              <div className="mt-4">
-                <h5 className="text-sm font-semibold mb-2 text-gray-300">Ijtimoiy tarmoqlar</h5>
-                <div className="flex space-x-3">
-                  <a href="#" className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors text-sm">
-                    💬
-                  </a>
-                  <a href="#" className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-600 transition-colors text-sm">
-                    📸
-                  </a>
-                  <a href="#" className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors text-sm">
-                    📘
-                  </a>
-                </div>
+              <div className="flex space-x-4">
+                <a href="https://t.me/InFast_edu" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors">
+                  💬
+                </a>
+                <a href="https://www.instagram.com/infast_academy" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-600 transition-colors">
+                  📸
+                </a>
               </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold mb-6">Sahifalar</h4>
+              <ul className="space-y-3">
+                <li><Link to="/courses" className="text-gray-400 hover:text-white transition-colors">Kurslar</Link></li>
+                <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">Biz haqimizda</Link></li>
+                <li><Link to="/team" className="text-gray-400 hover:text-white transition-colors">O'qituvchilar</Link></li>
+                <li><Link to="/blog" className="text-gray-400 hover:text-white transition-colors">Blog</Link></li>
+                <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Aloqa</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold mb-6">Aloqa</h4>
+              <ul className="space-y-3">
+                <li className="flex items-center text-gray-400">
+                  <MapPin className="h-5 w-5 mr-3 flex-shrink-0" />
+                  <span>Buloqboshi tumani, Yangi hokimiyat binosi</span>
+                </li>
+                <li className="flex items-center text-gray-400">
+                  <Phone className="h-5 w-5 mr-3 flex-shrink-0" />
+                  <div>
+                    <a href="tel:+998937435225" className="hover:text-blue-400 transition-colors block">+998 93 743 52 25</a>
+                    <a href="tel:+998902570100" className="hover:text-blue-400 transition-colors block text-sm">+998 90 257 01 00</a>
+                  </div>
+                </li>
+                <li className="flex items-center text-gray-400">
+                  <Mail className="h-5 w-5 mr-3 flex-shrink-0" />
+                  <a href="mailto:info@infast-academy.uz" className="hover:text-blue-400 transition-colors">info@infast-academy.uz</a>
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 pt-8 text-center">
-            <p className="text-gray-400 mb-4">
-              © 2024 InFast IT-Academy. Barcha huquqlar himoyalangan.
-            </p>
-            <div className="flex justify-center items-center space-x-6 text-sm text-gray-500">
-              <a href="#" className="hover:text-white transition-colors">Maxfiylik siyosati</a>
-              <span>•</span>
-              <a href="#" className="hover:text-white transition-colors">Foydalanish shartlari</a>
-              <span>•</span>
-              <a href="#" className="hover:text-white transition-colors">Biz bilan bog'lanish</a>
+          <div className="border-t border-gray-800 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-gray-400 mb-4 md:mb-0">
+                © 2024 InFast IT-Academy. Barcha huquqlar himoyalangan.
+              </p>
+              <div className="flex items-center space-x-6 text-sm text-gray-500">
+                <a href="#" className="hover:text-white transition-colors">Maxfiylik siyosati</a>
+                <span>•</span>
+                <a href="#" className="hover:text-white transition-colors">Foydalanish shartlari</a>
+              </div>
             </div>
           </div>
         </div>
@@ -747,4 +916,5 @@ export default function Landing() {
       )}
     </div>
   );
+}
 }
