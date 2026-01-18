@@ -353,7 +353,7 @@ export default function AdminTasks() {
                         <Edit size={16} /> Tahrirlash
                       </button>
                       <button
-                        onClick={() => handleDeleteTask(task._id, task.title)}
+                        onClick={() => handleDeleteTask(task)}
                         className="py-4 bg-gray-100 dark:bg-gray-800 hover:bg-red-500 hover:text-white dark:text-gray-300 rounded-[1.5rem] font-bold text-sm transition-all flex items-center justify-center gap-2"
                       >
                         <Trash2 size={16} /> O'chirish
@@ -635,6 +635,49 @@ export default function AdminTasks() {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* B. DELETE CONFIRMATION MODAL */}
+      {showDeleteModal && taskToDelete && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-gray-900 rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-800">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="text-red-600" size={32} />
+              </div>
+              <h3 className="text-2xl font-black dark:text-white mb-2">Vazifani O'chirish</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                <strong>"{taskToDelete.title}"</strong> vazifasini o'chirishni xohlaysizmi?
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+                <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
+                  <AlertCircle size={20} />
+                  <span className="font-semibold">Ogohlantirish!</span>
+                </div>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                  Bu amal o'chirib bo'lmaydi va vazifaga barcha topshiriqlar ham o'chib ketadi.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setTaskToDelete(null);
+                  }}
+                  className="flex-1 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all"
+                >
+                  Bekor Qilish
+                </button>
+                <button
+                  onClick={confirmDeleteTask}
+                  className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all"
+                >
+                  O'chirish
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
