@@ -115,11 +115,24 @@ router.get('/student', authenticateStudent, async (req, res) => {
     // Combine tasks with submission status
     const tasksWithStatus = tasks.map(task => {
       const submission = submissions.find(s => s.task_id._id.toString() === task._id.toString());
+      
+      // Convert submission file paths to full URLs if submission exists
+      let submissionWithUrls = null;
+      if (submission) {
+        submissionWithUrls = {
+          ...submission.toObject(),
+          submitted_files: submission.submitted_files.map(file => ({
+            ...file,
+            file_path: file.file_path && file.file_path.startsWith('http') ? file.file_path : getFileUrl(file.file_path || `/uploads/tasks/${file.filename}`)
+          }))
+        };
+      }
+      
       return {
         ...task.toObject(),
         image_url: task.image_url ? getFileUrl(task.image_url) : null,
         submitted: !!submission,
-        submission: submission || null
+        submission: submissionWithUrls
       };
     });
     
@@ -330,7 +343,16 @@ router.post('/:id/submit', authenticateStudent, upload.array('files', 5), async 
     await submission.populate('task_id');
     await submission.populate('student_id', 'full_name');
     
-    res.status(201).json(submission);
+    // Convert file paths to full URLs in response
+    const submissionWithUrls = {
+      ...submission.toObject(),
+      submitted_files: submission.submitted_files.map(file => ({
+        ...file,
+        file_path: file.file_path && file.file_path.startsWith('http') ? file.file_path : getFileUrl(file.file_path || `/uploads/tasks/${file.filename}`)
+      }))
+    };
+    
+    res.status(201).json(submissionWithUrls);
   } catch (error) {
     console.error('Error submitting task:', error);
     res.status(500).json({ message: error.message });

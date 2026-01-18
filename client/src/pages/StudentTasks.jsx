@@ -17,7 +17,9 @@ import {
   ArrowLeft,
   Clock,
   MoreVertical,
-  ChevronRight
+  ChevronRight,
+  Download,
+  Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -342,27 +344,77 @@ export default function StudentTasks() {
 
                {/* Submission Status */}
                {selectedTask.submission && (
-                  <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-5 rounded-2xl border border-green-100 dark:border-green-900/30">
-                     <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-green-100 dark:bg-green-800 p-2 rounded-full text-green-600 dark:text-green-300">
-                           <CheckCircle size={20} />
+                  <>
+                     <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-5 rounded-2xl border border-green-100 dark:border-green-900/30">
+                        <div className="flex items-center gap-3 mb-3">
+                           <div className="bg-green-100 dark:bg-green-800 p-2 rounded-full text-green-600 dark:text-green-300">
+                              <CheckCircle size={20} />
+                           </div>
+                           <div>
+                              <h4 className="font-bold text-gray-900 dark:text-white">Topshirildi</h4>
+                              <p className="text-xs text-green-600 dark:text-green-400">
+                                 {format(new Date(selectedTask.submission.submitted_at), 'dd MMMM, HH:mm', { locale: uz })}
+                              </p>
+                           </div>
                         </div>
-                        <div>
-                           <h4 className="font-bold text-gray-900 dark:text-white">Topshirildi</h4>
-                           <p className="text-xs text-green-600 dark:text-green-400">
-                              {format(new Date(selectedTask.submission.submitted_at), 'dd MMMM, HH:mm', { locale: uz })}
-                           </p>
+                        
+                        <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 p-3 rounded-xl mb-4">
+                           <span className="text-sm text-gray-600 dark:text-gray-400">Baholanishi:</span>
+                           <span className="font-bold text-lg text-green-600 dark:text-green-400">
+                              {selectedTask.submission.score ? selectedTask.submission.score : '---'}
+                              <span className="text-sm text-gray-400 font-normal"> / {selectedTask.max_score}</span>
+                           </span>
                         </div>
+
+                        {selectedTask.submission.description && (
+                           <div className="mb-4 p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+                              <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-2">Sizning izohingiz:</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 italic">{selectedTask.submission.description}</p>
+                           </div>
+                        )}
+
+                        {selectedTask.submission.submitted_files && selectedTask.submission.submitted_files.length > 0 && (
+                           <div className="space-y-3">
+                              <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Yuborilgan fayllar ({selectedTask.submission.submitted_files.length}):</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                 {selectedTask.submission.submitted_files.map((file, index) => {
+                                    const fileUrl = file.file_path?.startsWith('http') ? file.file_path : `${import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com'}${file.file_path?.startsWith('/') ? file.file_path : '/' + file.file_path}`;
+                                    const isImage = file.mime_type?.includes('image');
+                                    return (
+                                       <div key={index} className="flex items-center gap-3 bg-white/60 dark:bg-gray-800/60 p-3 rounded-xl border border-gray-200 dark:border-gray-700">
+                                          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
+                                             {getFileIcon(file)}
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{file.original_name}</p>
+                                             <p className="text-xs text-gray-500">{(file.file_size / 1024).toFixed(1)} KB</p>
+                                          </div>
+                                          <div className="flex gap-2">
+                                             {isImage && (
+                                                <button 
+                                                   onClick={() => setPreviewImage(fileUrl)} 
+                                                   className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-500 hover:text-indigo-600 transition-colors"
+                                                >
+                                                   <ImageIcon size={18} />
+                                                </button>
+                                             )}
+                                             <a 
+                                                href={fileUrl} 
+                                                target="_blank" 
+                                                rel="noreferrer" 
+                                                className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                             >
+                                                <Download size={18} />
+                                             </a>
+                                          </div>
+                                       </div>
+                                    );
+                                 })}
+                              </div>
+                           </div>
+                        )}
                      </div>
-                     
-                     <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 p-3 rounded-xl">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Baholanishi:</span>
-                        <span className="font-bold text-lg text-green-600 dark:text-green-400">
-                           {selectedTask.submission.score ? selectedTask.submission.score : '---'}
-                           <span className="text-sm text-gray-400 font-normal"> / {selectedTask.max_score}</span>
-                        </span>
-                     </div>
-                  </div>
+                  </>
                )}
             </div>
 
