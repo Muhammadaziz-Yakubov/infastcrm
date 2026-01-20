@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import {
-    Users, Search, Award, FileText, User, Mail, Calendar, Trophy, ChevronRight, GraduationCap, Sparkles
+    Users, Search, Award, FileText, User, Mail, Calendar, Trophy, ChevronRight, GraduationCap, Sparkles, TrendingUp, ShieldCheck
 } from 'lucide-react';
 
 export default function StudentClassmatesView() {

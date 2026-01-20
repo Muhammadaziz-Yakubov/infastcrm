@@ -7,7 +7,7 @@ import {
   CheckCircle2,
   XCircle,
   LogOut,
-  TrendingUp,
+  Activity,
   Moon,
   Sun,
   Wallet,
@@ -227,7 +227,7 @@ export default function StudentDashboard() {
                   {[
                     { label: "Reyting", val: `${data?.quizzes?.stats?.avgPercentage || 0}%`, icon: Brain, color: 'text-indigo-600', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
                     { label: "To'lov", val: `${(data?.totalPaid || 0).toLocaleString()}`, icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-                    { label: "Davomati", val: `${data?.attendance?.stats?.percentage || 0}%`, icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+                    { label: "Davomati", val: `${data?.attendance?.stats?.percentage || 0}%`, icon: Activity, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30' },
                     { label: 'Guruh', val: 'Faol', icon: Users, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' }
                   ].map((stat, i) => (
                     <div key={i} className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-[1.8rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-xl shadow-gray-200/20 dark:shadow-none hover:-translate-y-1 transition-all group">
