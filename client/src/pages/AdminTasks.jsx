@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Modal from '../components/Modal';
-import { 
-  FileText, Plus, Edit, Trash2, Search, Image as ImageIcon, 
-  Users, Target, Upload, Clock, X, Eye, Download, CheckCircle, 
+import {
+  FileText, Plus, Edit, Trash2, Search, Image as ImageIcon,
+  Users, Target, Upload, Clock, X, Eye, Download, CheckCircle,
   AlertCircle, MessageSquare, Star, File as FileIcon, ChevronRight,
   Filter, LayoutGrid, List, BarChart3, ArrowUpRight, Calendar
 } from 'lucide-react';
@@ -21,11 +21,13 @@ export default function AdminTasks() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  
+
   // Modals
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showSubmissionDetailModal, setShowSubmissionDetailModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [taskToArchive, setTaskToArchive] = useState(null);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -194,6 +196,16 @@ export default function AdminTasks() {
     }
   };
 
+  const handleArchiveTask = async (task) => {
+    try {
+      await api.put(`/tasks/${task._id}`, { ...task, status: 'CLOSED' });
+      alert('Vazifa arxivlandi');
+      fetchData();
+    } catch (error) {
+      alert('Xatolik yuz berdi');
+    }
+  };
+
   // --- LOGIC HELPERS ---
 
   const getImageUrl = (url) => {
@@ -218,10 +230,17 @@ export default function AdminTasks() {
     return tasks.filter(t => {
       const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesGroup = groupFilter ? t.group_id?._id === groupFilter : true;
+
+      // If we are in 'tasks' tab, only show ACTIVE
+      // If we are in 'archive' tab, only show CLOSED
+      const tabStatus = activeTab === 'tasks' ? 'ACTIVE' : (activeTab === 'archive' ? 'CLOSED' : null);
+
+      if (tabStatus && t.status !== tabStatus) return false;
+
       const matchesStatus = statusFilter === 'ALL' ? true : t.status === statusFilter;
       return matchesSearch && matchesGroup && matchesStatus;
     });
-  }, [tasks, searchTerm, groupFilter, statusFilter]);
+  }, [tasks, searchTerm, groupFilter, statusFilter, activeTab]);
 
   // --- RENDER COMPONENTS ---
 
@@ -239,10 +258,10 @@ export default function AdminTasks() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-gray-950 p-4 md:p-8 lg:p-12 font-sans">
-      
+
       {/* 1. TOP NAVIGATION & STATS */}
       <div className="max-w-[1400px] mx-auto space-y-10">
-        
+
         <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div>
             <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -253,7 +272,7 @@ export default function AdminTasks() {
             </p>
           </div>
           <div className="flex items-center gap-3 w-full lg:w-auto">
-            <button 
+            <button
               onClick={() => { resetTaskForm(); setShowTaskModal(true); }}
               className="flex-1 lg:flex-none px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 transition-all active:scale-95"
             >
@@ -271,17 +290,23 @@ export default function AdminTasks() {
 
         {/* 2. TABS SYSTEM */}
         <div className="flex items-center gap-2 p-1.5 bg-gray-200/50 dark:bg-gray-900/50 rounded-[1.5rem] w-fit">
-          <button 
+          <button
             onClick={() => setActiveTab('tasks')}
             className={`px-8 py-3 rounded-xl font-bold transition-all ${activeTab === 'tasks' ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
           >
-            Vazifalar Ro'yxati
+            Vazifalar
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('submissions')}
             className={`px-8 py-3 rounded-xl font-bold transition-all ${activeTab === 'submissions' ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
           >
-            Tekshirish (Submissions)
+            Tekshirish
+          </button>
+          <button
+            onClick={() => setActiveTab('archive')}
+            className={`px-8 py-3 rounded-xl font-bold transition-all ${activeTab === 'archive' ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Arxiv
           </button>
         </div>
 
@@ -292,15 +317,15 @@ export default function AdminTasks() {
             <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-800 flex flex-wrap gap-4">
               <div className="relative flex-1 min-w-[300px]">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Vazifa nomi bo'yicha qidirish..."
                   className="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 dark:text-white"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <select 
+              <select
                 className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl dark:text-white font-medium"
                 value={groupFilter}
                 onChange={(e) => setGroupFilter(e.target.value)}
@@ -308,7 +333,7 @@ export default function AdminTasks() {
                 <option value="">Barcha Guruhlar</option>
                 {groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
               </select>
-              <select 
+              <select
                 className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl dark:text-white font-medium"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -322,7 +347,7 @@ export default function AdminTasks() {
             {/* Task Grid */}
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[1,2,3,4,5,6].map(i => <div key={i} className="h-80 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-[2.5rem]" />)}
+                {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-80 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-[2.5rem]" />)}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -342,7 +367,7 @@ export default function AdminTasks() {
                     </div>
 
                     <h3 className="text-2xl font-black mb-3 dark:text-white line-clamp-1">{task.title}</h3>
-                    
+
                     <div className="flex flex-wrap gap-4 mb-8">
                       <div className="flex items-center gap-2 text-gray-500 text-sm font-bold bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-xl">
                         <Users size={16} className="text-blue-500" /> {task.group_id?.name || 'Guruhsiz'}
@@ -352,37 +377,76 @@ export default function AdminTasks() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2 mt-4">
                       <button
                         onClick={() => { setSelectedTask(task); loadSubmissions(task._id); setActiveTab('submissions'); }}
-                        className="py-3 bg-gray-100 dark:bg-gray-800 hover:bg-blue-600 hover:text-white dark:text-gray-300 rounded-[1rem] font-bold text-xs transition-all flex items-center justify-center gap-1"
+                        className="py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-2xl font-bold text-xs hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-1"
                       >
                         <Eye size={14} /> Tekshirish
                       </button>
                       <button
-                         onClick={() => { setSelectedTask(task); setFormData({
-                           title: task.title,
-                           description: task.description || '',
-                           group_id: task.group_id?._id || '',
-                           deadline: task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : '',
-                           max_score: task.max_score,
-                           status: task.status
-                         }); setImagePreview(getImageUrl(task.image_url)); setShowTaskModal(true); }}
-                        className="py-3 bg-gray-100 dark:bg-gray-800 hover:bg-amber-500 hover:text-white dark:text-gray-300 rounded-[1rem] font-bold text-xs transition-all flex items-center justify-center gap-1"
+                        onClick={() => {
+                          setSelectedTask(task); setFormData({
+                            title: task.title,
+                            description: task.description || '',
+                            group_id: task.group_id?._id || '',
+                            deadline: task.deadline ? new Date(new Date(task.deadline).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
+                            max_score: task.max_score,
+                            status: task.status
+                          }); setImagePreview(getImageUrl(task.image_url)); setShowTaskModal(true);
+                        }}
+                        className="py-3 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-2xl font-bold text-xs hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-1"
                       >
                         <Edit size={14} /> Tahrirlash
                       </button>
                       <button
                         onClick={() => handleDeleteTask(task)}
-                        className="py-3 bg-gray-100 dark:bg-gray-800 hover:bg-red-500 hover:text-white dark:text-gray-300 rounded-[1rem] font-bold text-xs transition-all flex items-center justify-center gap-1"
+                        className="py-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 rounded-2xl font-bold text-xs hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center gap-1"
                       >
                         <Trash2 size={14} /> O'chirish
                       </button>
+                      {task.status === 'ACTIVE' && (
+                        <button
+                          onClick={() => handleArchiveTask(task)}
+                          className="py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-2xl font-bold text-xs hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center gap-1"
+                        >
+                          <CheckCircle size={14} /> Tugatish
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
+          </section>
+        ) : activeTab === 'archive' ? (
+          <section className="space-y-6 animate-in fade-in duration-500">
+            <div className="bg-amber-50 dark:bg-amber-900/10 p-6 rounded-[2rem] border border-amber-200 dark:border-amber-900/20 flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center text-white"><AlertCircle size={24} /></div>
+              <p className="text-amber-800 dark:text-amber-200 font-bold">Arxivlangan vazifalar o'quvchilarga "Yakunlangan" bo'limida ko'rinadi va ular qayta topshira olmaydilar.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              {tasks.filter(t => t.status === 'CLOSED').length === 0 ? (
+                <div className="col-span-full py-20 text-center text-gray-400 font-bold">Arxivlangan vazifalar mavjud emas</div>
+              ) : (
+                tasks.filter(t => t.status === 'CLOSED').map(task => (
+                  <div key={task._id} className="bg-white dark:bg-gray-900 rounded-[3rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800 opacity-75">
+                    <h3 className="text-xl font-black mb-2 dark:text-white">{task.title}</h3>
+                    <p className="text-xs text-gray-500 mb-4">{task.group_id?.name}</p>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Vazifani qayta faollashtirmoqchimisiz?')) {
+                          api.put(`/tasks/${task._id}`, { ...task, status: 'ACTIVE' }).then(() => fetchData());
+                        }
+                      }}
+                      className="w-full py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl font-bold text-xs hover:bg-emerald-500 hover:text-white transition-all"
+                    >
+                      Qayta Faollashtirish
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </section>
         ) : (
           /* 4. SUBMISSIONS VIEW (Tekshirish qismi) */
@@ -436,18 +500,18 @@ export default function AdminTasks() {
                         </div>
 
                         <div className="flex items-center gap-4 w-full md:w-auto">
-                           {sub.status === 'GRADED' && (
-                             <div className="text-right mr-4">
-                               <p className="text-[10px] font-bold text-gray-400 uppercase">Ball</p>
-                               <p className="text-2xl font-black text-blue-600">{sub.score} / {selectedTask.max_score}</p>
-                             </div>
-                           )}
-                           <button 
+                          {sub.status === 'GRADED' && (
+                            <div className="text-right mr-4">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase">Ball</p>
+                              <p className="text-2xl font-black text-blue-600">{sub.score} / {selectedTask.max_score}</p>
+                            </div>
+                          )}
+                          <button
                             onClick={() => { setSelectedSubmission(sub); setGrading({ score: sub.score || '', feedback: sub.feedback || '' }); setShowSubmissionDetailModal(true); }}
                             className="flex-1 md:flex-none px-10 py-4 bg-gray-900 dark:bg-gray-800 text-white rounded-2xl font-bold hover:bg-blue-600 transition-all shadow-lg"
-                           >
+                          >
                             Tekshirish
-                           </button>
+                          </button>
                         </div>
                       </div>
                     ))
@@ -478,21 +542,21 @@ export default function AdminTasks() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Vazifa Sarlavhasi</label>
-                    <input 
+                    <input
                       required
                       className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 dark:text-white text-lg font-bold"
                       value={formData.title}
-                      onChange={e => setFormData({...formData, title: e.target.value})}
+                      onChange={e => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Masalan: React Hooks darsligi"
                     />
                   </div>
                   <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Guruhni Tanlang</label>
-                    <select 
+                    <select
                       required
                       className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] dark:text-white font-bold"
                       value={formData.group_id}
-                      onChange={e => setFormData({...formData, group_id: e.target.value})}
+                      onChange={e => setFormData({ ...formData, group_id: e.target.value })}
                     >
                       <option value="">Tanlash...</option>
                       {groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
@@ -502,31 +566,31 @@ export default function AdminTasks() {
 
                 <div className="space-y-3">
                   <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Vazifa Tavsifi (Full Description)</label>
-                  <textarea 
+                  <textarea
                     rows={5}
                     className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/20 dark:text-white"
                     value={formData.description}
-                    onChange={e => setFormData({...formData, description: e.target.value})}
+                    onChange={e => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Vazifa haqida batafsil ma'lumot kiriting..."
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                   <div className="space-y-3">
-                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Deadline</label>
-                    <input type="date" className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] dark:text-white font-bold" value={formData.deadline} onChange={e => setFormData({...formData, deadline: e.target.value})}/>
-                   </div>
-                   <div className="space-y-3">
+                  <div className="space-y-3">
+                    <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Tugatish vaqti (Deadline)</label>
+                    <input type="datetime-local" className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] dark:text-white font-bold" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} />
+                  </div>
+                  <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Maksimal Ball</label>
-                    <input type="number" className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] dark:text-white font-bold" value={formData.max_score} onChange={e => setFormData({...formData, max_score: e.target.value})}/>
-                   </div>
-                   <div className="space-y-3">
+                    <input type="number" className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] dark:text-white font-bold" value={formData.max_score} onChange={e => setFormData({ ...formData, max_score: e.target.value })} />
+                  </div>
+                  <div className="space-y-3">
                     <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Holati</label>
-                    <select className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] dark:text-white font-bold" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                    <select className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800 border-none rounded-[1.5rem] dark:text-white font-bold" value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                       <option value="ACTIVE">Faol</option>
                       <option value="CLOSED">Yopilgan</option>
                     </select>
-                   </div>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -568,7 +632,7 @@ export default function AdminTasks() {
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowSubmissionDetailModal(false)} />
           <div className="relative bg-white dark:bg-gray-900 w-full max-w-6xl rounded-[3.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[85vh] animate-in zoom-in-95 duration-200">
-            
+
             {/* Chap tomon: Talaba yuborgan kontent */}
             <div className="flex-1 overflow-y-auto p-10 space-y-8 border-r dark:border-gray-800">
               <div className="flex items-center gap-6 mb-10">
@@ -595,17 +659,17 @@ export default function AdminTasks() {
                     return (
                       <div key={i} className="group p-4 bg-white dark:bg-gray-800 border-2 dark:border-gray-700 rounded-2xl flex items-center justify-between hover:border-blue-500 transition-all">
                         <div className="flex items-center gap-3">
-                          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl">{file.mime_type?.includes('image') ? <ImageIcon size={24}/> : <FileIcon size={24}/>}</div>
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-xl">{file.mime_type?.includes('image') ? <ImageIcon size={24} /> : <FileIcon size={24} />}</div>
                           <span className="font-bold text-sm dark:text-white truncate max-w-[150px]">{file.original_name}</span>
                         </div>
                         <div className="flex gap-2">
-                           {file.mime_type?.includes('image') && (
-                             <button onClick={() => {
-                               console.log(`🖼️ Admin previewing image: ${fileUrl?.substring(0, 100)}...`);
-                               setPreviewImage(fileUrl);
-                             }} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-500 hover:text-blue-600"><Eye size={18}/></button>
-                           )}
-                           <a href={fileUrl} target="_blank" rel="noreferrer" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Download size={18}/></a>
+                          {file.mime_type?.includes('image') && (
+                            <button onClick={() => {
+                              console.log(`🖼️ Admin previewing image: ${fileUrl?.substring(0, 100)}...`);
+                              setPreviewImage(fileUrl);
+                            }} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-500 hover:text-blue-600"><Eye size={18} /></button>
+                          )}
+                          <a href={fileUrl} target="_blank" rel="noreferrer" className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Download size={18} /></a>
                         </div>
                       </div>
                     );
@@ -618,36 +682,36 @@ export default function AdminTasks() {
             <div className="w-full md:w-[400px] bg-gray-50 dark:bg-gray-800/30 p-10 flex flex-col justify-between">
               <div>
                 <h4 className="text-2xl font-black dark:text-white mb-8">Baholash</h4>
-                
+
                 <div className="space-y-8">
                   <div className="space-y-3">
                     <label className="text-xs font-black text-gray-400 uppercase">Qo'yiladigan Ball (Max: {selectedTask?.max_score})</label>
                     <div className="relative">
                       <Star className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-400" size={24} />
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         max={selectedTask?.max_score}
                         className="w-full pl-14 pr-6 py-5 bg-white dark:bg-gray-900 border-none rounded-2xl text-2xl font-black text-blue-600 focus:ring-4 focus:ring-blue-500/20"
                         value={grading.score}
-                        onChange={e => setGrading({...grading, score: e.target.value})}
+                        onChange={e => setGrading({ ...grading, score: e.target.value })}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <label className="text-xs font-black text-gray-400 uppercase">Fikr-mulohaza (Feedback)</label>
-                    <textarea 
+                    <textarea
                       rows={6}
                       className="w-full p-6 bg-white dark:bg-gray-900 border-none rounded-2xl dark:text-white font-medium"
                       placeholder="Talabaga xatolarini yoki yutuqlarini yozing..."
                       value={grading.feedback}
-                      onChange={e => setGrading({...grading, feedback: e.target.value})}
+                      onChange={e => setGrading({ ...grading, feedback: e.target.value })}
                     />
                   </div>
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={submitGrade}
                 className="w-full py-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-emerald-500/30 transition-all active:scale-95"
               >
@@ -705,8 +769,8 @@ export default function AdminTasks() {
       {/* C. IMAGE FULL PREVIEW */}
       {previewImage && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-300">
-           <button onClick={() => setPreviewImage(null)} className="absolute top-8 right-8 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all"><X size={32}/></button>
-           <img src={previewImage} className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" alt="Full Preview" />
+          <button onClick={() => setPreviewImage(null)} className="absolute top-8 right-8 p-4 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all"><X size={32} /></button>
+          <img src={previewImage} className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" alt="Full Preview" />
         </div>
       )}
 

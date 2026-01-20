@@ -65,7 +65,8 @@ router.get('/:id', authenticateStudent, async (req, res) => {
     }
 
     // Check if exam is for student's group and is published
-    if (exam.group_id._id.toString() !== student.group_id.toString() || exam.status !== 'PUBLISHED') {
+    const studentGroupId = student.group_id._id ? student.group_id._id.toString() : student.group_id.toString();
+    if (exam.group_id._id.toString() !== studentGroupId || exam.status !== 'PUBLISHED') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
@@ -94,9 +95,9 @@ router.get('/:id', authenticateStudent, async (req, res) => {
               question_text: q.question_text,
               options: q.options,
               correct_answer: q.correct_answer,
-              student_answer: studentAnswer ? studentAnswer.selected_answer : null,
+              student_answer: studentAnswer !== undefined && studentAnswer !== null ? studentAnswer.selected_answer : null,
               points: q.points,
-              is_correct: studentAnswer ? q.correct_answer === studentAnswer.selected_answer : false
+              is_correct: studentAnswer !== undefined && studentAnswer !== null ? q.correct_answer === studentAnswer.selected_answer : false
             };
           })
         },
@@ -150,7 +151,8 @@ router.post('/:id/start', authenticateStudent, async (req, res) => {
     }
 
     // Check if exam is for student's group and is published
-    if (exam.group_id.toString() !== student.group_id.toString() || exam.status !== 'PUBLISHED') {
+    const studentGroupId = student.group_id._id ? student.group_id._id.toString() : student.group_id.toString();
+    if (exam.group_id.toString() !== studentGroupId || exam.status !== 'PUBLISHED') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
@@ -247,6 +249,18 @@ router.post('/:id/submit', authenticateStudent, async (req, res) => {
 
     await result.save();
 
+    const questionsWithAnswers = exam.questions.map((q, index) => {
+      const studentAnswer = result.answers.find(a => a.question_index === index);
+      return {
+        question_text: q.question_text,
+        options: q.options,
+        correct_answer: q.correct_answer,
+        student_answer: studentAnswer !== undefined && studentAnswer !== null ? studentAnswer.selected_answer : null,
+        points: q.points,
+        is_correct: studentAnswer !== undefined && studentAnswer !== null ? q.correct_answer === studentAnswer.selected_answer : false
+      };
+    });
+
     res.json({
       message: 'Exam submitted successfully',
       result: {
@@ -255,7 +269,8 @@ router.post('/:id/submit', authenticateStudent, async (req, res) => {
         finished_at: result.finished_at,
         time_taken: result.time_taken,
         answers: result.answers
-      }
+      },
+      questions: questionsWithAnswers
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -289,9 +304,9 @@ router.get('/:id/result', authenticateStudent, async (req, res) => {
         question_text: q.question_text,
         options: q.options,
         correct_answer: q.correct_answer,
-        student_answer: studentAnswer ? studentAnswer.selected_answer : null,
+        student_answer: studentAnswer !== undefined && studentAnswer !== null ? studentAnswer.selected_answer : null,
         points: q.points,
-        is_correct: studentAnswer ? q.correct_answer === studentAnswer.selected_answer : false
+        is_correct: studentAnswer !== undefined && studentAnswer !== null ? q.correct_answer === studentAnswer.selected_answer : false
       };
     });
 

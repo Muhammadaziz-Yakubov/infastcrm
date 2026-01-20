@@ -21,6 +21,7 @@ import Staff from './pages/Staff';
 import AdminTasks from './pages/AdminTasks';
 import Rating from './pages/Rating';
 import Exams from './pages/Exams';
+import Quizzes from './pages/Quizzes';
 import StudentExams from './pages/StudentExams';
 import Certificates from './pages/Certificates';
 import Layout from './components/Layout';
@@ -48,13 +49,10 @@ function AppRoutes() {
       <Routes>
         {/* Student Routes */}
         <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/student/tasks" element={<StudentTasks />} />
+        <Route path="/student/:tab" element={<StudentDashboard />} />
         <Route path="/student/code-editor/:taskId" element={<StudentCodeEditor />} />
-        <Route path="/student/rating" element={<StudentRating />} />
-        <Route path="/student/exams" element={<StudentExams />} />
         <Route path="/student/profile" element={<StudentProfile />} />
         <Route path="/student/profile/:id" element={<StudentProfile />} />
-        <Route path="/student/classmates" element={<Classmates />} />
 
         {/* Protected Admin Routes */}
         <Route path="/" element={<Layout />}>
@@ -65,6 +63,7 @@ function AppRoutes() {
           <Route path="leads" element={<Leads />} />
           <Route path="marketing" element={<Marketing />} />
           <Route path="exams" element={<Exams />} />
+          <Route path="quizzes" element={<Quizzes />} />
           <Route path="payments" element={<Payments />} />
           <Route path="attendance" element={<Attendance />} />
           <Route path="staff" element={<Staff />} />
@@ -88,7 +87,7 @@ function AppRoutes() {
 
       {/* Redirect student routes to student-login */}
       <Route path="/student/*" element={<Navigate to="/student-login" replace />} />
-      
+
       {/* Redirect all other routes to admin login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

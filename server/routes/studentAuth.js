@@ -4,6 +4,7 @@ import Student from '../models/Student.js';
 import Payment from '../models/Payment.js';
 import Attendance from '../models/Attendance.js';
 import Group from '../models/Group.js';
+import QuizResult from '../models/QuizResult.js';
 import { authenticateStudent } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -34,7 +35,7 @@ router.post('/login', async (req, res) => {
     const student = await Student.findOne({ login: trimmedLogin }).select('+password').populate('group_id');
     if (!student) {
       console.log('❌ Student not found:', trimmedLogin);
-      return res.status(401).json({ message: 'Login yoki parol noto\'g\'ri' });
+      return res.status(401).json({ message: 'Login noto\'g\'ri' });
     }
 
     if (!student.password) {
@@ -44,7 +45,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await student.comparePassword(trimmedPassword);
     console.log('🔐 Password match:', isMatch);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Login yoki parol noto\'g\'ri' });
+      return res.status(401).json({ message: 'Parol noto\'g\'ri' });
     }
 
     const token = jwt.sign(
@@ -99,6 +100,22 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
     const allPayments = await Payment.find({ student_id: student._id });
     const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
 
+    // Get quiz results
+    const quizResults = await QuizResult.find({ student_id: student._id })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    const quizStats = {
+      total: await QuizResult.countDocuments({ student_id: student._id, status: 'FINISHED' }),
+      avgPercentage: 0
+    };
+
+    if (quizStats.total > 0) {
+      const allResults = await QuizResult.find({ student_id: student._id, status: 'FINISHED' });
+      const totalPercentage = allResults.reduce((sum, r) => sum + (r.percentage || 0), 0);
+      quizStats.avgPercentage = Math.round(totalPercentage / quizStats.total);
+    }
+
     res.json({
       student: {
         id: student._id,
@@ -130,6 +147,10 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
             ? Math.round((presentCount / totalAttendances) * 100)
             : 0
         }
+      },
+      quizzes: {
+        lastResults: quizResults,
+        stats: quizStats
       }
     });
   } catch (error) {
@@ -442,6 +463,30 @@ router.get('/my-rating', authenticateStudent, async (req, res) => {
       rank,
       totalStudents: allStudents.length
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Change password
+router.put('/change-password', authenticateStudent, async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const student = await Student.findById(req.student._id).select('+password');
+
+    if (!student) {
+      return res.status(404).json({ message: 'O\'quvchi topilmadi' });
+    }
+
+    const isMatch = await student.comparePassword(oldPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Eski parol noto\'g\'ri' });
+    }
+
+    student.password = newPassword;
+    await student.save();
+
+    res.json({ message: 'Parol muvaffaqiyatli o\'zgartirildi' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

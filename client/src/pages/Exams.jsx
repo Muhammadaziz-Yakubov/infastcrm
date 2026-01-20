@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Modal from '../components/Modal';
-import { 
-  FileText, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  FileText,
+  Plus,
+  Edit,
+  Trash2,
   Send,
   Clock,
   Calendar,
@@ -96,7 +96,7 @@ export default function Exams() {
       } else {
         await api.post('/exams', formData);
       }
-      
+
       fetchExams();
       setShowModal(false);
       resetForm();
@@ -105,7 +105,7 @@ export default function Exams() {
       console.error('Response data:', error.response?.data);
       console.error('Response status:', error.response?.status);
       console.error('Form data:', formData);
-      
+
       // Show detailed error message
       const errorMessage = error.response?.data?.message || error.message;
       console.error('Detailed error:', errorMessage);
@@ -147,11 +147,11 @@ export default function Exams() {
       } else {
         await api.post(`/exams/${selectedExam._id}/questions`, questionForm);
       }
-      
+
       // Refresh exam data
       const examResponse = await api.get(`/exams/${selectedExam._id}`);
       setSelectedExam(examResponse.data);
-      
+
       setEditingQuestionIndex(null);
       resetQuestionForm();
     } catch (error) {
@@ -174,7 +174,7 @@ export default function Exams() {
     if (!confirm('Savolni o\'chirishni tasdiqlaysizmi?')) return;
     try {
       await api.delete(`/exams/${selectedExam._id}/questions/${questionIndex}`);
-      
+
       // Refresh exam data
       const examResponse = await api.get(`/exams/${selectedExam._id}`);
       setSelectedExam(examResponse.data);
@@ -190,7 +190,7 @@ export default function Exams() {
         api.get(`/exams/${exam._id}/results`),
         api.get(`/exams/${exam._id}/stats`)
       ]);
-      
+
       setSelectedExam(exam);
       setExamResults(resultsResponse.data);
       setExamStats(statsResponse.data);
@@ -351,9 +351,9 @@ export default function Exams() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={14} />
-                        {new Date(exam.start_date).toLocaleTimeString('uz-UZ', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
+                        {new Date(exam.start_date).toLocaleTimeString('uz-UZ', {
+                          hour: '2-digit',
+                          minute: '2-digit'
                         })}
                       </div>
                     </div>
@@ -590,11 +590,10 @@ export default function Exams() {
                         </p>
                         <div className="space-y-1">
                           {question.options.map((option, optIndex) => (
-                            <div key={optIndex} className={`text-sm ${
-                              optIndex === question.correct_answer 
-                                ? 'text-green-600 dark:text-green-400 font-medium' 
-                                : 'text-gray-600 dark:text-gray-400'
-                            }`}>
+                            <div key={optIndex} className={`text-sm ${optIndex === question.correct_answer
+                              ? 'text-green-600 dark:text-green-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-400'
+                              }`}>
                               {String.fromCharCode(65 + optIndex)}. {option}
                               {optIndex === question.correct_answer && ' ✅'}
                             </div>
@@ -793,7 +792,7 @@ export default function Exams() {
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                           <div className="flex items-center gap-2">
                             <div className="w-20 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                              <div 
+                              <div
                                 className="bg-green-500 h-2 rounded-full"
                                 style={{ width: `${result.percentage}%` }}
                               />
@@ -805,15 +804,14 @@ export default function Exams() {
                           {Math.floor(result.time_taken / 60)}:{(result.time_taken % 60).toString().padStart(2, '0')}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                            result.status === 'FINISHED' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                              : result.status === 'TIME_EXPIRED'
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${result.status === 'FINISHED'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                            : result.status === 'TIME_EXPIRED'
                               ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
                               : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                          }`}>
-                            {result.status === 'FINISHED' ? 'Tugagan' : 
-                             result.status === 'TIME_EXPIRED' ? 'Vaqt tugagan' : 'Boshlangan'}
+                            }`}>
+                            {result.status === 'FINISHED' ? 'Tugagan' :
+                              result.status === 'TIME_EXPIRED' ? 'Vaqt tugagan' : 'Boshlangan'}
                           </span>
                         </td>
                       </tr>

@@ -24,6 +24,8 @@ import studentExamRoutes from './routes/studentExams.js';
 import publicRoutes from './routes/public.js';
 import badgeRoutes from './routes/badges.js';
 import certificateRoutes from './routes/certificates.js';
+import quizRoutes from './routes/quizzes.js';
+import studentQuizRoutes from './routes/studentQuizzes.js';
 import { authenticate, requireAdmin } from './middleware/auth.js';
 import User from './models/User.js';
 
@@ -416,6 +418,8 @@ app.use('/api/student/exams', studentExamRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/badges', badgeRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/quizzes', quizRoutes);
+app.use('/api/student/quizzes', studentQuizRoutes);
 
 // Global error handler
 app.use((error, req, res, next) => {

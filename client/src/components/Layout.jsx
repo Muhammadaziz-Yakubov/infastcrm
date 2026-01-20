@@ -1,13 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Users, 
-  UserPlus, 
-  UserCheck, 
-  CreditCard, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  UserPlus,
+  UserCheck,
+  CreditCard,
   ClipboardCheck,
   Moon,
   Sun,
@@ -21,7 +21,8 @@ import {
   TrendingUp,
   FileText,
   Target,
-  Award
+  Award,
+  Brain
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -42,6 +43,7 @@ export default function Layout() {
     { path: '/marketing', icon: TrendingUp, label: 'Marketing', adminOnly: true },
     { path: '/tasks', icon: Target, label: 'Vazifalar', adminOnly: true },
     { path: '/exams', icon: FileText, label: 'Imtihonlar', adminOnly: true },
+    { path: '/quizzes', icon: Brain, label: 'Quiz (Dars testi)', adminOnly: true },
     { path: '/payments', icon: CreditCard, label: 'To\'lovlar' },
     { path: '/attendance', icon: ClipboardCheck, label: 'Davomat' },
     { path: '/rating', icon: Trophy, label: 'Reyting' },
@@ -58,9 +60,8 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-full z-20 transition-all duration-300 ${
-        collapsed ? 'w-20' : 'w-72'
-      }`}>
+      <aside className={`fixed left-0 top-0 h-full z-20 transition-all duration-300 ${collapsed ? 'w-20' : 'w-72'
+        }`}>
         <div className="h-full bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 shadow-xl flex flex-col">
           {/* Logo */}
           <div className={`p-6 border-b border-gray-100 dark:border-gray-700 ${collapsed ? 'px-4' : ''}`}>
@@ -76,7 +77,7 @@ export default function Layout() {
               )}
             </div>
           </div>
-          
+
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {filteredMenuItems.map((item, index) => {
@@ -86,11 +87,10 @@ export default function Layout() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'sidebar-link-active'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                  } ${collapsed ? 'justify-center' : ''}`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                    ? 'sidebar-link-active'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    } ${collapsed ? 'justify-center' : ''}`}
                   style={{ animationDelay: `${index * 50}ms` }}
                   title={collapsed ? item.label : ''}
                 >
@@ -121,7 +121,7 @@ export default function Layout() {
               {darkMode ? <Sun size={20} className="text-yellow-500" /> : <Moon size={20} />}
               {!collapsed && <span className="font-medium">{darkMode ? 'Yorug\' rejim' : 'Qorong\'u rejim'}</span>}
             </button>
-            
+
             <button
               onClick={logout}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors ${collapsed ? 'justify-center' : ''}`}
