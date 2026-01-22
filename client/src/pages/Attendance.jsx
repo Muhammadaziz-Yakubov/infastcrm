@@ -52,7 +52,7 @@ export default function Attendance() {
     }
   };
 
-  const fetchStudents = async () => {
+  const fetchStudents = async (retryCount = 0) => {
     if (!selectedGroup) return;
     setLoadingStudents(true);
     try {
@@ -65,6 +65,18 @@ export default function Attendance() {
     } catch (error) {
       console.error('❌ Error fetching students:', error);
       console.error('❌ Error response:', error.response?.data);
+      
+      // Retry on 500 errors (database issues)
+      if (error.response?.status === 500 && retryCount < 2) {
+        console.log(`🔄 Retrying students fetch (${retryCount + 1}/3)...`);
+        setTimeout(() => fetchStudents(retryCount + 1), 1000 * (retryCount + 1));
+        return;
+      }
+      
+      // Show user-friendly error
+      if (error.response?.status === 500) {
+        alert('Ma\'lumotlar yuklanmadi. Iltimos, qayta urinib ko\'ring.');
+      }
     } finally {
       setLoadingStudents(false);
     }

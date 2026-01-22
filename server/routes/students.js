@@ -38,15 +38,43 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     console.log('🔍 Students filter:', filter);
+    
+    // Add timeout and better error handling
     const students = await Student.find(filter)
       .select('full_name phone status group_id coin_balance profile_image next_payment_date')
       .populate('group_id', 'name status')
       .sort({ full_name: 1 })
-      .lean();
+      .lean()
+      .maxTimeMS(5000) // 5 second timeout
+      .allowDiskUse(true); // For complex queries
+    
     console.log('📊 Found students count:', students.length);
     res.json(students);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('❌ Students query error:', error.message);
+    
+    // Fallback: try without populate if timeout
+    if (error.message.includes('timeout') || error.message.includes('connection')) {
+      try {
+        console.log('🔄 Trying fallback without populate...');
+        const students = await Student.find(filter)
+          .select('full_name phone status group_id coin_balance profile_image next_payment_date')
+          .sort({ full_name: 1 })
+          .lean()
+          .maxTimeMS(3000);
+        
+        console.log('📊 Fallback students count:', students.length);
+        res.json(students);
+        return;
+      } catch (fallbackError) {
+        console.error('❌ Fallback also failed:', fallbackError.message);
+      }
+    }
+    
+    res.status(500).json({ 
+      message: 'Database connection error. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

@@ -357,10 +357,12 @@ const connectDB = async () => {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/infast-crm';
 
     const conn = await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 10000, // Increased from 5000
+      socketTimeoutMS: 60000, // Increased from 45000
       maxPoolSize: 10,
-      family: 4
+      family: 4,
+      retryWrites: true,
+      w: 'majority'
     });
 
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
