@@ -29,8 +29,13 @@ export default function Attendance() {
     fetchGroups();
   }, []);
 
+  const [loadingStudents, setLoadingStudents] = useState(false);
+
   useEffect(() => {
     if (selectedGroup) {
+      // Clear previous data immediately
+      setStudents([]);
+      setAttendance([]);
       fetchStudents();
       fetchAttendance();
     }
@@ -49,11 +54,16 @@ export default function Attendance() {
 
   const fetchStudents = async () => {
     if (!selectedGroup) return;
+    setLoadingStudents(true);
     try {
-      const response = await api.get('/students', { params: { group_id: selectedGroup } });
+      const response = await api.get('/students', { 
+        params: { group_id: selectedGroup, status: 'ACTIVE' } 
+      });
       setStudents(response.data);
     } catch (error) {
       console.error('Error fetching students:', error);
+    } finally {
+      setLoadingStudents(false);
     }
   };
 
@@ -262,7 +272,12 @@ export default function Attendance() {
             </div>
           </div>
 
-          {students.length === 0 ? (
+          {loadingStudents ? (
+            <div className="p-12 text-center">
+              <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-500 dark:text-gray-400">O'quvchilar yuklanmoqda...</p>
+            </div>
+          ) : students.length === 0 ? (
             <div className="p-12 text-center">
               <Users className="mx-auto text-gray-300 dark:text-gray-600 mb-4" size={48} />
               <p className="text-gray-500 dark:text-gray-400">Bu guruhda o'quvchilar yo'q</p>

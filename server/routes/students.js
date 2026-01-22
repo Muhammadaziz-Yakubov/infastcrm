@@ -37,8 +37,10 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     const students = await Student.find(filter)
-      .populate('group_id')
-      .sort({ next_payment_date: 1, createdAt: -1 });
+      .select('full_name phone status group_id coin_balance profile_image next_payment_date')
+      .populate('group_id', 'name status')
+      .sort({ full_name: 1 })
+      .lean();
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });
