@@ -9,6 +9,35 @@ import CoinService from '../services/CoinService.js';
 
 const router = express.Router();
 
+// Simple cache for attendance data
+const attendanceCache = new Map();
+const CACHE_TTL = 15000; // 15 seconds for attendance (changes frequently)
+
+const getCachedAttendance = (cacheKey) => {
+  const cached = attendanceCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+};
+
+const setCachedAttendance = (cacheKey, data) => {
+  attendanceCache.set(cacheKey, {
+    data,
+    timestamp: Date.now()
+  });
+  
+  // Clean old cache entries periodically
+  if (attendanceCache.size > 30) {
+    const now = Date.now();
+    for (const [key, value] of attendanceCache.entries()) {
+      if (now - value.timestamp > CACHE_TTL) {
+        attendanceCache.delete(key);
+      }
+    }
+  }
+};
+
 // Get all attendance records
 router.get('/', authenticate, async (req, res) => {
   try {
@@ -23,6 +52,14 @@ router.get('/', authenticate, async (req, res) => {
       filter.date = { $gte: startOfDay, $lte: endOfDay };
     }
 
+    // Check cache first
+    const cacheKey = JSON.stringify({ group_id, student_id, date });
+    const cachedAttendance = getCachedAttendance(cacheKey);
+    if (cachedAttendance) {
+      console.log('📋 Using cached attendance data');
+      return res.json(cachedAttendance);
+    }
+    
     const attendance = await Attendance.find(filter)
       .select('student_id group_id date status')
       .populate('student_id', 'full_name phone profile_image')
@@ -30,6 +67,10 @@ router.get('/', authenticate, async (req, res) => {
       .sort({ date: -1 })
       .lean()
       .maxTimeMS(5000);
+    
+    // Cache the results
+    setCachedAttendance(cacheKey, attendance);
+    
     res.json(attendance);
   } catch (error) {
     res.status(500).json({ message: error.message });

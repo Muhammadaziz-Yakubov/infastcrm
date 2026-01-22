@@ -36,10 +36,15 @@ const setCachedStudents = (cacheKey, data) => {
 
 // Get all students
 router.get('/', authenticate, async (req, res) => {
+  // Declare filter outside try block for fallback access
+  let filter = {};
+  
   try {
     const { group_id, status, payment_filter } = req.query;
     console.log('🔍 Students query params:', { group_id, status, payment_filter });
-    const filter = {};
+    
+    // Reset filter for this request
+    filter = {};
     if (group_id) filter.group_id = group_id;
     
     // Handle special payment filters
@@ -98,8 +103,7 @@ router.get('/', authenticate, async (req, res) => {
     if (error.message.includes('timeout') || error.message.includes('connection')) {
       try {
         console.log('🔄 Trying fallback without populate...');
-        const fallbackFilter = { ...filter }; // Copy filter to avoid scope issues
-        const students = await Student.find(fallbackFilter)
+        const students = await Student.find(filter)
           .select('full_name phone status group_id coin_balance profile_image next_payment_date')
           .sort({ full_name: 1 })
           .lean()
