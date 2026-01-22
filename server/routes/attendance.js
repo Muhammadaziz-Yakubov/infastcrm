@@ -281,10 +281,17 @@ router.post('/', authenticate, async (req, res) => {
     // Award or deduct coins based on attendance status (only for new records)
     if (!existing && attendance.student_id && attendance.group_id) {
       try {
+        // Use timeout for coin operations
+        const coinTimeout = setTimeout(() => {
+          console.error('❌ Coin operation timeout in attendance');
+        }, 3000);
+        
         const existingCoin = await CoinHistory.findOne({
           related_id: attendance._id,
           reason_type: { $in: ['ATTENDANCE_PRESENT', 'ATTENDANCE_ABSENT'] }
-        }).maxTimeMS(3000);
+        }).maxTimeMS(2000);
+        
+        clearTimeout(coinTimeout);
         
         if (!existingCoin && attendance.student_id._id) {
           if (attendance.status === 'PRESENT') {
@@ -308,10 +315,12 @@ router.post('/', authenticate, async (req, res) => {
               attendance._id
             );
           }
+          console.log(`✅ Coin operation completed for attendance ${attendance._id}`);
         }
       } catch (coinError) {
-        console.error('Error updating coins for attendance:', coinError);
+        console.error('❌ Error updating coins for attendance:', coinError.message);
         // Don't fail the request if coin operations fail
+        // This prevents attendance from failing due to coin issues
       }
     }
     
