@@ -57,11 +57,22 @@ export default function Attendance() {
     setLoadingStudents(true);
     try {
       console.log('🔍 Fetching students for group:', selectedGroup);
+      // Get both ACTIVE and DEBTOR students (they should attend classes)
       const response = await api.get('/students', { 
-        params: { group_id: selectedGroup, status: 'ACTIVE' } 
+        params: { 
+          group_id: selectedGroup, 
+          // Remove status filter to get all students, then filter on frontend
+        } 
       });
       console.log('📊 Students response:', response.data);
-      setStudents(response.data);
+      
+      // Filter students on frontend to show ACTIVE and DEBTOR (they should attend)
+      const filteredStudents = response.data.filter(student => 
+        student.status === 'ACTIVE' || student.status === 'DEBTOR'
+      );
+      
+      console.log('📊 Filtered students for attendance:', filteredStudents.length);
+      setStudents(filteredStudents);
     } catch (error) {
       console.error('❌ Error fetching students:', error);
       console.error('❌ Error response:', error.response?.data);

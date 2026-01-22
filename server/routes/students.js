@@ -82,13 +82,40 @@ router.get('/', authenticate, async (req, res) => {
     }
     
     // Add timeout and better error handling
-    const students = await Student.find(filter)
+    let students = await Student.find(filter)
       .select('full_name phone status group_id coin_balance profile_image next_payment_date')
       .populate('group_id', 'name status')
       .sort({ full_name: 1 })
       .lean()
       .maxTimeMS(5000) // 5 second timeout
       .allowDiskUse(true); // For complex queries
+    
+    // Additional validation: if group_id is specified, verify students belong to active groups
+    if (group_id) {
+      const group = await Group.findById(group_id).select('status').maxTimeMS(2000);
+      if (group && group.status !== 'ACTIVE') {
+        console.log(`⚠️ Group ${group_id} is not ACTIVE (${group.status}), but returning students anyway`);
+      }
+      
+      // Log if no students found for this group
+      if (students.length === 0) {
+        console.log(`❌ No students found for group ${group_id} with filter:`, filter);
+        
+        // Try without status filter to see if students exist with different status
+        const allStudentsInGroup = await Student.find({ group_id })
+          .select('full_name status')
+          .maxTimeMS(3000);
+          
+        if (allStudentsInGroup.length > 0) {
+          console.log(`📊 Found ${allStudentsInGroup.length} students with different statuses:`);
+          allStudentsInGroup.forEach(s => {
+            console.log(`   - ${s.full_name} (${s.status})`);
+          });
+        } else {
+          console.log(`📊 No students at all in group ${group_id}`);
+        }
+      }
+    }
     
     console.log('📊 Found students count:', students.length);
     
