@@ -857,46 +857,55 @@ ${scoresList}`;
 
 // Send attendance summary after 1 hour
 export const sendAttendanceSummary = async (groupId, date) => {
+  const startTime = Date.now();
+  
+  // Set a timeout to prevent infinite hanging
+  const timeout = setTimeout(() => {
+    console.error('❌ Attendance summary timeout after 30 seconds');
+  }, 30000);
+
   try {
     console.log(`📋 Starting attendance summary for group ${groupId}`);
 
-    let group = await Group.findById(groupId).populate('course_id');
+    let group = await Group.findById(groupId).populate('course_id').maxTimeMS(5000);
     if (!group) {
       console.log(`❌ Group ${groupId} not found`);
+      clearTimeout(timeout);
       return;
     }
 
     if (!group.telegram_chat_id) {
       console.log(`❌ Group ${group.name} has no telegram_chat_id`);
+      clearTimeout(timeout);
       return;
     }
 
     console.log(`📋 Found group ${group.name} with chat_id: ${group.telegram_chat_id}`);
 
     // Refresh group data to get latest chat_id
-    group = await Group.findById(groupId).populate('course_id');
+    group = await Group.findById(groupId).populate('course_id').maxTimeMS(3000);
     console.log(`🔄 Refreshed group ${group.name} with chat_id: ${group.telegram_chat_id}`);
 
     // Get today's attendance records
     const attendanceRecords = await Attendance.find({
       group_id: groupId,
       date: new Date(date)
-    }).populate('student_id');
+    }).populate('student_id').maxTimeMS(8000);
 
     // Get all students in group
-    const allStudents = await Student.find({ group_id: groupId });
+    const allStudents = await Student.find({ group_id: groupId }).maxTimeMS(5000);
 
     // Separate present and absent students
     const presentStudents = attendanceRecords
       .filter(record => record.status === 'PRESENT')
       .map(record => ({
-        ...record.student_id.toObject(),
+        ...record.student_id?.toObject() || {},
         score: record.score || 0
       }));
 
     const absentStudents = allStudents.filter(student =>
       !attendanceRecords.some(record =>
-        record.student_id._id.toString() === student._id.toString() &&
+        record.student_id?._id?.toString() === student._id.toString() &&
         record.status === 'PRESENT'
       )
     );
@@ -928,9 +937,11 @@ export const sendAttendanceSummary = async (groupId, date) => {
       await sendTelegramMessageToChat(currentChatId, scoresMessage);
     }
 
-    console.log(`✅ Attendance summary and scores sent to group ${group.name}`);
+    clearTimeout(timeout);
+    console.log(`✅ Attendance summary and scores sent to group ${group.name} in ${Date.now() - startTime}ms`);
   } catch (error) {
-    console.error('Error sending attendance summary:', error);
+    clearTimeout(timeout);
+    console.error('❌ Error sending attendance summary:', error.message);
   }
 };
 
