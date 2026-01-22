@@ -357,9 +357,11 @@ const connectDB = async () => {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/infast-crm';
 
     const conn = await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 10000, // Increased from 5000
-      socketTimeoutMS: 60000, // Increased from 45000
-      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 15000, // Increased to 15s
+      socketTimeoutMS: 90000, // Increased to 90s
+      maxPoolSize: 5, // Reduced to avoid connection limits
+      minPoolSize: 2, // Keep minimum connections
+      maxIdleTimeMS: 30000, // Close idle connections after 30s
       family: 4,
       retryWrites: true,
       w: 'majority'

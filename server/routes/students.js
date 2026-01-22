@@ -5,6 +5,35 @@ import { authenticate, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Simple cache for students data
+const studentsCache = new Map();
+const CACHE_TTL = 30000; // 30 seconds
+
+const getCachedStudents = (cacheKey) => {
+  const cached = studentsCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+};
+
+const setCachedStudents = (cacheKey, data) => {
+  studentsCache.set(cacheKey, {
+    data,
+    timestamp: Date.now()
+  });
+  
+  // Clean old cache entries periodically
+  if (studentsCache.size > 50) {
+    const now = Date.now();
+    for (const [key, value] of studentsCache.entries()) {
+      if (now - value.timestamp > CACHE_TTL) {
+        studentsCache.delete(key);
+      }
+    }
+  }
+};
+
 // Get all students
 router.get('/', authenticate, async (req, res) => {
   try {
@@ -39,6 +68,14 @@ router.get('/', authenticate, async (req, res) => {
 
     console.log('🔍 Students filter:', filter);
     
+    // Check cache first
+    const cacheKey = JSON.stringify({ group_id, status, payment_filter });
+    const cachedStudents = getCachedStudents(cacheKey);
+    if (cachedStudents) {
+      console.log('📋 Using cached students data');
+      return res.json(cachedStudents);
+    }
+    
     // Add timeout and better error handling
     const students = await Student.find(filter)
       .select('full_name phone status group_id coin_balance profile_image next_payment_date')
@@ -49,6 +86,10 @@ router.get('/', authenticate, async (req, res) => {
       .allowDiskUse(true); // For complex queries
     
     console.log('📊 Found students count:', students.length);
+    
+    // Cache the results
+    setCachedStudents(cacheKey, students);
+    
     res.json(students);
   } catch (error) {
     console.error('❌ Students query error:', error.message);
@@ -57,7 +98,8 @@ router.get('/', authenticate, async (req, res) => {
     if (error.message.includes('timeout') || error.message.includes('connection')) {
       try {
         console.log('🔄 Trying fallback without populate...');
-        const students = await Student.find(filter)
+        const fallbackFilter = { ...filter }; // Copy filter to avoid scope issues
+        const students = await Student.find(fallbackFilter)
           .select('full_name phone status group_id coin_balance profile_image next_payment_date')
           .sort({ full_name: 1 })
           .lean()
