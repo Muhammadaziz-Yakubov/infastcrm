@@ -9,6 +9,7 @@ const router = express.Router();
 router.get('/', authenticate, async (req, res) => {
   try {
     const { group_id, status, payment_filter } = req.query;
+    console.log('🔍 Students query params:', { group_id, status, payment_filter });
     const filter = {};
     if (group_id) filter.group_id = group_id;
     
@@ -36,11 +37,13 @@ router.get('/', authenticate, async (req, res) => {
       filter.status = status;
     }
 
+    console.log('🔍 Students filter:', filter);
     const students = await Student.find(filter)
       .select('full_name phone status group_id coin_balance profile_image next_payment_date')
       .populate('group_id', 'name status')
       .sort({ full_name: 1 })
       .lean();
+    console.log('📊 Found students count:', students.length);
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -111,6 +111,15 @@ const studentSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Indexes for performance
+studentSchema.index({ group_id: 1 });
+studentSchema.index({ group_id: 1, status: 1 });
+studentSchema.index({ status: 1 });
+studentSchema.index({ login: 1 });
+studentSchema.index({ phone: 1 });
+studentSchema.index({ next_payment_date: 1 });
+studentSchema.index({ full_name: 1 });
+
 // Hash password before saving
 studentSchema.pre('save', async function() {
   if (!this.isModified('password') || !this.password) {

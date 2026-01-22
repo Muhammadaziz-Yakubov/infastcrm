@@ -56,12 +56,15 @@ export default function Attendance() {
     if (!selectedGroup) return;
     setLoadingStudents(true);
     try {
+      console.log('🔍 Fetching students for group:', selectedGroup);
       const response = await api.get('/students', { 
         params: { group_id: selectedGroup, status: 'ACTIVE' } 
       });
+      console.log('📊 Students response:', response.data);
       setStudents(response.data);
     } catch (error) {
-      console.error('Error fetching students:', error);
+      console.error('❌ Error fetching students:', error);
+      console.error('❌ Error response:', error.response?.data);
     } finally {
       setLoadingStudents(false);
     }
