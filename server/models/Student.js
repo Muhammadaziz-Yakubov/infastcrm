@@ -65,6 +65,13 @@ const studentSchema = new mongoose.Schema({
     default: Date.now
   },
 
+  // Coin balance
+  coin_balance: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+
   // Gamification fields
   gamification: {
     total_xp: {

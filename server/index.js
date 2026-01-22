@@ -31,6 +31,9 @@ import quizRoutes from './routes/quizzes.js';
 import studentQuizRoutes from './routes/studentQuizzes.js';
 import smsRoutes from './routes/sms.js';
 import eventRoutes from './routes/events.js';
+import referralRoutes from './routes/referrals.js';
+import coinRoutes from './routes/coins.js';
+import marketRoutes from './routes/market.js';
 import { processEventAttendance } from './services/eventService.js';
 import { setupArenaSocket } from './socket/arena.js';
 import { authenticate, requireAdmin } from './middleware/auth.js';
@@ -446,7 +449,10 @@ app.use('/api/certificates', certificateRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/student/quizzes', studentQuizRoutes);
 app.use('/api/sms', smsRoutes);
+app.use('/api/admin/coins', coinRoutes);
+app.use('/api/market', marketRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/referrals', referralRoutes);
 
 // Global error handler
 app.use((error, req, res, next) => {

@@ -3,6 +3,7 @@ import Payment from '../models/Payment.js';
 import Student from '../models/Student.js';
 import { authenticate } from '../middleware/auth.js';
 import { sendPaymentNotification } from '../services/telegramBot.js';
+import ReferralService from '../services/ReferralService.js';
 
 const router = express.Router();
 
@@ -58,31 +59,57 @@ router.get('/:id', authenticate, async (req, res) => {
 // Create payment
 router.post('/', authenticate, async (req, res) => {
   try {
-    const payment = new Payment(req.body);
+    let paymentAmount = req.body.amount;
+    let discountInfo = null;
+
+    const student = await Student.findById(req.body.student_id);
+    if (!student) {
+      return res.status(404).json({ message: 'Talaba topilmadi' });
+    }
+
+    const discountResult = await ReferralService.calculateReferrerDiscount(
+      req.body.student_id,
+      paymentAmount
+    );
+
+    if (discountResult.hasDiscount) {
+      paymentAmount = paymentAmount - discountResult.discountAmount;
+      discountInfo = {
+        originalAmount: req.body.amount,
+        discountAmount: discountResult.discountAmount,
+        discountPercent: discountResult.discountPercent,
+        finalAmount: paymentAmount,
+        activeReferralsCount: discountResult.activeReferralsCount
+      };
+    }
+
+    const payment = new Payment({
+      ...req.body,
+      amount: paymentAmount,
+      discount_applied: discountResult.hasDiscount,
+      discount_info: discountInfo
+    });
     await payment.save();
 
-    // Update student payment dates and status
-    const student = await Student.findById(payment.student_id);
+    const friendReferralResult = await ReferralService.handleFriendFirstPayment(
+      req.body.student_id,
+      req.body.amount
+    );
+
     if (student) {
       const paymentDate = new Date(payment.payment_date);
       student.last_payment_date = paymentDate;
       
-      // Calculate next payment date (same day next month)
       const paymentDay = paymentDate.getDate();
       const nextPaymentDate = new Date(paymentDate.getFullYear(), paymentDate.getMonth() + 1, paymentDay);
 
-      // If the calculated date is not the expected day (due to month length differences),
-      // it means we went to the next month but landed on a different day
-      // In this case, use the last day of the target month
       if (nextPaymentDate.getDate() !== paymentDay) {
-        // We went past the end of the month, so use the last day of the target month
         const targetYear = paymentDate.getFullYear();
         const targetMonth = paymentDate.getMonth() + 1;
-        nextPaymentDate.setFullYear(targetYear, targetMonth + 1, 0); // Last day of target month
+        nextPaymentDate.setFullYear(targetYear, targetMonth + 1, 0);
       }
 
       student.next_payment_date = nextPaymentDate;
-      
       student.status = 'ACTIVE';
       await student.save();
     }
@@ -92,10 +119,14 @@ router.post('/', authenticate, async (req, res) => {
       populate: { path: 'group_id' }
     });
 
-    // Send Telegram notification
     await sendPaymentNotification(payment.student_id._id, payment);
 
-    res.status(201).json(payment);
+    res.status(201).json({
+      payment,
+      discountInfo,
+      referralActivated: friendReferralResult ? true : false,
+      referralMessage: friendReferralResult?.message
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

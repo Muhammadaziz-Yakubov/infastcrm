@@ -4,6 +4,7 @@ import Group from '../models/Group.js';
 import Student from '../models/Student.js';
 import { authenticate } from '../middleware/auth.js';
 import { sendAttendanceSummary } from '../services/telegramBot.js';
+import CoinService from '../services/CoinService.js';
 
 const router = express.Router();
 
@@ -82,6 +83,36 @@ router.post('/', authenticate, async (req, res) => {
     await attendance.populate('student_id');
     await attendance.populate('group_id');
     
+    // Award or deduct coins based on attendance status
+    try {
+      const student = await Student.findById(attendance.student_id._id);
+      if (student) {
+        if (attendance.status === 'PRESENT') {
+          await CoinService.addCoins(
+            student._id,
+            50,
+            `Darsga qatnashdi: ${attendance.group_id.name}`,
+            'ATTENDANCE_PRESENT',
+            null,
+            attendance.group_id._id,
+            attendance._id
+          );
+        } else if (attendance.status === 'ABSENT') {
+          await CoinService.deductCoins(
+            student._id,
+            50,
+            `Darsga kelmadi: ${attendance.group_id.name}`,
+            'ATTENDANCE_ABSENT',
+            null,
+            attendance.group_id._id,
+            attendance._id
+          );
+        }
+      }
+    } catch (coinError) {
+      console.error('Error updating coins for attendance:', coinError);
+    }
+    
     // Schedule attendance summary after 10 minutes
     console.log(`🔍 Checking group ${attendance.group_id.name} for telegram_chat_id: ${attendance.group_id.telegram_chat_id}`);
 
@@ -137,6 +168,36 @@ router.put('/:id', authenticate, async (req, res) => {
       .populate('group_id');
     if (!attendance) {
       return res.status(404).json({ message: 'Attendance record not found' });
+    }
+    
+    // Award or deduct coins based on updated attendance status
+    try {
+      const student = await Student.findById(attendance.student_id._id);
+      if (student) {
+        if (attendance.status === 'PRESENT') {
+          await CoinService.addCoins(
+            student._id,
+            50,
+            `Darsga qatnashdi (yangilandi): ${attendance.group_id.name}`,
+            'ATTENDANCE_PRESENT',
+            null,
+            attendance.group_id._id,
+            attendance._id
+          );
+        } else if (attendance.status === 'ABSENT') {
+          await CoinService.deductCoins(
+            student._id,
+            50,
+            `Darsga kelmadi (yangilandi): ${attendance.group_id.name}`,
+            'ATTENDANCE_ABSENT',
+            null,
+            attendance.group_id._id,
+            attendance._id
+          );
+        }
+      }
+    } catch (coinError) {
+      console.error('Error updating coins for attendance update:', coinError);
     }
     
     // Schedule attendance summary after 10 minutes when attendance is updated

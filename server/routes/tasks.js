@@ -6,8 +6,11 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import Task from '../models/Task.js';
 import TaskSubmission from '../models/TaskSubmission.js';
+import Student from '../models/Student.js';
+import Group from '../models/Group.js';
 import { authenticate, requireAdmin, authenticateStudent } from '../middleware/auth.js';
 import { sendTelegramMessageToChat } from '../services/telegramBot.js';
+import CoinService from '../services/CoinService.js';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -486,6 +489,21 @@ router.post('/:id/submit', authenticateStudent, upload.array('files', 5), async 
     await submission.save();
     await submission.populate('task_id');
     await submission.populate('student_id', 'full_name');
+    
+    // Award coins for task submission
+    try {
+      await CoinService.addCoins(
+        student._id,
+        100,
+        `Vazifa topshirildi: ${submission.task_id.title}`,
+        'HOMEWORK_SUBMITTED',
+        null,
+        student.group_id,
+        submission._id
+      );
+    } catch (coinError) {
+      console.error('Error awarding coins for task submission:', coinError);
+    }
     
     // Convert file paths to full URLs in response
     const submissionWithUrls = {

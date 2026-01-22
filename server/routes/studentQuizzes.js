@@ -2,6 +2,7 @@ import express from 'express';
 import Quiz from '../models/Quiz.js';
 import QuizResult from '../models/QuizResult.js';
 import { authenticateStudent } from '../middleware/auth.js';
+import CoinService from '../services/CoinService.js';
 
 const router = express.Router();
 
@@ -123,6 +124,33 @@ router.post('/:id/submit', authenticateStudent, async (req, res) => {
         result.time_taken = Math.floor((result.finished_at - result.started_at) / 1000);
 
         await result.save();
+
+        // Award or deduct coins based on quiz score
+        try {
+            if (result.score === 100) {
+                await CoinService.addCoins(
+                    student._id,
+                    100,
+                    `Quiz 100% bajarildi: ${quiz.title}`,
+                    'QUIZ_COMPLETED',
+                    null,
+                    student.group_id,
+                    result._id
+                );
+            } else {
+                await CoinService.deductCoins(
+                    student._id,
+                    100,
+                    `Quiz to'liq bajarilmadi (${result.score}%): ${quiz.title}`,
+                    'QUIZ_NOT_COMPLETED',
+                    null,
+                    student.group_id,
+                    result._id
+                );
+            }
+        } catch (coinError) {
+            console.error('Error updating coins for quiz:', coinError);
+        }
 
         const questionsWithAnswers = quiz.questions.map((q, index) => {
             const studentAnswer = result.answers.find(a => a.question_index === index);

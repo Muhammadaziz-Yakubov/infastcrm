@@ -23,7 +23,9 @@ import {
   Target,
   Award,
   Brain,
-  MessageSquare
+  MessageSquare,
+  Coins,
+  ShoppingBag
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -50,6 +52,8 @@ export default function Layout() {
     { path: '/rating', icon: Trophy, label: 'Reyting' },
     { path: '/certificates', icon: Award, label: 'Sertifikatlar', adminOnly: true },
     { path: '/sms', icon: MessageSquare, label: 'SMS Xabarnoma', adminOnly: true },
+    { path: '/coins', icon: Coins, label: 'Tangalar', adminOnly: true },
+    { path: '/market', icon: ShoppingBag, label: 'Market', adminOnly: true },
     { path: '/staff', icon: UserCog, label: 'Xodimlar', adminOnly: true },
   ];
 
