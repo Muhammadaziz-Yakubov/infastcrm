@@ -22,7 +22,8 @@ import {
   FileText,
   Target,
   Award,
-  Brain
+  Brain,
+  MessageSquare
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -48,6 +49,7 @@ export default function Layout() {
     { path: '/attendance', icon: ClipboardCheck, label: 'Davomat' },
     { path: '/rating', icon: Trophy, label: 'Reyting' },
     { path: '/certificates', icon: Award, label: 'Sertifikatlar', adminOnly: true },
+    { path: '/sms', icon: MessageSquare, label: 'SMS Xabarnoma', adminOnly: true },
     { path: '/staff', icon: UserCog, label: 'Xodimlar', adminOnly: true },
   ];
 

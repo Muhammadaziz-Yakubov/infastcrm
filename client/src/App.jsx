@@ -24,6 +24,7 @@ import Exams from './pages/Exams';
 import Quizzes from './pages/Quizzes';
 import StudentExams from './pages/StudentExams';
 import Certificates from './pages/Certificates';
+import Sms from './pages/Sms';
 import Layout from './components/Layout';
 
 // PrivateRoute komponenti endi ishlatilmaydi, chunki AppRoutes buni boshqaradi
@@ -70,6 +71,7 @@ function AppRoutes() {
           <Route path="tasks" element={<AdminTasks />} />
           <Route path="rating" element={<Rating />} />
           <Route path="certificates" element={<Certificates />} />
+          <Route path="sms" element={<Sms />} />
         </Route>
 
         {/* Catch all - redirect to appropriate dashboard */}
