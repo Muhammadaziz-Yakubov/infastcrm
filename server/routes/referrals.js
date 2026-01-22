@@ -1,10 +1,10 @@
 import express from 'express';
 import ReferralService from '../services/ReferralService.js';
-import { authenticateToken, isAdmin } from '../middleware/auth.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/create', authenticateToken, isAdmin, async (req, res) => {
+router.post('/create', authenticate, requireAdmin, async (req, res) => {
   try {
     const { referrer_id, friend_id, notes } = req.body;
 
@@ -33,7 +33,7 @@ router.post('/create', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-router.post('/approve/:id', authenticateToken, isAdmin, async (req, res) => {
+router.post('/approve/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const referral = await ReferralService.approveReferral(
       req.params.id,
@@ -50,7 +50,7 @@ router.post('/approve/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-router.post('/cancel/:id', authenticateToken, isAdmin, async (req, res) => {
+router.post('/cancel/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { reason } = req.body;
 
@@ -74,7 +74,7 @@ router.post('/cancel/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-router.get('/all', authenticateToken, isAdmin, async (req, res) => {
+router.get('/all', authenticate, requireAdmin, async (req, res) => {
   try {
     const { status } = req.query;
     const referrals = await ReferralService.getAllReferrals(status);
@@ -86,7 +86,7 @@ router.get('/all', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-router.get('/by-referrer/:referrerId', authenticateToken, isAdmin, async (req, res) => {
+router.get('/by-referrer/:referrerId', authenticate, requireAdmin, async (req, res) => {
   try {
     const referrals = await ReferralService.getReferralsByReferrer(req.params.referrerId);
     res.json({ referrals });
@@ -96,7 +96,7 @@ router.get('/by-referrer/:referrerId', authenticateToken, isAdmin, async (req, r
   }
 });
 
-router.get('/by-friend/:friendId', authenticateToken, isAdmin, async (req, res) => {
+router.get('/by-friend/:friendId', authenticate, requireAdmin, async (req, res) => {
   try {
     const referral = await ReferralService.getReferralsByFriend(req.params.friendId);
     res.json({ referral });
@@ -106,7 +106,7 @@ router.get('/by-friend/:friendId', authenticateToken, isAdmin, async (req, res) 
   }
 });
 
-router.get('/statistics', authenticateToken, isAdmin, async (req, res) => {
+router.get('/statistics', authenticate, requireAdmin, async (req, res) => {
   try {
     const stats = await ReferralService.getStatistics();
     res.json(stats);
