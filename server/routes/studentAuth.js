@@ -6,6 +6,8 @@ import Attendance from '../models/Attendance.js';
 import Group from '../models/Group.js';
 import QuizResult from '../models/QuizResult.js';
 import { authenticateStudent } from '../middleware/auth.js';
+import ExamResult from '../models/ExamResult.js';
+import ArenaResult from '../models/ArenaResult.js';
 
 const router = express.Router();
 
@@ -415,51 +417,83 @@ router.get('/submissions', authenticateStudent, async (req, res) => {
 router.get('/my-rating', authenticateStudent, async (req, res) => {
   try {
     // Get all graded submissions for this student
+    // Get all graded submissions for this student
     const submissions = await TaskSubmission.find({
       student_id: req.student._id,
       status: 'GRADED'
-    });
-    const taskScores = submissions.map(s => s.score).filter(s => s !== null);
+    }).populate('task_id');
 
-    // Get attendance scores
-    const attendances = await Attendance.find({
-      student_id: req.student._id,
-      score: { $ne: null }
-    });
-    const attendanceScores = attendances.map(a => a.score);
+    // Calculate Student's Own Stats
+    const totalScore = submissions.reduce((sum, ts) => sum + (ts.score || 0), 0);
+    const totalPoints = submissions.reduce((sum, ts) => sum + (ts.task_id?.max_score || 100), 0);
 
-    // Calculate averages
-    const allScores = [...taskScores, ...attendanceScores];
-    const averageScore = allScores.length > 0
-      ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length)
-      : 0;
+    // Quiz scores
+    const quizzes = await QuizResult.find({ student_id: req.student._id, status: 'FINISHED' });
+    const quizScore = quizzes.reduce((sum, q) => sum + (q.score || 0), 0);
+    const quizPoints = quizzes.reduce((sum, q) => sum + (q.total_points || 0), 0);
 
-    // Get rank among all students
+    // Exam scores
+    const exams = await ExamResult.find({ student_id: req.student._id, status: 'FINISHED' });
+    const examScore = exams.reduce((sum, e) => sum + (e.score || 0), 0);
+    const examPoints = exams.reduce((sum, e) => sum + (e.total_points || 0), 0);
+
+    // Arena scores (Extra credit)
+    const arenaResults = await ArenaResult.find({ student_id: req.student._id });
+    const arenaScore = arenaResults.reduce((sum, r) => sum + (r.score || 0), 0);
+
+    const grandTotalScore = totalScore + quizScore + examScore + arenaScore;
+    const grandTotalPoints = totalPoints + quizPoints + examPoints;
+    const percentage = grandTotalPoints > 0 ? Math.round((grandTotalScore / grandTotalPoints) * 100) : 0;
+
+    // Get rank among all students (Expensive operation - duplicated logic from public.js)
     const allStudents = await Student.find({ status: { $in: ['ACTIVE', 'DEBTOR'] } });
+
+    // We need to calculate score for ALL students to determine rank
     const allRatings = await Promise.all(allStudents.map(async (student) => {
-      const subs = await TaskSubmission.find({
-        student_id: student._id,
-        status: 'GRADED'
-      });
-      const atts = await Attendance.find({
-        student_id: student._id,
-        score: { $ne: null }
-      });
-      const scores = [...subs.map(s => s.score), ...atts.map(a => a.score)].filter(s => s !== null);
+      // Tasks
+      const sSubmissions = await TaskSubmission.find({ student_id: student._id, status: 'GRADED' }).populate('task_id');
+      const sTotalScore = sSubmissions.reduce((sum, s) => sum + (s.score || 0), 0);
+      const sTotalPoints = sSubmissions.reduce((sum, s) => sum + (s.task_id?.max_score || 100), 0);
+
+      // Quizzes
+      const sQuizzes = await QuizResult.find({ student_id: student._id, status: 'FINISHED' });
+      const sQuizScore = sQuizzes.reduce((sum, q) => sum + (q.score || 0), 0);
+      const sQuizPoints = sQuizzes.reduce((sum, q) => sum + (q.total_points || 0), 0);
+
+      // Exams
+      const sExams = await ExamResult.find({ student_id: student._id, status: 'FINISHED' });
+      const sExamScore = sExams.reduce((sum, e) => sum + (e.score || 0), 0);
+      const sExamPoints = sExams.reduce((sum, e) => sum + (e.total_points || 0), 0);
+
+      // Arena
+      const sArena = await ArenaResult.find({ student_id: student._id });
+      const sArenaScore = sArena.reduce((sum, r) => sum + (r.score || 0), 0);
+
+      const sGrandTotalScore = sTotalScore + sQuizScore + sExamScore + sArenaScore;
+      const sGrandTotalPoints = sTotalPoints + sQuizPoints + sExamPoints;
+
+      const sPercentage = sGrandTotalPoints > 0 ? (sGrandTotalScore / sGrandTotalPoints * 100) : 0;
+
       return {
         studentId: student._id.toString(),
-        avg: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
+        percentage: sPercentage,
+        totalScore: sGrandTotalScore // tie breaker
       };
     }));
 
-    allRatings.sort((a, b) => b.avg - a.avg);
+    // Sort by percentage desc, then score desc
+    allRatings.sort((a, b) => {
+      if (b.percentage !== a.percentage) return b.percentage - a.percentage;
+      return b.totalScore - a.totalScore;
+    });
+
     const rank = allRatings.findIndex(r => r.studentId === req.student._id.toString()) + 1;
 
     res.json({
-      averageScore,
+      averageScore: percentage, // This is now "Overall Percentage"
       taskCount: submissions.length,
-      attendanceCount: attendances.length,
-      totalAssessments: allScores.length,
+      attendanceCount: quizzes.length + exams.length, // repurposing field or just showing assessments
+      totalAssessments: submissions.length + quizzes.length + exams.length + arenaResults.length,
       rank,
       totalStudents: allStudents.length
     });

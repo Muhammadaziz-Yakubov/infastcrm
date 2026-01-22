@@ -4,6 +4,7 @@ import Task from '../models/Task.js';
 import TaskSubmission from '../models/TaskSubmission.js';
 import QuizResult from '../models/QuizResult.js';
 import ExamResult from '../models/ExamResult.js';
+import ArenaResult from '../models/ArenaResult.js';
 
 const router = express.Router();
 
@@ -37,10 +38,14 @@ router.get('/ratings', async (req, res) => {
       const examScore = studentExams.reduce((sum, e) => sum + (e.score || 0), 0);
       const examPoints = studentExams.reduce((sum, e) => sum + (e.total_points || 0), 0);
 
-      const grandTotalScore = totalScore + quizScore + examScore;
+      // Arena scores
+      const arenaResults = await ArenaResult.find({ student_id: student._id });
+      const arenaScore = arenaResults.reduce((sum, r) => sum + (r.score || 0), 0);
+
+      const grandTotalScore = totalScore + quizScore + examScore + arenaScore;
       const grandTotalPoints = totalPoints + quizPoints + examPoints;
       const percentage = grandTotalPoints > 0 ? (grandTotalScore / grandTotalPoints * 100) : 0;
-      const completedTasks = studentSubmissions.length + studentQuizzes.length + studentExams.length;
+      const completedTasks = studentSubmissions.length + studentQuizzes.length + studentExams.length + arenaResults.length;
 
       ratings.push({
         student_id: student._id,

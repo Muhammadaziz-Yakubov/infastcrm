@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import cron from 'node-cron';
 import path from 'path';
 import fs from 'fs';
@@ -26,6 +28,7 @@ import badgeRoutes from './routes/badges.js';
 import certificateRoutes from './routes/certificates.js';
 import quizRoutes from './routes/quizzes.js';
 import studentQuizRoutes from './routes/studentQuizzes.js';
+import { setupArenaSocket } from './socket/arena.js';
 import { authenticate, requireAdmin } from './middleware/auth.js';
 import User from './models/User.js';
 
@@ -37,6 +40,24 @@ console.log(`MONGODB_URI: ${process.env.MONGODB_URI ? 'SET' : 'NOT SET'}`);
 console.log(`TELEGRAM_BOT_TOKEN: ${process.env.TELEGRAM_BOT_TOKEN ? 'SET' : 'NOT SET'}`);
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:4173',
+      process.env.FRONTEND_URL,
+      /^https:\/\/.*\.vercel\.app$/
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// Setup Arena Socket
+setupArenaSocket(io);
+
 const PORT = process.env.PORT || 5000;
 
 // Create uploads directory if it doesn't exist
@@ -458,6 +479,6 @@ cron.schedule('0 7 * * *', () => {
   sendAllClassReminders();
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

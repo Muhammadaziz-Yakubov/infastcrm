@@ -20,7 +20,8 @@ import {
   Target,
   ChevronRight,
   ArrowRight,
-  Bell
+  Bell,
+  Gamepad2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -33,6 +34,7 @@ import StudentTasksView from '../components/StudentTasksView';
 import StudentExamsView from '../components/StudentExamsView';
 import StudentRatingView from '../components/StudentRatingView';
 import StudentClassmatesView from '../components/StudentClassmatesView';
+import StudentArenaView from '../components/StudentArenaView';
 
 export default function StudentDashboard() {
   const [data, setData] = useState(null);
@@ -82,6 +84,7 @@ export default function StudentDashboard() {
   const tabs = [
     { id: 'overview', label: 'Umumiy', icon: LayoutDashboard },
     { id: 'tasks', label: 'Vazifalar', icon: FileCode },
+    { id: 'arena', label: 'Arena', icon: Gamepad2 },
     { id: 'exams', label: 'Imtihonlar', icon: Target },
     { id: 'rating', label: 'Reyting', icon: Trophy },
     { id: 'profile', label: 'Profil', icon: UserCircle },
@@ -335,6 +338,7 @@ export default function StudentDashboard() {
             )}
 
             {activeTab === 'tasks' && <StudentTasksView setFullScreen={setFullScreen} />}
+            {activeTab === 'arena' && <StudentArenaView />}
             {activeTab === 'exams' && <StudentExamsView setFullScreen={setFullScreen} />}
             {activeTab === 'rating' && <StudentRatingView />}
             {activeTab === 'classmates' && <StudentClassmatesView />}
