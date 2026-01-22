@@ -7,7 +7,7 @@ const studentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  phone: {
+  phone: {  
     type: String,
     required: true,
     trim: true

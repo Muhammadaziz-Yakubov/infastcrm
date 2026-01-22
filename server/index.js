@@ -8,6 +8,7 @@ import cron from 'node-cron';
 import path from 'path';
 import fs from 'fs';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
+import { sendDebtorSmsReminders } from './jobs/debtorSmsJob.js';
 import { sendDailyReminders, sendAllClassReminders, testBotConnection, setupWebhook, handleWebhook, startPolling } from './services/telegramBot.js';
 import authRoutes from './routes/auth.js';
 import studentAuthRoutes from './routes/studentAuth.js';
@@ -28,6 +29,9 @@ import badgeRoutes from './routes/badges.js';
 import certificateRoutes from './routes/certificates.js';
 import quizRoutes from './routes/quizzes.js';
 import studentQuizRoutes from './routes/studentQuizzes.js';
+import smsRoutes from './routes/sms.js';
+import eventRoutes from './routes/events.js';
+import { processEventAttendance } from './services/eventService.js';
 import { setupArenaSocket } from './socket/arena.js';
 import { authenticate, requireAdmin } from './middleware/auth.js';
 import User from './models/User.js';
@@ -441,6 +445,8 @@ app.use('/api/badges', badgeRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/student/quizzes', studentQuizRoutes);
+app.use('/api/sms', smsRoutes);
+app.use('/api/events', eventRoutes);
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -477,6 +483,8 @@ cron.schedule('0 12 * * *', () => {
 cron.schedule('0 7 * * *', () => {
   console.log('📚 Sending daily class reminders...');
   sendAllClassReminders();
+  console.log('📩 Sending daily debtor SMS reminders...');
+  sendDebtorSmsReminders();
 });
 
 httpServer.listen(PORT, () => {
