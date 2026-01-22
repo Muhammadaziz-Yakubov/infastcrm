@@ -4,7 +4,7 @@ import Group from '../models/Group.js';
 import Student from '../models/Student.js';
 import CoinHistory from '../models/CoinHistory.js';
 import { authenticate } from '../middleware/auth.js';
-import { sendAttendanceSummary } from '../services/telegramBot.js';
+import { sendAttendanceSummary, sendTelegramMessageToChat } from '../services/telegramBot.js';
 import CoinService from '../services/CoinService.js';
 
 const router = express.Router();
