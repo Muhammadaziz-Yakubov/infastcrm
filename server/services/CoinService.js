@@ -4,17 +4,16 @@ import mongoose from 'mongoose';
 
 class CoinService {
   async addCoins(studentId, amount, reason, reasonType, adminId = null, groupId = null, relatedId = null) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-      const student = await Student.findById(studentId).session(session);
+      const student = await Student.findByIdAndUpdate(
+        studentId,
+        { $inc: { coin_balance: amount } },
+        { new: true }
+      );
+      
       if (!student) {
         throw new Error('Student not found');
       }
-
-      student.coin_balance += amount;
-      await student.save({ session });
 
       const history = new CoinHistory({
         student_id: studentId,
@@ -28,35 +27,29 @@ class CoinService {
         admin_id: adminId
       });
 
-      await history.save({ session });
-      await session.commitTransaction();
+      await history.save();
 
       return { student, history };
     } catch (error) {
-      await session.abortTransaction();
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 
   async deductCoins(studentId, amount, reason, reasonType, adminId = null, groupId = null, relatedId = null) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-      const student = await Student.findById(studentId).session(session);
-      if (!student) {
+      // First get current balance to check
+      const currentStudent = await Student.findById(studentId).select('coin_balance');
+      if (!currentStudent) {
         throw new Error('Student not found');
       }
 
-      if (student.coin_balance < amount) {
-        student.coin_balance = 0;
-      } else {
-        student.coin_balance -= amount;
-      }
-
-      await student.save({ session });
+      const newBalance = Math.max(0, currentStudent.coin_balance - amount);
+      
+      const student = await Student.findByIdAndUpdate(
+        studentId,
+        { coin_balance: newBalance },
+        { new: true }
+      );
 
       const history = new CoinHistory({
         student_id: studentId,
@@ -70,15 +63,11 @@ class CoinService {
         admin_id: adminId
       });
 
-      await history.save({ session });
-      await session.commitTransaction();
+      await history.save();
 
       return { student, history };
     } catch (error) {
-      await session.abortTransaction();
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 
