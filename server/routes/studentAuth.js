@@ -1,5 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import path from 'path';
 import Student from '../models/Student.js';
 import Payment from '../models/Payment.js';
 import Attendance from '../models/Attendance.js';
@@ -10,6 +12,36 @@ import ExamResult from '../models/ExamResult.js';
 import ArenaResult from '../models/ArenaResult.js';
 
 const router = express.Router();
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/submissions/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept images, PDFs, and documents
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only images, PDFs, and documents are allowed'));
+    }
+  }
+});
 
 // Student Login
 router.post('/login', async (req, res) => {
@@ -367,13 +399,25 @@ router.get('/tasks/:id', authenticateStudent, async (req, res) => {
 });
 
 // Submit task
-router.post('/tasks/:id/submit', authenticateStudent, async (req, res) => {
+router.post('/tasks/:id/submit', authenticateStudent, upload.array('files', 5), async (req, res) => {
   try {
-    const { code, description } = req.body;
+    const { description } = req.body;
     const task = await Task.findById(req.params.id);
 
     if (!task) {
       return res.status(404).json({ message: 'Vazifa topilmadi' });
+    }
+
+    // Handle file uploads
+    let submitted_files = [];
+    if (req.files && req.files.length > 0) {
+      submitted_files = req.files.map(file => ({
+        filename: file.filename,
+        original_name: file.originalname,
+        file_path: file.path,
+        file_size: file.size,
+        mime_type: file.mimetype
+      }));
     }
 
     // Check if already submitted
@@ -384,8 +428,8 @@ router.post('/tasks/:id/submit', authenticateStudent, async (req, res) => {
 
     if (existingSubmission) {
       // Update existing submission
-      existingSubmission.code = code;
       existingSubmission.description = description;
+      existingSubmission.submitted_files = submitted_files;
       existingSubmission.submitted_at = new Date();
       existingSubmission.status = 'PENDING';
       existingSubmission.score = null;
@@ -398,13 +442,14 @@ router.post('/tasks/:id/submit', authenticateStudent, async (req, res) => {
     const submission = new TaskSubmission({
       task_id: task._id,
       student_id: req.student._id,
-      code,
-      description
+      description,
+      submitted_files
     });
     await submission.save();
 
     res.status(201).json(submission);
   } catch (error) {
+    console.error('Task submission error:', error);
     res.status(400).json({ message: error.message });
   }
 });

@@ -24,9 +24,12 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     const attendance = await Attendance.find(filter)
-      .populate('student_id')
-      .populate('group_id')
-      .sort({ date: -1 });
+      .select('student_id group_id date status')
+      .populate('student_id', 'full_name phone profile_image')
+      .populate('group_id', 'name')
+      .sort({ date: -1 })
+      .lean()
+      .maxTimeMS(5000);
     res.json(attendance);
   } catch (error) {
     res.status(500).json({ message: error.message });

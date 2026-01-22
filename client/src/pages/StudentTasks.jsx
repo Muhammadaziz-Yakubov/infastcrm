@@ -138,6 +138,16 @@ export default function StudentTasks() {
     return <File size={24} className="text-gray-500" />;
   };
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setSubmitData({ ...submitData, files: [...submitData.files, ...files] });
+  };
+
+  const removeFile = (index) => {
+    const newFiles = submitData.files.filter((_, i) => i !== index);
+    setSubmitData({ ...submitData, files: newFiles });
+  };
+
   const getCardColor = (type) => {
     switch (type) {
       case 'QUIZ':
@@ -198,17 +208,17 @@ export default function StudentTasks() {
 
       {showTaskModal && selectedTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="h-48 bg-gray-100 relative">
+          <div className="bg-white dark:bg-gray-800 w-full max-w-2xl md:max-w-xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] mx-4">
+            <div className="h-48 md:h-56 bg-gray-100 relative">
               {selectedTask.image_url ? <img src={selectedTask.image_url} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-indigo-600" />}
               <button onClick={() => setShowTaskModal(false)} className="absolute top-4 right-4 p-2 bg-black/20 rounded-full text-white"><X /></button>
             </div>
-            <div className="p-6 overflow-y-auto">
-              <h2 className="text-2xl font-bold mb-4 dark:text-white">{selectedTask.title}</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">{selectedTask.description}</p>
+            <div className="p-4 md:p-6 overflow-y-auto">
+              <h2 className="text-xl md:text-2xl font-bold mb-4 dark:text-white">{selectedTask.title}</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm md:text-base">{selectedTask.description}</p>
               {selectedTask.submission && <div className="bg-green-50 p-4 rounded-xl text-green-700 font-bold">Topshirilgan: {selectedTask.submission.score || 'Baholanmoqda'}</div>}
             </div>
-            <div className="p-6 bg-gray-50 dark:bg-gray-700 border-t">
+            <div className="p-4 md:p-6 bg-gray-50 dark:bg-gray-700 border-t">
               {!selectedTask.submission && <button onClick={() => { setShowTaskModal(false); setShowSubmitModal(true); }} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Vazifani topshirish</button>}
             </div>
           </div>
@@ -217,11 +227,48 @@ export default function StudentTasks() {
 
       {showSubmitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-6 shadow-2xl">
-            <h3 className="text-xl font-bold mb-4">Vazifa yuborish</h3>
-            <textarea onChange={e => setSubmitData({ ...submitData, description: e.target.value })} className="w-full p-3 border rounded-xl mb-4 h-32" placeholder="Izoh..." />
-            <input type="file" multiple onChange={e => setSubmitData({ ...submitData, files: Array.from(e.target.files) })} className="mb-6 block" />
-            <button onClick={handleSubmitTask} disabled={submitting} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Yuborish</button>
+          <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-4 md:p-6 shadow-2xl mx-4">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Vazifa yuborish</h3>
+            <textarea onChange={e => setSubmitData({ ...submitData, description: e.target.value })} className="w-full p-3 border rounded-xl mb-4 h-32 text-sm" placeholder="Izoh..." />
+            
+            {/* File upload with preview */}
+            <div className="mb-6">
+              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Fayllarni tanlash
+              </label>
+              <input 
+                type="file" 
+                multiple 
+                accept="image/*,.pdf,.doc,.docx,.txt"
+                onChange={handleFileChange} 
+                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              />
+              
+              {/* File previews */}
+              {submitData.files.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {submitData.files.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        {getFileIcon(file)}
+                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                        <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(1)}KB)</span>
+                      </div>
+                      <button 
+                        onClick={() => removeFile(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <button onClick={handleSubmitTask} disabled={submitting} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold disabled:opacity-50">
+              {submitting ? 'Yuborilmoqda...' : 'Yuborish'}
+            </button>
             <button onClick={() => setShowSubmitModal(false)} className="w-full mt-2 text-gray-500 py-2">Bekor qilish</button>
           </div>
         </div>
