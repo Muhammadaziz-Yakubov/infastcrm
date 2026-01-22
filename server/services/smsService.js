@@ -78,6 +78,8 @@ export const sendSms = async ({ phone, message, studentId, type }) => {
   };
   if (from) payload.from = from;
 
+  console.log('📱 SMS Request:', { url: `${DEVSMS_BASE_URL}/send_sms.php`, phone: to, messageLength: message.length });
+  
   const { statusCode, json, raw } = await requestJson('POST', `${DEVSMS_BASE_URL}/send_sms.php`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -86,6 +88,8 @@ export const sendSms = async ({ phone, message, studentId, type }) => {
     body: payload
   });
 
+  console.log('📱 SMS Response:', { statusCode, json, raw: raw?.substring(0, 500) });
+
   log.provider_response = json ?? raw;
 
   if (statusCode >= 200 && statusCode < 300 && json?.success) {
@@ -93,9 +97,11 @@ export const sendSms = async ({ phone, message, studentId, type }) => {
     log.provider_sms_id = json?.data?.sms_id ? String(json.data.sms_id) : '';
     log.provider_request_id = json?.data?.request_id ? String(json.data.request_id) : '';
     log.provider_status = json?.data?.status ? String(json.data.status) : '';
+    console.log('✅ SMS sent successfully to:', to);
   } else {
     log.status = 'FAILED';
     log.provider_error = json?.error || json?.message || `HTTP ${statusCode}`;
+    console.log('❌ SMS failed:', log.provider_error);
   }
 
   await log.save();

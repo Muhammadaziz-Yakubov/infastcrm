@@ -243,9 +243,17 @@ router.get('/view/:id', authenticateStudent, async (req, res) => {
 // Get classmates (students in same group)
 router.get('/classmates', authenticateStudent, async (req, res) => {
   try {
+    // Handle both populated and non-populated group_id
+    const groupId = req.student.group_id?._id || req.student.group_id;
+    
+    if (!groupId) {
+      return res.json([]);
+    }
+
     const students = await Student.find({
-      group_id: req.student.group_id._id,
-      _id: { $ne: req.student._id } // Exclude current student
+      group_id: groupId,
+      _id: { $ne: req.student._id }, // Exclude current student
+      status: { $in: ['ACTIVE', 'DEBTOR'] } // Only show active students
     }).populate('group_id').select('-phone -password -login');
 
     res.json(students.map(s => ({

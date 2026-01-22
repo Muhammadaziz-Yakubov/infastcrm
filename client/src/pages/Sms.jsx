@@ -364,6 +364,7 @@ export default function Sms() {
                 <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Xabar</th>
                 <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Turi</th>
                 <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Status</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Xato</th>
                 <th className="px-8 py-6 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Sana</th>
               </tr>
             </thead>
@@ -400,6 +401,15 @@ export default function Sms() {
                     </span>
                   </td>
                   <td className="px-8 py-5">
+                    {log.provider_error ? (
+                      <p className="text-xs text-red-500 font-bold max-w-[200px] truncate" title={log.provider_error}>
+                        {log.provider_error}
+                      </p>
+                    ) : (
+                      <span className="text-gray-300">-</span>
+                    )}
+                  </td>
+                  <td className="px-8 py-5">
                     <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
                       <Clock size={14} />
                       {new Date(log.createdAt).toLocaleString('uz-UZ')}
@@ -408,7 +418,7 @@ export default function Sms() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="5" className="px-8 py-20 text-center">
+                  <td colSpan="6" className="px-8 py-20 text-center">
                     <div className="flex flex-col items-center">
                       <MessageSquare size={48} className="text-gray-200 dark:text-gray-700 mb-4" />
                       <p className="text-gray-400 font-bold">Hech qanday SMS topilmadi</p>
@@ -440,6 +450,9 @@ export default function Sms() {
                 </span>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{log.message}</p>
+              {log.provider_error && (
+                <p className="text-xs text-red-500 font-bold">{log.provider_error}</p>
+              )}
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <Clock size={12} />
                 {new Date(log.createdAt).toLocaleString('uz-UZ')}
