@@ -7,7 +7,13 @@ import {
     Crown,
     Users,
     TrendingUp,
-    Target as TargetIcon
+    Target as TargetIcon,
+    Award,
+    Zap,
+    BookOpen,
+    FileCode,
+    Brain,
+    GraduationCap
 } from 'lucide-react';
 
 export default function StudentRatingView() {
@@ -16,24 +22,18 @@ export default function StudentRatingView() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchRatings();
-        fetchMyRating();
+        fetchData();
     }, []);
 
-    const fetchRatings = async () => {
+    const fetchData = async () => {
         try {
-            const response = await api.get('/public/ratings');
-            const transformedData = response.data.map(item => ({
-                rank: item.rank,
-                averageScore: Math.round(item.percentage),
-                student: {
-                    full_name: item.full_name,
-                    group: {
-                        name: item.group_name
-                    }
-                }
-            }));
-            setRatings(transformedData);
+            setLoading(true);
+            const [globalRes, myRes] = await Promise.all([
+                api.get('/public/ratings'),
+                api.get('/student-auth/my-rating')
+            ]);
+            setRatings(globalRes.data);
+            setMyRating(myRes.data);
         } catch (error) {
             console.error('Error fetching ratings:', error);
         } finally {
@@ -41,82 +41,108 @@ export default function StudentRatingView() {
         }
     };
 
-    const fetchMyRating = async () => {
-        try {
-            const token = localStorage.getItem('studentToken');
-            const response = await api.get('/student-auth/my-rating', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setMyRating(response.data);
-        } catch (error) {
-            console.error('Error fetching my rating:', error);
-        }
-    };
-
     const getRankIcon = (rank) => {
-        if (rank === 1) return <Crown className="text-yellow-400 drop-shadow-xl" size={24} strokeWidth={2.5} />;
-        if (rank === 2) return <Medal className="text-gray-300 drop-shadow-lg" size={20} strokeWidth={2.5} />;
-        if (rank === 3) return <Medal className="text-amber-500 drop-shadow-md" size={20} strokeWidth={2.5} />;
-        return <span className="text-gray-400 font-black text-xs tabular-nums">{rank}</span>;
+        if (rank === 1) return <Crown className="text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]" size={32} strokeWidth={2.5} />;
+        if (rank === 2) return <Medal className="text-gray-300 drop-shadow-[0_0_8px_rgba(209,213,219,0.5)]" size={24} strokeWidth={2.5} />;
+        if (rank === 3) return <Medal className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" size={24} strokeWidth={2.5} />;
+        return <span className="text-gray-400 font-black text-sm tabular-nums">{rank}</span>;
     };
 
-    if (loading) return <div className="text-center py-24 text-gray-500 animate-pulse font-black uppercase tracking-[0.3em]">Reyting hisoblanmoqda...</div>;
+    if (loading) return (
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6">
+            <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-500 font-black uppercase tracking-[0.3em] animate-pulse">Reyting hisoblanmoqda...</p>
+        </div>
+    );
 
     const top3 = ratings.slice(0, 3);
+    const others = ratings.slice(3);
 
     return (
-        <div className="space-y-12 pb-20 animate-in fade-in duration-700">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4">
-                <div className="flex items-center gap-4 md:gap-5">
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-[1.8rem] bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 flex items-center justify-center shadow-2xl shadow-orange-500/30 transform hover:rotate-6 transition-transform">
-                        <Trophy className="text-white" size={24} md:size={32} strokeWidth={2.5} />
+        <div className="space-y-12 pb-32 animate-in fade-in duration-700">
+            {/* Elegant Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-4">
+                <div className="flex items-center gap-6">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-20 animate-pulse"></div>
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-[2rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-2xl transform hover:rotate-6 transition-all duration-500">
+                            <Trophy className="text-white" size={32} md:size={40} strokeWidth={2.5} />
+                        </div>
                     </div>
                     <div>
-                        <h2 className="text-2xl md:text-4xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-yellow-500 to-orange-600 bg-clip-text text-transparent">Akademiya Reytingi</h2>
-                        <p className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 ml-1 opacity-70">Sizning natijalaringiz va umumiy yutuqlar</p>
+                        <h2 className="text-3xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Elite Leaderboard</h2>
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-[0.4em] mt-2 ml-1 opacity-70 flex items-center gap-2">
+                            <Zap size={12} className="text-yellow-400" /> Akademiya eng kuchli talabalari
+                        </p>
                     </div>
                 </div>
             </div>
 
+            {/* Premium Personal Rank Card */}
             {myRating && (
-                <div className="group relative bg-gradient-to-br from-[#1a1c2e] via-[#242745] to-[#1a1c2e] rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 text-white shadow-2xl shadow-indigo-500/20 overflow-hidden border border-white/5">
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full -mr-40 -mt-40 blur-[100px] transition-transform group-hover:scale-125 duration-1000"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500/5 rounded-full -ml-20 -mb-20 blur-[80px]"></div>
+                <div className="group relative bg-[#0f111a] rounded-[3rem] p-8 md:p-12 text-white shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/5">
+                    {/* Animated Decorative Blobs */}
+                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full -mr-40 -mt-40 blur-[120px] group-hover:bg-indigo-600/20 transition-all duration-1000"></div>
+                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-600/10 rounded-full -ml-20 -mb-20 blur-[100px]"></div>
 
-                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-                        <div className="flex items-center gap-6 md:gap-10 w-full md:w-auto">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-20 animate-pulse"></div>
-                                <div className="w-20 h-20 md:w-28 md:h-28 bg-white/5 backdrop-blur-2xl rounded-2xl md:rounded-[2.2rem] flex flex-col items-center justify-center border border-white/10 shadow-inner relative z-10">
-                                    <span className="text-white/40 text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-1">O'rin</span>
-                                    <span className="text-3xl md:text-5xl font-black italic tracking-tighter text-yellow-400">#{myRating.rank}</span>
+                    <div className="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-12">
+                        <div className="flex flex-col md:flex-row items-center gap-8 w-full xl:w-auto">
+                            <div className="relative group/avatar">
+                                <div className="absolute -inset-1 bg-gradient-to-tr from-yellow-400 to-orange-600 rounded-[2.5rem] blur opacity-25 group-hover/avatar:opacity-50 transition-opacity"></div>
+                                <div className="w-24 h-24 md:w-32 md:h-32 bg-[#1a1c2e] rounded-[2.2rem] flex flex-col items-center justify-center border border-white/10 shadow-2xl relative z-10 overflow-hidden">
+                                    {myRating.profile_image ? (
+                                        <img src={myRating.profile_image} className="w-full h-full object-cover" alt="Me" />
+                                    ) : (
+                                        <>
+                                            <span className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">O'rin</span>
+                                            <span className="text-4xl md:text-6xl font-black italic tracking-tighter text-yellow-400">#{myRating.rank}</span>
+                                        </>
+                                    )}
                                 </div>
-                            </div>
-                            <div>
-                                <h3 className="text-2xl font-black italic uppercase tracking-tight mb-2">Sizning ko'rsatkichingiz</h3>
-                                <div className="flex flex-wrap gap-4">
-                                    <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                        <Users size={14} className="text-indigo-400" /> {myRating.totalStudents} TA O'QUVCHI ORASIDA
+                                {myRating.profile_image && (
+                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-black font-black text-xs px-4 py-1 rounded-full shadow-xl shadow-yellow-500/30 z-20">
+                                        #{myRating.rank}
                                     </div>
-                                    <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                        <TargetIcon size={14} className="text-emerald-400" /> AKTIV HOLATDA
+                                )}
+                            </div>
+                            <div className="text-center md:text-left">
+                                <h3 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight mb-4 flex items-center gap-3 justify-center md:justify-start">
+                                    {myRating.full_name}
+                                    <Star className="text-yellow-400 fill-yellow-400 animate-pulse" size={24} />
+                                </h3>
+                                <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                                    <div className="px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 group/stat">
+                                        <Users size={14} className="text-indigo-400 group-hover/stat:scale-120 transition-transform" /> {myRating.totalStudents} TA O'QUVCHI
+                                    </div>
+                                    <div className="px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                        <TrendingUp size={14} className="text-emerald-400" /> {Math.ceil(myRating.totalPoints / 1000)}k POWER
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-start md:items-end flex-col gap-2 w-full md:w-auto mt-4 md:mt-0">
-                            <span className="text-white/40 text-[8px] md:text-[10px] font-black uppercase tracking-widest mb-1 uppercase tracking-widest">Natija</span>
-                            <div className="flex items-center gap-5">
-                                <div className="text-right">
-                                    <span className="text-4xl md:text-6xl font-black tracking-tighter italic bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">{myRating.averageScore}%</span>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-auto">
+                            {[
+                                { label: 'Darslar', val: myRating.stats?.lessons || 0, icon: BookOpen, color: 'text-blue-400' },
+                                { label: 'Vazifa', val: myRating.stats?.tasks || 0, icon: FileCode, color: 'text-purple-400' },
+                                { label: 'Quiz', val: myRating.stats?.quizzes || 0, icon: Zap, color: 'text-amber-400' },
+                                { label: 'Imtihon', val: myRating.stats?.exams || 0, icon: GraduationCap, color: 'text-rose-400' }
+                            ].map((stat, i) => (
+                                <div key={i} className="bg-white/5 p-4 rounded-3xl border border-white/5 flex flex-col items-center gap-1 min-w-[100px]">
+                                    <stat.icon size={16} className={stat.color} />
+                                    <span className="text-[8px] font-black text-white/40 uppercase mt-1">{stat.label}</span>
+                                    <span className="text-xl font-black tabular-nums">{stat.val}</span>
                                 </div>
-                                <div className="w-1.5 h-16 bg-white/10 rounded-full overflow-hidden">
-                                    <div
-                                        className="w-full bg-gradient-to-t from-orange-600 to-yellow-400 rounded-full transition-all duration-1000 origin-bottom"
-                                        style={{ height: `${myRating.averageScore}%` }}
-                                    ></div>
+                            ))}
+                        </div>
+
+                        <div className="flex flex-col items-center xl:items-end gap-2 w-full xl:w-auto border-t xl:border-t-0 xl:border-l border-white/5 pt-8 xl:pt-0 xl:pl-12">
+                            <span className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1 italic">Total Points</span>
+                            <div className="flex items-center gap-6">
+                                <div className="text-right">
+                                    <span className="text-5xl md:text-7xl font-black tracking-tighter italic bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent tabular-nums">
+                                        {myRating.totalPoints.toLocaleString()}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -124,113 +150,155 @@ export default function StudentRatingView() {
                 </div>
             )}
 
-            {/* Podium for top 3 */}
-            <div className="grid grid-cols-3 gap-4 md:gap-12 items-end max-w-4xl mx-auto pt-20 px-4">
+            {/* Podium for top 3 - Elite Design */}
+            <div className="grid grid-cols-3 gap-6 md:gap-16 items-end max-w-5xl mx-auto pt-24 px-4 relative">
                 {/* 2nd Place */}
                 {top3[1] && (
-                    <div className="flex flex-col items-center gap-4 md:gap-6 group hover:-translate-y-1 transition-transform duration-500">
+                    <div className="flex flex-col items-center gap-6 group hover:-translate-y-2 transition-all duration-500">
                         <div className="relative">
-                            <div className="w-16 h-16 md:w-28 md:h-28 rounded-full border-4 border-gray-300 dark:border-gray-600 p-1.5 md:p-2 bg-white dark:bg-gray-800 shadow-2xl overflow-hidden relative z-10">
-                                <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
-                                    <Users size={20} md:size={28} strokeWidth={1.5} />
-                                </div>
+                            <div className="w-20 h-20 md:w-36 md:h-36 rounded-full border-4 border-gray-400/30 p-2 bg-white dark:bg-gray-800 shadow-2xl relative z-10 overflow-hidden">
+                                {top3[1].profile_image ? (
+                                    <img src={top3[1].profile_image} className="w-full h-full object-cover" alt="2nd" />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+                                        <Users size={32} />
+                                    </div>
+                                )}
                             </div>
-                            <div className="absolute -bottom-2 md:-bottom-3 left-1/2 -translate-x-1/2 bg-gray-400 text-white text-[8px] md:text-[11px] font-black px-2 md:px-4 py-1 rounded-full shadow-xl shadow-gray-400/30 z-20 uppercase tracking-widest border border-white/20">2nd</div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gray-400 text-white text-[10px] md:text-sm font-black px-4 md:px-6 py-1.5 rounded-full shadow-2xl z-20 uppercase italic">2nd</div>
                         </div>
                         <div className="text-center w-full">
-                            <p className="text-[10px] md:text-base font-black dark:text-white truncate tracking-tight">{top3[1].student.full_name}</p>
-                            <p className="text-[8px] md:text-sm text-indigo-500 font-black uppercase tracking-widest mt-1 italic">{top3[1].averageScore}%</p>
+                            <p className="text-xs md:text-xl font-black dark:text-white truncate tracking-tight uppercase italic">{top3[1].full_name}</p>
+                            <p className="text-[10px] md:text-lg text-indigo-500 font-black mt-1 tabular-nums italic">{top3[1].total_points.toLocaleString()} pts</p>
                         </div>
-                        <div className="w-full h-16 md:h-32 bg-gradient-to-b from-gray-200/80 via-gray-300/80 to-gray-400/80 dark:from-gray-700/50 dark:via-gray-800/50 dark:to-gray-900/50 rounded-t-[1.5rem] md:rounded-t-[2.5rem] shadow-2xl border-x border-t border-gray-200 dark:border-white/5 backdrop-blur-3xl"></div>
+                        <div className="w-full h-24 md:h-44 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-400 dark:from-gray-700/50 dark:via-gray-800/50 dark:to-gray-900/50 rounded-t-[2rem] md:rounded-t-[3rem] shadow-2xl border-x border-t border-gray-100 dark:border-white/5 backdrop-blur-3xl relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-5 mask-gradient"></div>
+                        </div>
                     </div>
                 )}
 
-                {/* 1st Place */}
+                {/* 1st Place - The King */}
                 {top3[0] && (
-                    <div className="flex flex-col items-center gap-4 md:gap-6 group hover:-translate-y-2 transition-transform duration-700">
-                        <div className="relative pt-4 md:pt-8">
-                            <div className="absolute -top-4 md:-top-6 left-1/2 -translate-x-1/2 animate-bounce z-30">
-                                <Crown className="text-yellow-400 drop-shadow-2xl filter brightness-110" size={32} md:size={56} strokeWidth={2.5} />
+                    <div className="flex flex-col items-center gap-8 group hover:-translate-y-4 transition-all duration-700">
+                        <div className="relative pt-12">
+                            <div className="absolute -top-6 md:-top-10 left-1/2 -translate-x-1/2 animate-bounce z-30">
+                                <Crown className="text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)] filter brightness-110" size={48} md:size={72} strokeWidth={2.5} />
                             </div>
                             <div className="relative">
-                                <div className="absolute inset-0 bg-yellow-400/30 blur-3xl animate-pulse"></div>
-                                <div className="w-20 h-20 md:w-40 md:h-40 rounded-full border-4 md:border-8 border-yellow-400/30 p-1.5 md:p-2.5 bg-white dark:bg-gray-800 shadow-inner overflow-hidden relative z-10">
-                                    <div className="w-full h-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-500">
-                                        <Users size={32} md:size={48} strokeWidth={1} />
-                                    </div>
+                                <div className="absolute inset-0 bg-yellow-400/40 blur-3xl animate-pulse"></div>
+                                <div className="w-24 h-24 md:w-48 md:h-48 rounded-full border-4 md:border-8 border-yellow-400 p-2 md:p-3 bg-white dark:bg-gray-800 shadow-[0_0_50px_rgba(250,204,21,0.3)] relative z-10 overflow-hidden">
+                                    {top3[0].profile_image ? (
+                                        <img src={top3[0].profile_image} className="w-full h-full object-cover scale-110 group-hover:scale-125 transition-transform duration-700" alt="Legend" />
+                                    ) : (
+                                        <div className="w-full h-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-500">
+                                            <Users size={48} md:size={64} />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                            <div className="absolute -bottom-2 md:-bottom-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-white text-[9px] md:text-xs font-black px-4 md:px-6 py-1.5 md:py-2 rounded-full shadow-2xl shadow-yellow-500/40 z-20 uppercase tracking-widest border border-white/20 italic">1st</div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] md:text-lg font-black px-6 md:px-10 py-2 md:py-3 rounded-full shadow-[0_15px_35px_rgba(250,204,21,0.5)] z-20 uppercase italic tracking-tighter">THE LEGEND</div>
                         </div>
                         <div className="text-center w-full">
-                            <p className="text-xs md:text-2xl font-black dark:text-white truncate tracking-tighter italic uppercase">{top3[0].student.full_name}</p>
-                            <p className="text-[10px] md:text-base text-yellow-500 font-black uppercase tracking-widest mt-1 italic">{top3[0].averageScore}% pts</p>
+                            <p className="text-sm md:text-3xl font-black dark:text-white truncate tracking-tighter italic uppercase bg-gradient-to-b from-white to-gray-400 bg-clip-text">{top3[0].full_name}</p>
+                            <p className="text-xs md:text-2xl text-yellow-500 font-black mt-2 tabular-nums italic drop-shadow-lg">{top3[0].total_points.toLocaleString()} PTS</p>
                         </div>
-                        <div className="w-full h-24 md:h-56 bg-gradient-to-b from-yellow-400/80 via-orange-500/80 to-red-600/80 dark:from-yellow-500/40 dark:via-orange-600/40 dark:to-red-700/40 rounded-t-[2rem] md:rounded-t-[3.5rem] shadow-2xl border-x border-t border-yellow-300 dark:border-white/10 backdrop-blur-3xl relative overflow-hidden">
-                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <div className="w-full h-36 md:h-72 bg-gradient-to-b from-yellow-400 via-orange-500 to-red-600 dark:from-yellow-400/40 dark:via-orange-600/40 dark:to-red-700/60 rounded-t-[2.5rem] md:rounded-t-[4rem] shadow-2xl border-x border-t border-yellow-300/50 dark:border-white/10 backdrop-blur-3xl relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
                     </div>
                 )}
 
                 {/* 3rd Place */}
                 {top3[2] && (
-                    <div className="flex flex-col items-center gap-4 md:gap-6 group hover:-translate-y-1 transition-transform duration-500">
+                    <div className="flex flex-col items-center gap-6 group hover:-translate-y-2 transition-all duration-500">
                         <div className="relative">
-                            <div className="w-14 h-14 md:w-24 md:h-24 rounded-full border-4 border-amber-600/30 p-1.5 md:p-2 bg-white dark:bg-gray-800 shadow-2xl overflow-hidden relative z-10">
-                                <div className="w-full h-full bg-amber-50 dark:bg-amber-900/10 flex items-center justify-center text-amber-600">
-                                    <Users size={16} md:size={24} strokeWidth={1.5} />
-                                </div>
+                            <div className="w-18 h-18 md:w-32 md:h-32 rounded-full border-4 border-amber-600/30 p-2 bg-white dark:bg-gray-800 shadow-2xl relative z-10 overflow-hidden">
+                                {top3[2].profile_image ? (
+                                    <img src={top3[2].profile_image} className="w-full h-full object-cover" alt="3rd" />
+                                ) : (
+                                    <div className="w-full h-full bg-amber-50 dark:bg-amber-900/10 flex items-center justify-center text-amber-600">
+                                        <Users size={28} />
+                                    </div>
+                                )}
                             </div>
-                            <div className="absolute -bottom-2 md:-bottom-3 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-[8px] md:text-[11px] font-black px-2 md:px-4 py-1 rounded-full shadow-xl shadow-amber-600/30 z-20 uppercase tracking-widest border border-white/20">3rd</div>
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-[10px] md:text-sm font-black px-4 md:px-6 py-1.5 rounded-full shadow-2xl z-20 uppercase italic">3rd</div>
                         </div>
                         <div className="text-center w-full">
-                            <p className="text-[10px] md:text-base font-black dark:text-white truncate tracking-tight">{top3[2].student.full_name}</p>
-                            <p className="text-[8px] md:text-sm text-indigo-500 font-black uppercase tracking-widest mt-1 italic">{top3[2].averageScore}%</p>
+                            <p className="text-xs md:text-xl font-black dark:text-white truncate tracking-tight uppercase italic">{top3[2].full_name}</p>
+                            <p className="text-[10px] md:text-lg text-indigo-500 font-black mt-1 tabular-nums italic">{top3[2].total_points.toLocaleString()} pts</p>
                         </div>
-                        <div className="w-full h-12 md:h-28 bg-gradient-to-b from-amber-600/60 to-amber-800/60 dark:from-amber-800/40 dark:to-amber-950/40 rounded-t-[1.5rem] md:rounded-t-[2.5rem] shadow-2xl border-x border-t border-amber-500/30 dark:border-white/5 backdrop-blur-3xl"></div>
+                        <div className="w-full h-20 md:h-36 bg-gradient-to-b from-amber-500 via-amber-600 to-amber-700 dark:from-amber-700/40 dark:via-amber-800/40 dark:to-amber-950/40 rounded-t-[1.8rem] md:rounded-t-[2.8rem] shadow-2xl border-x border-t border-amber-500/20 dark:border-white/5 backdrop-blur-3xl"></div>
                     </div>
                 )}
             </div>
 
-            {/* List View */}
-            <div className="bg-white dark:bg-gray-800 rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800/50 backdrop-blur-xl">
-                <div className="p-5 md:p-8 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-between">
-                    <h3 className="font-black text-sm md:text-xl text-gray-900 dark:text-white flex items-center gap-3 md:gap-4 italic uppercase tracking-tighter">
-                        <TrendingUp size={18} md:size={24} className="text-orange-500" />
-                        O'quvchilar reytingi
+            {/* Elite Table List */}
+            <div className="bg-white dark:bg-[#0f111a] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] dark:shadow-none overflow-hidden border border-gray-100 dark:border-white/5 backdrop-blur-2xl">
+                <div className="p-8 md:p-10 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 flex items-center justify-between">
+                    <h3 className="font-black text-xl md:text-2xl text-gray-900 dark:text-white flex items-center gap-4 italic uppercase tracking-tighter">
+                        <TrendingUp size={28} className="text-indigo-500 animate-bounce" />
+                        O'quvchilar Reytingi
                     </h3>
-                    <div className="px-3 py-1.5 bg-gray-200/50 dark:bg-gray-800 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-                        {ratings.length} O'QUVCHI
+                    <div className="px-5 py-2 bg-indigo-600 rounded-2xl text-[10px] md:text-xs font-black text-white uppercase tracking-widest shadow-xl shadow-indigo-600/30">
+                        {ratings.length} MEMBERS
                     </div>
                 </div>
 
-                <div className="divide-y divide-gray-50 dark:divide-gray-700/30">
-                    {ratings.map((rating, index) => {
-                        const isMe = myRating && rating.student.full_name === myRating.full_name;
+                <div className="divide-y divide-gray-100 dark:divide-white/5">
+                    {others.map((rating, index) => {
+                        const isMe = myRating && rating.student_id === myRating.student_id;
                         return (
-                            <div key={index} className={`flex items-center gap-4 md:gap-6 p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-300 group ${isMe ? 'bg-indigo-50/30 dark:bg-indigo-900/10 border-l-4 border-l-indigo-500' : rating.rank <= 3 ? 'bg-indigo-50/10 dark:bg-indigo-900/5' : ''}`}>
-                                <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 border duration-500 group-hover:scale-110 shadow-sm ${rating.rank === 1 ? 'bg-yellow-100 border-yellow-200 text-yellow-600 dark:bg-yellow-900/30 dark:border-yellow-700' :
-                                    rating.rank === 2 ? 'bg-gray-100 border-gray-200 text-gray-500 dark:bg-gray-700 dark:border-gray-600' :
-                                        rating.rank === 3 ? 'bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-900/30 dark:border-amber-700' :
-                                            'bg-gray-50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-700'
-                                    }`}>
-                                    {getRankIcon(rating.rank)}
+                            <div key={index} className={`flex items-center gap-4 md:gap-8 p-6 md:p-8 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-500 group relative ${isMe ? 'bg-indigo-50/50 dark:bg-indigo-600/10' : ''}`}>
+                                {isMe && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-600"></div>}
+
+                                <div className="w-8 md:w-12 text-center shrink-0">
+                                    <span className="text-sm md:text-xl font-black text-gray-300 dark:text-white/20 tabular-nums">#{rating.rank}</span>
                                 </div>
+
+                                <div className="relative shrink-0">
+                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-indigo-500/50 transition-all duration-500 shadow-lg">
+                                        {rating.profile_image ? (
+                                            <img src={rating.profile_image} className="w-full h-full object-cover scale-100 group-hover:scale-110 transition-transform" alt="Av" />
+                                        ) : (
+                                            <div className="w-full h-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400">
+                                                <Users size={24} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
                                 <div className="flex-1 min-w-0">
-                                    <p className={`font-black text-sm md:text-lg text-gray-900 dark:text-white truncate tracking-tight uppercase italic ${isMe ? 'text-indigo-600 dark:text-indigo-400' : ''}`}>
-                                        {rating.student.full_name}
-                                        {isMe && <span className="ml-2 text-[8px] bg-indigo-600 text-white px-2 py-0.5 rounded-full not-italic">SIZ</span>}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-[7px] md:text-[10px] font-black text-gray-400 dark:text-gray-500 truncate uppercase tracking-widest bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-lg border border-gray-200/50 dark:border-white/5">{rating.student.group.name}</span>
+                                    <div className="flex items-center gap-3">
+                                        <p className={`font-black text-base md:text-xl text-gray-900 dark:text-white truncate tracking-tight uppercase italic ${isMe ? 'text-indigo-600 dark:text-indigo-400' : ''}`}>
+                                            {rating.full_name}
+                                        </p>
+                                        {isMe && <span className="px-3 py-0.5 bg-indigo-600 text-white text-[8px] font-black rounded-full uppercase tracking-widest">Siz</span>}
+                                    </div>
+                                    <div className="flex items-center gap-4 mt-1.5">
+                                        <span className="text-[9px] font-black text-gray-400 dark:text-white/40 uppercase tracking-[0.2em]">{rating.group_name}</span>
+                                        <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-white/10"></div>
+                                        <div className="flex items-center gap-1">
+                                            <Zap size={10} className="text-yellow-500" />
+                                            <span className="text-[9px] font-black text-yellow-600/80 dark:text-yellow-500/80 uppercase">Active Elite</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="text-right">
+
+                                <div className="text-right shrink-0">
                                     <div className="flex items-baseline gap-1 justify-end">
-                                        <span className="text-xl md:text-3xl font-black text-indigo-600 dark:text-indigo-400 tracking-tighter tabular-nums">{rating.averageScore}</span>
-                                        <span className="text-[8px] md:text-[10px] font-black text-indigo-400/60 uppercase italic">%</span>
+                                        <span className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tighter tabular-nums group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                            {rating.total_points.toLocaleString()}
+                                        </span>
+                                        <span className="text-[10px] font-black text-gray-300 dark:text-white/20 uppercase italic">Pts</span>
                                     </div>
-                                    <div className="text-[7px] md:text-[9px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-widest mt-0.5">Success</div>
+                                    <div className="mt-1 flex items-center justify-end gap-1">
+                                        <div className="flex gap-0.5">
+                                            {[1, 2, 3, 4, 5].map(i => (
+                                                <div key={i} className={`w-1 h-1 rounded-full ${i <= 4 ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-white/10'}`}></div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         );
