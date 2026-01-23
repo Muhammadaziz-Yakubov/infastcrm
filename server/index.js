@@ -98,7 +98,7 @@ app.use('/api/student-exams', studentExamsRoutes);
 app.use('/api/student-quizzes', studentQuizzesRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 
-// Apply maintenance middleware to student routes
+// Apply maintenance middleware to protect routes (but allow maintenance endpoints)
 app.use('/api/student-auth', maintenanceService.checkMaintenance());
 app.use('/api/student-exams', maintenanceService.checkMaintenance('exams'));
 app.use('/api/student-quizzes', maintenanceService.checkMaintenance('quizzes'));

@@ -151,7 +151,7 @@ class MaintenanceService {
   checkMaintenance(feature = null) {
     return (req, res, next) => {
       // Skip maintenance check for admin users and maintenance endpoints
-      if (req.user?.role === 'ADMIN' || req.path.includes('/maintenance')) {
+      if (req.user?.role === 'ADMIN' || req.path.includes('/maintenance') || req.path.includes('/health') || req.skipMaintenance) {
         return next();
       }
 

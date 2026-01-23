@@ -3,6 +3,12 @@ import maintenanceService from '../services/maintenanceService.js';
 
 const router = express.Router();
 
+// Skip maintenance middleware for maintenance routes
+router.use((req, res, next) => {
+  req.skipMaintenance = true;
+  next();
+});
+
 // Get maintenance status (public endpoint)
 router.get('/status', (req, res) => {
   res.json(maintenanceService.getStatus());
