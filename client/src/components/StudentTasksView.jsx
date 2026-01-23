@@ -134,11 +134,14 @@ export default function StudentTasksView({ setFullScreen }) {
             const formData = new FormData();
             formData.append('description', submitData.description);
             submitData.files.forEach(f => formData.append('files', f));
-            await api.post(`/tasks/${selectedTask._id}/submit`, formData);
+            const response = await api.post(`/tasks/${selectedTask._id}/submit`, formData);
+            alert('Muvaffaqiyatli jo\'natildi! 🚀');
             setShowSubmitModal(false);
             fetchData();
         } catch (error) {
-            alert('Xatolik yuz berdi');
+            console.error('Submission error:', error);
+            const errorMsg = error.response?.data?.message || error.message || 'Xatolik yuz berdi';
+            alert(`Xatolik: ${errorMsg}`);
         } finally {
             setSubmitting(false);
         }

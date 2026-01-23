@@ -11,13 +11,18 @@ import { authenticateStudent } from '../middleware/auth.js';
 import ExamResult from '../models/ExamResult.js';
 import ArenaResult from '../models/ArenaResult.js';
 import RatingService from '../services/RatingService.js';
+import fs from 'fs';
 
 const router = express.Router();
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/submissions/');
+    const dir = 'uploads/submissions/';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -28,18 +33,18 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 50 * 1024 * 1024 // 50MB limit
   },
   fileFilter: function (req, file, cb) {
     // Accept images, PDFs, and documents
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt/;
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error('Only images, PDFs, and documents are allowed'));
+      cb(new Error('Format noto\'g\'ri. Faqat rasm, PDF va hujjatlar (doc, zip) ruxsat berilgan.'));
     }
   }
 });
@@ -415,7 +420,7 @@ router.post('/tasks/:id/submit', authenticateStudent, upload.array('files', 5), 
       submitted_files = req.files.map(file => ({
         filename: file.filename,
         original_name: file.originalname,
-        file_path: file.path,
+        file_path: `/uploads/submissions/${file.filename}`,
         file_size: file.size,
         mime_type: file.mimetype
       }));

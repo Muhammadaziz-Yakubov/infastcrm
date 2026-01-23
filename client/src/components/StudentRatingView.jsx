@@ -13,31 +13,58 @@ import {
     BookOpen,
     FileCode,
     Brain,
-    GraduationCap
+    GraduationCap,
+    Filter,
+    ChevronDown,
+    Building2,
+    Users2
 } from 'lucide-react';
 
 export default function StudentRatingView() {
     const [ratings, setRatings] = useState([]);
+    const [filters, setFilters] = useState({ groups: [], courses: [] });
+    const [selectedFilters, setSelectedFilters] = useState({ groupId: '', courseId: '' });
     const [myRating, setMyRating] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [filterLoading, setFilterLoading] = useState(false);
 
     useEffect(() => {
-        fetchData();
+        fetchInitialData();
     }, []);
 
-    const fetchData = async () => {
+    useEffect(() => {
+        fetchRatings();
+    }, [selectedFilters]);
+
+    const fetchInitialData = async () => {
         try {
             setLoading(true);
-            const [globalRes, myRes] = await Promise.all([
-                api.get('/public/ratings'),
+            const [filterRes, myRes] = await Promise.all([
+                api.get('/public/ratings/filters'),
                 api.get('/student-auth/my-rating')
             ]);
-            setRatings(globalRes.data);
+            setFilters(filterRes.data);
             setMyRating(myRes.data);
+        } catch (error) {
+            console.error('Error fetching initial rating data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchRatings = async () => {
+        try {
+            setFilterLoading(true);
+            const params = new URLSearchParams();
+            if (selectedFilters.groupId) params.append('groupId', selectedFilters.groupId);
+            if (selectedFilters.courseId) params.append('courseId', selectedFilters.courseId);
+
+            const res = await api.get(`/public/ratings?${params.toString()}`);
+            setRatings(res.data);
         } catch (error) {
             console.error('Error fetching ratings:', error);
         } finally {
-            setLoading(false);
+            setFilterLoading(false);
         }
     };
 
@@ -51,7 +78,7 @@ export default function StudentRatingView() {
     if (loading) return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6">
             <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-500 font-black uppercase tracking-[0.3em] animate-pulse">Reyting hisoblanmoqda...</p>
+            <p className="text-gray-500 font-black uppercase tracking-[0.3em] animate-pulse">Reyting yuklanmoqda...</p>
         </div>
     );
 
@@ -61,11 +88,11 @@ export default function StudentRatingView() {
     return (
         <div className="space-y-12 pb-32 animate-in fade-in duration-700">
             {/* Elegant Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pb-4">
                 <div className="flex items-center gap-6">
                     <div className="relative">
                         <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-20 animate-pulse"></div>
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-[2rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-2xl transform hover:rotate-6 transition-all duration-500">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-[2.2rem] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-2xl transform hover:rotate-6 transition-all duration-500">
                             <Trophy className="text-white" size={32} md:size={40} strokeWidth={2.5} />
                         </div>
                     </div>
@@ -76,12 +103,40 @@ export default function StudentRatingView() {
                         </p>
                     </div>
                 </div>
+
+                {/* Filters UI */}
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="relative group">
+                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-indigo-500 transition-colors" size={16} />
+                        <select
+                            value={selectedFilters.courseId}
+                            onChange={(e) => setSelectedFilters(prev => ({ ...prev, courseId: e.target.value }))}
+                            className="appearance-none bg-white dark:bg-gray-800 border-none rounded-2xl pl-12 pr-10 py-3.5 text-xs font-bold focus:ring-4 ring-indigo-500/10 transition-all dark:text-white shadow-xl shadow-gray-200/20 dark:shadow-none min-w-[160px]"
+                        >
+                            <option value="">Barcha Fanlar (Markaz)</option>
+                            {filters.courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                    </div>
+
+                    <div className="relative group">
+                        <Users2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-indigo-500 transition-colors" size={16} />
+                        <select
+                            value={selectedFilters.groupId}
+                            onChange={(e) => setSelectedFilters(prev => ({ ...prev, groupId: e.target.value }))}
+                            className="appearance-none bg-white dark:bg-gray-800 border-none rounded-2xl pl-12 pr-10 py-3.5 text-xs font-bold focus:ring-4 ring-indigo-500/10 transition-all dark:text-white shadow-xl shadow-gray-200/20 dark:shadow-none min-w-[150px]"
+                        >
+                            <option value="">Barcha Guruhlar</option>
+                            {filters.groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
+                    </div>
+                </div>
             </div>
 
             {/* Premium Personal Rank Card */}
             {myRating && (
                 <div className="group relative bg-[#0f111a] rounded-[3rem] p-8 md:p-12 text-white shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/5">
-                    {/* Animated Decorative Blobs */}
                     <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full -mr-40 -mt-40 blur-[120px] group-hover:bg-indigo-600/20 transition-all duration-1000"></div>
                     <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-600/10 rounded-full -ml-20 -mb-20 blur-[100px]"></div>
 
@@ -111,8 +166,8 @@ export default function StudentRatingView() {
                                     <Star className="text-yellow-400 fill-yellow-400 animate-pulse" size={24} />
                                 </h3>
                                 <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                                    <div className="px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 group/stat">
-                                        <Users size={14} className="text-indigo-400 group-hover/stat:scale-120 transition-transform" /> {myRating.totalStudents} TA O'QUVCHI
+                                    <div className="px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                        <Users size={14} className="text-indigo-400" /> {myRating.totalStudents} TA O'QUVCHI
                                     </div>
                                     <div className="px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                                         <TrendingUp size={14} className="text-emerald-400" /> {Math.ceil(myRating.totalPoints / 1000)}k POWER
@@ -151,7 +206,7 @@ export default function StudentRatingView() {
             )}
 
             {/* Podium for top 3 - Elite Design */}
-            <div className="grid grid-cols-3 gap-6 md:gap-16 items-end max-w-5xl mx-auto pt-24 px-4 relative">
+            <div className={`grid grid-cols-3 gap-6 md:gap-16 items-end max-w-5xl mx-auto pt-24 px-4 relative transition-opacity duration-300 ${filterLoading ? 'opacity-50' : 'opacity-100'}`}>
                 {/* 2nd Place */}
                 {top3[1] && (
                     <div className="flex flex-col items-center gap-6 group hover:-translate-y-2 transition-all duration-500">
@@ -171,9 +226,7 @@ export default function StudentRatingView() {
                             <p className="text-xs md:text-xl font-black dark:text-white truncate tracking-tight uppercase italic">{top3[1].full_name}</p>
                             <p className="text-[10px] md:text-lg text-indigo-500 font-black mt-1 tabular-nums italic">{top3[1].total_points.toLocaleString()} pts</p>
                         </div>
-                        <div className="w-full h-24 md:h-44 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-400 dark:from-gray-700/50 dark:via-gray-800/50 dark:to-gray-900/50 rounded-t-[2rem] md:rounded-t-[3rem] shadow-2xl border-x border-t border-gray-100 dark:border-white/5 backdrop-blur-3xl relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-5 mask-gradient"></div>
-                        </div>
+                        <div className="w-full h-24 md:h-44 bg-gradient-to-b from-gray-200 via-gray-300 to-gray-400 dark:from-gray-700/50 dark:via-gray-800/50 dark:to-gray-900/50 rounded-t-[2rem] md:rounded-t-[3rem] shadow-2xl border-x border-t border-gray-100 dark:border-white/5 backdrop-blur-3xl"></div>
                     </div>
                 )}
 
@@ -204,7 +257,6 @@ export default function StudentRatingView() {
                         </div>
                         <div className="w-full h-36 md:h-72 bg-gradient-to-b from-yellow-400 via-orange-500 to-red-600 dark:from-yellow-400/40 dark:via-orange-600/40 dark:to-red-700/60 rounded-t-[2.5rem] md:rounded-t-[4rem] shadow-2xl border-x border-t border-yellow-300/50 dark:border-white/10 backdrop-blur-3xl relative overflow-hidden">
                             <div className="absolute inset-x-0 top-0 h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                         </div>
                     </div>
                 )}
@@ -234,11 +286,11 @@ export default function StudentRatingView() {
             </div>
 
             {/* Elite Table List */}
-            <div className="bg-white dark:bg-[#0f111a] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] dark:shadow-none overflow-hidden border border-gray-100 dark:border-white/5 backdrop-blur-2xl">
+            <div className={`bg-white dark:bg-[#0f111a] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] dark:shadow-none overflow-hidden border border-gray-100 dark:border-white/5 backdrop-blur-2xl transition-all duration-300 ${filterLoading ? 'opacity-50 blur-[2px]' : 'opacity-100 blur-0'}`}>
                 <div className="p-8 md:p-10 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 flex items-center justify-between">
                     <h3 className="font-black text-xl md:text-2xl text-gray-900 dark:text-white flex items-center gap-4 italic uppercase tracking-tighter">
                         <TrendingUp size={28} className="text-indigo-500 animate-bounce" />
-                        O'quvchilar Reytingi
+                        O'quvchilar Ro'yxati
                     </h3>
                     <div className="px-5 py-2 bg-indigo-600 rounded-2xl text-[10px] md:text-xs font-black text-white uppercase tracking-widest shadow-xl shadow-indigo-600/30">
                         {ratings.length} MEMBERS
@@ -246,10 +298,19 @@ export default function StudentRatingView() {
                 </div>
 
                 <div className="divide-y divide-gray-100 dark:divide-white/5">
-                    {others.map((rating, index) => {
+                    {ratings.length === 0 ? (
+                        <div className="p-20 text-center">
+                            <Users className="mx-auto text-gray-200 dark:text-white/5 mb-4" size={64} />
+                            <p className="text-gray-400 font-black uppercase tracking-widest">Ma'lumot topilmadi</p>
+                        </div>
+                    ) : (others.length === 0 && top3.length > 0 ? (
+                        <div className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">
+                            Faqat shohsupadagi g'oliblar mavjud
+                        </div>
+                    ) : (others.map((rating, index) => {
                         const isMe = myRating && rating.student_id === myRating.student_id;
                         return (
-                            <div key={index} className={`flex items-center gap-4 md:gap-8 p-6 md:p-8 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-500 group relative ${isMe ? 'bg-indigo-50/50 dark:bg-indigo-600/10' : ''}`}>
+                            <div key={rating._id || index} className={`flex items-center gap-4 md:gap-8 p-6 md:p-8 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-500 group relative ${isMe ? 'bg-indigo-50/50 dark:bg-indigo-600/10' : ''}`}>
                                 {isMe && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-600"></div>}
 
                                 <div className="w-8 md:w-12 text-center shrink-0">
@@ -277,11 +338,8 @@ export default function StudentRatingView() {
                                     </div>
                                     <div className="flex items-center gap-4 mt-1.5">
                                         <span className="text-[9px] font-black text-gray-400 dark:text-white/40 uppercase tracking-[0.2em]">{rating.group_name}</span>
-                                        <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-white/10"></div>
-                                        <div className="flex items-center gap-1">
-                                            <Zap size={10} className="text-yellow-500" />
-                                            <span className="text-[9px] font-black text-yellow-600/80 dark:text-yellow-500/80 uppercase">Active Elite</span>
-                                        </div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500/30"></div>
+                                        <span className="text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.2em]">{rating.course_name}</span>
                                     </div>
                                 </div>
 
@@ -302,7 +360,7 @@ export default function StudentRatingView() {
                                 </div>
                             </div>
                         );
-                    })}
+                    })).length === 0 && <div className="p-10 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">Ro'yxat bo'sh</div>)}
                 </div>
             </div>
         </div>
