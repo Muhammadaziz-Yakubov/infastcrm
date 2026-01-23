@@ -59,6 +59,7 @@ const taskSubmissionSchema = new mongoose.Schema({
 
 // Prevent duplicate submissions
 taskSubmissionSchema.index({ task_id: 1, student_id: 1 }, { unique: true });
+taskSubmissionSchema.index({ student_id: 1 });
 
 export default mongoose.model('TaskSubmission', taskSubmissionSchema);
 

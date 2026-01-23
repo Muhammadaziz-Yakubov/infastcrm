@@ -6,10 +6,50 @@ import Attendance from '../models/Attendance.js';
 import Group from '../models/Group.js';
 import Course from '../models/Course.js';
 
+// In-memory cache implementation
+const ratingCache = {
+    data: new Map(),
+    set(key, value, ttlSeconds) {
+        this.data.set(key, {
+            value,
+            expiry: Date.now() + (ttlSeconds * 1000)
+        });
+
+        // Cleanup old keys to prevent memory leaks (simple logic)
+        if (this.data.size > 100) {
+            const now = Date.now();
+            for (const [k, v] of this.data.entries()) {
+                if (now > v.expiry) this.data.delete(k);
+            }
+        }
+    },
+    get(key) {
+        const item = this.data.get(key);
+        if (!item) return null;
+        if (Date.now() > item.expiry) {
+            this.data.delete(key);
+            return null;
+        }
+        return item.value;
+    },
+    clear() {
+        this.data.clear();
+    }
+};
+
 class RatingService {
     async getGlobalRatings(filters = {}) {
         try {
             const { groupId, courseId, limit = 1000 } = filters;
+
+            // Generate cache key
+            const cacheKey = `ratings_${groupId || 'all'}_${courseId || 'all'}_${limit}`;
+
+            // Check cache
+            const cachedData = ratingCache.get(cacheKey);
+            if (cachedData) {
+                return cachedData;
+            }
 
             // 1. Build student filter
             const studentFilter = { status: { $in: ['ACTIVE', 'DEBTOR'] } };
@@ -116,11 +156,22 @@ class RatingService {
                 r.rank = currentRank;
             });
 
-            return ratings.slice(0, limit);
+            const finalResult = ratings.slice(0, limit);
+
+            // Save to cache (TTL: 5 minutes)
+            ratingCache.set(cacheKey, finalResult, 300);
+
+            return finalResult;
         } catch (error) {
             console.error('Error in RatingService.getGlobalRatings:', error);
             throw error;
         }
+    }
+
+    // Call this method whenever a score changes (e.g., submission graded, quiz finished)
+    // to invalidate the cache.
+    invalidateCache() {
+        ratingCache.clear();
     }
 
     async getFilters() {

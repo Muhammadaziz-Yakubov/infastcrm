@@ -55,8 +55,11 @@ const examResultSchema = new mongoose.Schema({
   timestamps: true
 });
 
+examResultSchema.index({ student_id: 1 });
+examResultSchema.index({ exam_id: 1 });
+
 // Calculate percentage when score is updated
-examResultSchema.pre('save', function() {
+examResultSchema.pre('save', function () {
   if (this.total_points > 0) {
     this.percentage = (this.score / this.total_points) * 100;
   }

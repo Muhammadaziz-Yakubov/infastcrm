@@ -55,6 +55,9 @@ const quizResultSchema = new mongoose.Schema({
     timestamps: true
 });
 
+quizResultSchema.index({ student_id: 1 });
+quizResultSchema.index({ quiz_id: 1 });
+
 quizResultSchema.pre('save', function () {
     if (this.total_points > 0) {
         this.percentage = (this.score / this.total_points) * 100;
