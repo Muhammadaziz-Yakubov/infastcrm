@@ -119,18 +119,64 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
   try {
     const student = req.student;
 
-    // Get payment history
-    const payments = await Payment.find({ student_id: student._id })
-      .sort({ payment_date: -1 })
-      .limit(10);
-
-    // Get attendance history
-    const attendances = await Attendance.find({
-      student_id: student._id,
-      group_id: student.group_id._id
-    })
-      .sort({ date: -1 })
-      .limit(30);
+    // Run all queries in parallel for better performance
+    const [
+      payments,
+      attendances,
+      allPayments,
+      quizResults,
+      tasks,
+      submissions,
+      examResults
+    ] = await Promise.all([
+      // Get recent payments (limit 5 instead of 10)
+      Payment.find({ student_id: student._id })
+        .sort({ payment_date: -1 })
+        .limit(5)
+        .lean(),
+      
+      // Get recent attendance (limit 10 instead of 30)
+      Attendance.find({
+        student_id: student._id,
+        group_id: student.group_id._id
+      })
+        .sort({ date: -1 })
+        .limit(10)
+        .lean(),
+      
+      // Get all payments for total calculation
+      Payment.find({ student_id: student._id })
+        .select('amount')
+        .lean(),
+      
+      // Get recent quiz results (limit 3 instead of 5)
+      QuizResult.find({ student_id: student._id })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean(),
+      
+      // Get tasks for student's group
+      Task.find({ 
+        group_id: student.group_id._id,
+        status: 'ACTIVE'
+      })
+        .select('_id deadline')
+        .lean(),
+      
+      // Get task submissions
+      TaskSubmission.find({ 
+        student_id: student._id 
+      })
+        .select('task_id status')
+        .lean(),
+      
+      // Get exam results
+      ExamResult.find({ student_id: student._id })
+        .select('score')
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean()
+    ]);
 
     // Calculate attendance stats
     const totalAttendances = attendances.length;
@@ -138,38 +184,18 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
     const absentCount = attendances.filter(a => a.status === 'ABSENT').length;
     const lateCount = attendances.filter(a => a.status === 'LATE').length;
 
-    // Total payments
-    const allPayments = await Payment.find({ student_id: student._id });
-    const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
+    // Calculate total payments
+    const totalPaid = allPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
 
-    // Get quiz results
-    const quizResults = await QuizResult.find({ student_id: student._id })
-      .sort({ createdAt: -1 })
-      .limit(5);
-
+    // Calculate quiz stats (optimized)
     const quizStats = {
-      total: await QuizResult.countDocuments({ student_id: student._id, status: 'FINISHED' }),
-      avgPercentage: 0
+      total: quizResults.length,
+      avgPercentage: quizResults.length > 0 
+        ? Math.round(quizResults.reduce((sum, r) => sum + (r.percentage || 0), 0) / quizResults.length)
+        : 0
     };
 
-    if (quizStats.total > 0) {
-      const allResults = await QuizResult.find({ student_id: student._id, status: 'FINISHED' });
-      const totalPercentage = allResults.reduce((sum, r) => sum + (r.percentage || 0), 0);
-      quizStats.avgPercentage = Math.round(totalPercentage / quizStats.total);
-    }
-
-    // Get tasks for student's group
-    const tasks = await Task.find({ 
-      group_id: student.group_id._id,
-      status: 'ACTIVE'
-    }).sort({ deadline: 1 });
-
-    // Get task submissions for this student
-    const submissions = await TaskSubmission.find({ 
-      student_id: student._id 
-    });
-
-    // Calculate task stats
+    // Calculate task stats (optimized)
     const taskStats = {
       total: tasks.length,
       pending: 0,
@@ -177,17 +203,14 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
       graded: submissions.filter(s => s.status === 'GRADED').length
     };
 
+    const submissionTaskIds = new Set(submissions.map(s => s.task_id.toString()));
     tasks.forEach(task => {
-      const submission = submissions.find(s => s.task_id.toString() === task._id.toString());
-      if (!submission || submission.status === 'PENDING') {
+      if (!submissionTaskIds.has(task._id.toString())) {
         taskStats.pending++;
       }
     });
 
-    // Get exam results
-    const examResults = await ExamResult.find({ student_id: student._id })
-      .sort({ createdAt: -1 });
-
+    // Calculate exam stats (optimized)
     const examStats = {
       count: examResults.length,
       avgScore: examResults.length > 0 
@@ -242,6 +265,7 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Dashboard error:', error);
     res.status(500).json({ message: error.message });
   }
 });

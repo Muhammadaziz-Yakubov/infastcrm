@@ -77,46 +77,53 @@ export default function StudentDashboard() {
     fetchDashboard();
   }, []);
 
-  const fetchDashboard = async () => {
-    // Check cache first
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    const cacheTimestamp = localStorage.getItem(`${CACHE_KEY}_timestamp`);
-    
-    if (cachedData && cacheTimestamp) {
-      const cacheAge = Date.now() - parseInt(cacheTimestamp);
-      if (cacheAge < CACHE_DURATION) {
-        setData(JSON.parse(cachedData));
-        setLoading(false);
-        return;
-      }
-    }
-
-    try {
-      const response = await api.get('/student-auth/dashboard');
-      const dashboardData = response.data;
-      
-      // Cache the data
-      localStorage.setItem(CACHE_KEY, JSON.stringify(dashboardData));
-      localStorage.setItem(`${CACHE_KEY}_timestamp`, Date.now().toString());
-      
-      setData(dashboardData);
-    } catch (error) {
-      console.error('❌ Error fetching dashboard:', error);
-      // Set default data to prevent UI issues
-      setData({
-        student: null,
-        group: null,
-        payments: [],
-        totalPaid: 0,
-        attendance: { records: [], stats: { total: 0, present: 0, absent: 0, late: 0, percentage: 0 } },
-        quizzes: { lastResults: [], stats: { total: 0, avgPercentage: 0 } },
-        tasks: { pendingCount: 0, submittedCount: 0, gradedCount: 0, totalCount: 0 },
-        exams: { stats: { count: 0, avgScore: 0 } }
-      });
-    } finally {
+  const fetchDashboard = async (retryCount = 0) => {
+  // Check cache first
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  const cacheTimestamp = localStorage.getItem(`${CACHE_KEY}_timestamp`);
+  
+  if (cachedData && cacheTimestamp) {
+    const cacheAge = Date.now() - parseInt(cacheTimestamp);
+    if (cacheAge < CACHE_DURATION) {
+      setData(JSON.parse(cachedData));
       setLoading(false);
+      return;
     }
-  };
+  }
+
+  try {
+    const response = await api.get('/student-auth/dashboard');
+    const dashboardData = response.data;
+    
+    // Cache the data
+    localStorage.setItem(CACHE_KEY, JSON.stringify(dashboardData));
+    localStorage.setItem(`${CACHE_KEY}_timestamp`, Date.now().toString());
+    
+    setData(dashboardData);
+  } catch (error) {
+    console.error('❌ Error fetching dashboard:', error);
+    
+    // Retry once if it's a timeout error
+    if (retryCount === 0 && error.code === 'ECONNABORTED') {
+      console.log('🔄 Retrying dashboard fetch...');
+      return fetchDashboard(1);
+    }
+    
+    // Set default data to prevent UI issues
+    setData({
+      student: null,
+      group: null,
+      payments: [],
+      totalPaid: 0,
+      attendance: { records: [], stats: { total: 0, present: 0, absent: 0, late: 0, percentage: 0 } },
+      quizzes: { lastResults: [], stats: { total: 0, avgPercentage: 0 } },
+      tasks: { pendingCount: 0, submittedCount: 0, gradedCount: 0, totalCount: 0 },
+      exams: { stats: { count: 0, avgScore: 0 } }
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLogout = () => {
     studentLogout();
