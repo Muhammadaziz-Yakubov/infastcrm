@@ -24,6 +24,8 @@ import {
 import { format, isValid } from 'date-fns';
 import { uz } from 'date-fns/locale';
 
+import { Helmet } from 'react-helmet-async';
+
 export default function StudentMarket() {
   const [activeTab, setActiveTab] = useState('shop');
   const [items, setItems] = useState([]);
@@ -143,6 +145,10 @@ export default function StudentMarket() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20 px-4 md:px-0">
+      <Helmet>
+        <title>Market | InFast Academy</title>
+        <meta name="description" content="Coinlaringizni ajoyib sovg'alarga almashtiring. InFast Academy Marketi." />
+      </Helmet>
 
       {/* 🚀 Clean & Professional Header */}
       <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-600 shadow-xl">
@@ -180,8 +186,8 @@ export default function StudentMarket() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === tab.id
-                  ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-lg scale-105'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-lg scale-105'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
                 }`}
             >
               {tab.label}
@@ -252,8 +258,8 @@ export default function StudentMarket() {
                         onClick={() => setShowConfirmModal(item)}
                         disabled={!canAfford || isOutOfStock}
                         className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${canAfford && !isOutOfStock
-                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 active:scale-95'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 active:scale-95'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                           }`}
                       >
                         Sotib olish

@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import nodeCron from 'node-cron';
+import compression from 'compression';
 
 // Routes
 import authRoutes from './routes/auth.js';
@@ -57,6 +58,7 @@ const io = new Server(httpServer, {
 
 // Middleware
 app.use(cors());
+app.use(compression());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
