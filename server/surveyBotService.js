@@ -52,9 +52,9 @@ export const initSurveyBot = () => {
 
 👤 <b>F.I.SH:</b> ${session.data.fullName}
 📍 <b>Tuman:</b> ${session.data.district}
-� <b>Maktab:</b> ${session.data.school}
+ <b>Maktab:</b> ${session.data.school}
 🎓 <b>Sinf:</b> ${session.data.schoolClass}
-�🏢 <b>MFY:</b> ${session.data.mfy}
+🏢 <b>MFY:</b> ${session.data.mfy}
 🏘 <b>Mahalla/Ko'cha:</b> ${session.data.street}
 🏠 <b>Uy raqami:</b> ${session.data.house}
 📞 <b>Ota-ona raqami:</b> ${session.data.parentPhone}
