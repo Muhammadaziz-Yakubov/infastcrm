@@ -26,7 +26,17 @@ export const initSurveyBot = () => {
     }
 
     try {
-        const bot = new TelegramBot(TOKEN, { polling: true });
+        const bot = new TelegramBot(TOKEN, { 
+            polling: {
+                interval: 1000, // Poll every 1 second instead of default
+                autoStart: false // Don't start automatically
+            }
+        });
+
+        // Start polling with error handling
+        bot.startPolling().catch(err => {
+            console.log('⚠️ Survey bot polling failed:', err.message);
+        });
 
         bot.on('message', async (msg) => {
             const chatId = msg.chat.id;

@@ -548,7 +548,16 @@ export const testBotConnection = async () => {
   if (connectionTested) return true; // Already tested
 
   try {
-    const botInfo = await bot.getMe();
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Connection timeout')), 10000); // 10 second timeout
+    });
+
+    const botInfo = await Promise.race([
+      bot.getMe(),
+      timeoutPromise
+    ]);
+    
     console.log('🤖 Bot connected successfully:', botInfo.username);
 
     // Try to send test message, if fails due to supergroup, update chat_id

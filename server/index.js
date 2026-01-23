@@ -98,20 +98,65 @@ app.use('/api/student-quizzes', studentQuizzesRoutes);
 // Socket.io setup
 setupArenaSocket(io);
 
-// Database connection
+// Database connection with timeout
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://muhammadyakubov:vNq4X9x9X9x9X9x9@cluster0.abcde.mongodb.net/infastcrm';
-mongoose.connect(MONGODB_URI)
+
+// Add connection timeout
+const connectWithTimeout = () => {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('MongoDB connection timeout'));
+    }, 15000); // 15 second timeout
+
+    mongoose.connect(MONGODB_URI)
+      .then(() => {
+        clearTimeout(timeout);
+        resolve();
+      })
+      .catch((err) => {
+        clearTimeout(timeout);
+        reject(err);
+      });
+  });
+};
+
+connectWithTimeout()
     .then(() => {
         console.log('✅ Connected to MongoDB');
 
-        // Initial services startup
-        testBotConnection();
-        initSurveyBot();
-        if (process.env.NODE_ENV === 'production') {
-            setupWebhook();
-        }
+        // Initialize services asynchronously to avoid blocking startup
+        initializeServices();
     })
-    .catch(err => console.error('❌ MongoDB connection error:', err));
+    .catch(err => {
+        console.error('❌ MongoDB connection error:', err);
+        // Continue with server startup even if MongoDB fails initially
+        console.log('⚠️ Server will start anyway, MongoDB will retry...');
+        initializeServices();
+    });
+
+// Initialize services asynchronously
+const initializeServices = async () => {
+    // Start services in background without blocking server startup
+    setTimeout(() => {
+        testBotConnection().catch(err => 
+            console.log('⚠️ Telegram bot connection failed (non-critical):', err.message)
+        );
+    }, 2000); // 2 second delay
+
+    setTimeout(() => {
+        initSurveyBot().catch(err => 
+            console.log('⚠️ Survey bot initialization failed (non-critical):', err.message)
+        );
+    }, 5000); // 5 second delay
+
+    if (process.env.NODE_ENV === 'production') {
+        setTimeout(() => {
+            setupWebhook().catch(err => 
+                console.log('⚠️ Webhook setup failed (non-critical):', err.message)
+            );
+        }, 8000); // 8 second delay
+    }
+};
 
 // Cron Jobs
 // Daily payment status check at 00:00
