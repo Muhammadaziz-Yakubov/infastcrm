@@ -88,10 +88,9 @@ export default function StudentDashboard() {
     { id: 'market', label: 'Market', icon: ShoppingBag },
     { id: 'exams', label: 'Imtihonlar', icon: Target },
     { id: 'rating', label: 'Reyting', icon: Trophy },
+    { id: 'attendance', label: 'Davomat', icon: Calendar },
+    { id: 'payments', label: "To'lovlar", icon: Wallet },
     { id: 'profile', label: 'Profil', icon: UserCircle },
-    // Hidden tabs
-    { id: 'payments', label: "To'lovlar", icon: Wallet, hidden: true },
-    { id: 'attendance', label: 'Davomat', icon: Calendar, hidden: true },
   ];
 
 
@@ -229,12 +228,16 @@ export default function StudentDashboard() {
                 {/* Main Stats Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
                   {[
-                    { label: "Reyting", val: `${data?.quizzes?.stats?.avgPercentage || 0}%`, icon: Brain, color: 'text-indigo-600', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
-                    { label: "To'lov", val: `${(data?.totalPaid || 0).toLocaleString()}`, icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-                    { label: "Davomati", val: `${data?.attendance?.stats?.percentage || 0}%`, icon: Activity, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30' },
-                    { label: 'Guruh', val: 'Faol', icon: Users, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' }
+                    { id: 'rating', label: "Reyting", val: `${data?.quizzes?.stats?.avgPercentage || 0}%`, icon: Brain, color: 'text-indigo-600', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
+                    { id: 'payments', label: "To'lov", val: `${(data?.totalPaid || 0).toLocaleString()}`, icon: Wallet, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
+                    { id: 'attendance', label: "Davomati", val: `${data?.attendance?.stats?.percentage || 0}%`, icon: Activity, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+                    { id: 'classmates', label: 'Guruh', val: 'Faol', icon: Users, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' }
                   ].map((stat, i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-[1.8rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-xl shadow-gray-200/20 dark:shadow-none hover:-translate-y-1 transition-all group">
+                    <div
+                      key={i}
+                      onClick={() => setActiveTab(stat.id)}
+                      className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-[1.8rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-xl shadow-gray-200/20 dark:shadow-none hover:-translate-y-1 transition-all group cursor-pointer"
+                    >
                       <div className={`w-10 h-10 md:w-14 md:h-14 ${stat.bg} ${stat.color} rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6 shadow-sm group-hover:scale-110 transition-transform`}>
                         <stat.icon size={20} md:size={28} />
                       </div>
@@ -387,40 +390,61 @@ export default function StudentDashboard() {
             )}
 
             {activeTab === 'attendance' && (
-              <div className="space-y-8">
-                <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                  <div className="w-16 h-16 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center">
-                    <Calendar size={32} />
+              <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-20">
+                <div className="flex items-center gap-6 bg-white dark:bg-gray-800 p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 dark:border-gray-700 shadow-2xl shadow-indigo-500/5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-[2rem] bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center shadow-inner">
+                    <Calendar size={32} md:size={40} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black dark:text-white">Davomat Jurnali</h2>
-                    <p className="text-sm text-gray-500 font-medium">O{"'"}quv jarayonidagi ishtirokingiz tahlili</p>
+                    <h2 className="text-2xl md:text-3xl font-black dark:text-white tracking-tight uppercase italic">Davomat Jurnali</h2>
+                    <p className="text-sm md:text-lg text-gray-500 font-medium">O'quv jarayonidagi ishtirok va baholar tahlili</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {data?.attendance?.records?.length > 0 ? data.attendance.records.map((r) => (
-                    <div key={r._id} className="bg-white dark:bg-gray-800 rounded-[2rem] p-6 shadow-lg border border-gray-50 dark:border-gray-700 flex items-center justify-between group">
-                      <div className="flex items-center gap-5">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${r.status === 'PRESENT' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
-                          {r.status === 'PRESENT' ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+                    <div key={r._id} className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-gray-50 dark:border-gray-700/50 flex flex-col gap-4 group hover:border-indigo-500/30 transition-all">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-5">
+                          <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${r.status === 'PRESENT' ? 'bg-emerald-500 text-white shadow-emerald-500/20' :
+                              r.status === 'LATE' ? 'bg-amber-500 text-white shadow-amber-500/20' :
+                                'bg-rose-500 text-white shadow-rose-500/20'
+                            }`}>
+                            {r.status === 'PRESENT' ? <CheckCircle2 size={24} md:size={28} /> :
+                              r.status === 'LATE' ? <Clock size={24} md:size={28} /> :
+                                <XCircle size={24} md:size={28} />}
+                          </div>
+                          <div>
+                            <p className="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">
+                              {format(new Date(r.date), 'dd MMMM, yyyy', { locale: uz })}
+                            </p>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-0.5">{format(new Date(r.date), 'EEEE', { locale: uz })}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-lg font-black text-gray-900 dark:text-white">{format(new Date(r.date), 'dd.MM.yyyy')}</p>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{format(new Date(r.date), 'EEEE', { locale: uz })}</p>
-                        </div>
+
+                        {(r.score > 0) && (
+                          <div className="flex flex-col items-center">
+                            <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest mb-1 italic">Dars Balli</span>
+                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-amber-500/20 flex items-center justify-center font-black text-amber-600 dark:text-amber-400 text-lg md:text-xl italic shadow-2xl shadow-amber-500/10 bg-amber-50 dark:bg-amber-900/10">
+                              {r.score}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      {r.score && (
-                        <div className="w-12 h-12 rounded-full border-2 border-orange-500 flex items-center justify-center font-black text-orange-600 text-sm italic shadow-lg shadow-orange-500/10">
-                          +{r.score}
+
+                      {r.note && (
+                        <div className="mt-2 p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border-l-4 border-indigo-500">
+                          <p className="text-xs md:text-sm font-bold text-indigo-700 dark:text-indigo-300 italic">
+                            💬 Ustoz izohi: "{r.note}"
+                          </p>
                         </div>
                       )}
                     </div>
                   )) : (
                     <div className="col-span-full text-center py-20 bg-white dark:bg-gray-800 rounded-[2.5rem] border border-dashed border-gray-200 dark:border-gray-700">
                       <Calendar size={48} className="mx-auto text-gray-200 mb-4" />
-                      <p className="text-gray-400 font-bold text-lg">Davomat ma{"'"}lumotlari hali kiritilmagan</p>
+                      <p className="text-gray-400 font-bold text-lg">Davomat ma'lumotlari hali kiritilmagan</p>
                     </div>
                   )}
                 </div>

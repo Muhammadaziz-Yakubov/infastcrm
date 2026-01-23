@@ -84,14 +84,22 @@ router.post('/', authenticate, async (req, res) => {
       });
 
       if (existing) {
-        existing.status = status.toUpperCase();
+        // Update fields if provided
+        Object.keys(data).forEach(key => {
+          if (key !== '_id' && key !== 'student_id' && key !== 'group_id' && key !== 'date') {
+            existing[key] = data[key];
+          }
+        });
+
+        if (data.status) existing.status = data.status.toUpperCase();
+
         existing.calculateCoins();
         await existing.save();
         savedRecords.push(existing);
       } else {
         const record = new Attendance({
           ...data,
-          status: status.toUpperCase(),
+          status: data.status ? data.status.toUpperCase() : 'ABSENT',
           date: recordDate
         });
         record.calculateCoins();
