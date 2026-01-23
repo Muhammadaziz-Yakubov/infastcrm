@@ -32,7 +32,9 @@ import {
   Mail,
   X,
   TrendingUp,
-  ArrowRight
+  ArrowRight,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -209,62 +211,98 @@ export default function StudentProfile() {
     }
   };
 
-  if (loading) return <div className="text-center py-24 text-gray-500 animate-pulse font-black uppercase tracking-[0.3em]">Profil yuklanmoqda...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh]">
+      <div className="w-16 h-16 border-4 border-indigo-600/20 rounded-full relative">
+        <div className="absolute inset-0 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <p className="mt-4 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 animate-pulse italic">Profil Yuklanmoqda...</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 animate-in fade-in duration-700">
-      {/* Header / Hero Section */}
-      <div className="relative h-96 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-700 to-indigo-900"></div>
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
 
-        <div className="max-w-7xl mx-auto px-6 h-full flex items-end pb-12 relative z-10">
+      {/* 🚀 HERO SECTION - Mobile Optimized */}
+      <div className="relative h-auto md:h-96 overflow-hidden bg-[#1a1c2e] pb-10 md:pb-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-gray-900 opacity-90"></div>
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
+
+        {/* Glow Spheres */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px]"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-[60px]"></div>
+
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex flex-col md:flex-row items-center md:items-end pb-0 md:pb-12 relative z-10 pt-10 md:pt-0">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-10 w-full">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-white/20 blur-3xl rounded-full scale-125 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="w-32 h-32 md:w-56 md:h-56 rounded-[2.5rem] md:rounded-[3.5rem] border-[6px] md:border-[10px] border-white dark:border-gray-900 bg-white shadow-2xl overflow-hidden relative transform group-hover:rotate-3 transition-transform duration-500">
+
+            {/* 📸 Profile Image with Status Ring */}
+            <div className="relative group shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-[2.5rem] blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
+              <div className="w-32 h-32 md:w-52 md:h-52 rounded-[2rem] md:rounded-[3rem] border-[6px] md:border-[8px] border-white dark:border-[#1a1c2e] bg-gray-800 shadow-2xl relative overflow-hidden group-hover:rotate-2 transition-transform duration-500">
                 {profile?.profile_image || imagePreview ? (
                   <img src={getImageUrl(profile?.profile_image || imagePreview)} className="w-full h-full object-cover" alt="" />
                 ) : (
-                  <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-indigo-500">
-                    <User size={64} md:size={80} strokeWidth={1} />
+                  <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-white/50">
+                    <User size={48} md:size={80} strokeWidth={1} />
                   </div>
                 )}
+
+                {/* Image Edit Overlay - Only on desktop or explicit touch */}
                 {isOwnProfile && (
-                  <label className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm">
-                    <Camera className="text-white" size={24} md:size={32} />
+                  <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
+                    <Camera className="text-white mb-2" size={24} md:size={32} />
+                    <span className="text-[8px] font-black text-white uppercase tracking-widest">Rasmni yangilash</span>
                     <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
                   </label>
                 )}
               </div>
+
+              {/* Online Status Badge */}
+              <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-2 rounded-xl border-4 border-white dark:border-[#1a1c2e] shadow-lg">
+                <CheckCircle2 size={16} md:size={24} fill="white" className="text-emerald-500" />
+              </div>
             </div>
 
-            <div className="flex-1 text-center md:text-left pb-4 space-y-4">
-              <div className="flex flex-col items-center md:items-start gap-4">
-                <h1 className="text-3xl md:text-6xl font-black text-white md:text-gray-900 dark:text-white tracking-tighter italic uppercase drop-shadow-sm leading-none">{profile?.full_name}</h1>
-                <div className="flex items-center gap-2">
-                  <div className="px-3 py-1.5 bg-white/10 md:bg-indigo-600 rounded-xl text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest border border-white/20 md:border-none shadow-xl shadow-indigo-500/20">TALABA</div>
-                  <div className="px-3 py-1.5 bg-white/10 md:bg-gray-100 dark:bg-gray-800/80 text-white/80 md:text-indigo-600 dark:text-indigo-400 rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest border border-white/10 dark:border-white/5">{profile?.group?.name || 'Mustaqil o\'quvchi'}</div>
+            {/* 👤 Info Block */}
+            <div className="flex-1 text-center md:text-left space-y-3 md:space-y-4 w-full">
+              <div>
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-2 md:mb-3">
+                  <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10 text-[9px] font-black text-indigo-300 uppercase tracking-widest backdrop-blur-md">
+                    Student ID: 00{profile?._id ? profile._id.slice(-3) : '---'}
+                  </span>
+                  {ranking && (
+                    <span className="px-2.5 py-1 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-[9px] font-black text-yellow-400 uppercase tracking-widest backdrop-blur-md flex items-center gap-1">
+                      <Trophy size={10} /> Rank #{ranking}
+                    </span>
+                  )}
                 </div>
+                <h1 className="text-3xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-xl truncate px-2 md:px-0">
+                  {profile?.full_name}
+                </h1>
+                <p className="text-white/60 font-bold text-xs md:text-sm mt-2 flex items-center justify-center md:justify-start gap-2">
+                  <GraduationCap size={14} />
+                  {profile?.group?.name || 'Mustaqil o\'quvchi'}
+                </p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 mt-4">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
                 {isOwnProfile && profile?.phone && (
-                  <div className="px-5 py-2.5 bg-white/10 md:bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center gap-2 md:gap-3 backdrop-blur-md border border-white/10 dark:border-white/5 shadow-sm">
-                    <Phone size={16} className="text-indigo-500" />
-                    <span className="text-sm font-black dark:text-gray-300 tracking-wider tabular-nums">{profile?.phone}</span>
+                  <div className="px-5 py-3 bg-white/5 rounded-2xl flex items-center gap-3 backdrop-blur-sm border border-white/5">
+                    <Phone size={14} className="text-gray-400" />
+                    <span className="text-xs font-bold text-gray-300 tracking-wider tabular-nums">{profile?.phone}</span>
                   </div>
                 )}
-                {ranking && (
-                  <div className="px-5 py-2.5 bg-gradient-to-br from-yellow-400 to-amber-500 text-black rounded-2xl flex items-center gap-2 md:gap-3 shadow-2xl shadow-yellow-500/30 border border-yellow-300 transform hover:scale-105 transition-transform duration-300">
-                    <Trophy size={16} strokeWidth={3} />
-                    <span className="text-[10px] md:text-sm font-black italic">RANK #{ranking}</span>
-                  </div>
-                )}
+
                 {isOwnProfile && (
-                  <button onClick={() => setEditModal(true)} className="px-6 py-2.5 bg-white text-indigo-600 rounded-2xl font-black shadow-xl hover:-translate-y-1 transition-all text-[10px] md:text-xs uppercase tracking-widest flex items-center gap-2 md:gap-3 group border border-gray-100 dark:border-white/5">
-                    <Settings size={16} className="group-hover:rotate-90 transition-transform duration-500" /> SOZLAMALAR
+                  <button onClick={() => setEditModal(true)} className="px-6 py-3 bg-white text-indigo-900 rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2">
+                    <Settings size={14} className="animate-spin-slow" /> Profilni Tahrirlash
+                  </button>
+                )}
+
+                {isOwnProfile && (
+                  <button onClick={() => navigate('/student')} className="md:hidden px-4 py-3 bg-white/10 text-white rounded-2xl font-bold border border-white/10 backdrop-blur-md">
+                    <ArrowRight size={18} />
                   </button>
                 )}
               </div>
@@ -273,132 +311,120 @@ export default function StudentProfile() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 -mt-8 relative z-20">
-        <div className="grid lg:grid-cols-3 gap-10">
-          {/* Left Sidebar */}
-          <div className="space-y-10">
-            {/* Stats Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-xl border border-gray-100 dark:border-gray-700/50 relative overflow-hidden group/stats">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full -mr-16 -mt-16 blur-3xl opacity-0 group-hover/stats:opacity-100 transition-opacity duration-700"></div>
-              <h3 className="text-[8px] md:text-xs font-black uppercase tracking-widest text-gray-400 mb-6 md:mb-10 ml-1 italic opacity-70">Akademiya Faoliyati</h3>
-              <div className="space-y-6 md:space-y-10 relative z-10">
-                {ranking && (
-                  <div className="flex items-center justify-between group/line">
-                    <div className="flex items-center gap-3 md:gap-5">
-                      <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 flex items-center justify-center shadow-sm border border-yellow-100/50 group-hover/line:scale-110 transition-transform duration-500">
-                        <TrendingUp size={20} md:size={24} />
-                      </div>
-                      <span className="text-[10px] md:text-sm font-bold dark:text-gray-300 uppercase tracking-widest">Reyting O'rni</span>
-                    </div>
-                    <span className="text-2xl md:text-3xl font-black text-yellow-500 italic drop-shadow-sm">#{ranking}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between group/line">
-                  <div className="flex items-center gap-3 md:gap-5">
-                    <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-orange-50 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center shadow-sm border border-orange-100/50 group-hover/line:scale-110 transition-transform duration-500">
-                      <Trophy size={20} md:size={24} />
-                    </div>
-                    <span className="text-[10px] md:text-sm font-bold dark:text-gray-300 uppercase tracking-widest">Yutuqlar</span>
-                  </div>
-                  <span className="text-2xl md:text-3xl font-black tabular-nums dark:text-white italic">{badges.length}</span>
+      {/* 📊 MAIN CONTENT GRID */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6 md:-mt-8 relative z-20 space-y-8 md:space-y-0">
+        <div className="grid lg:grid-cols-3 gap-6 md:gap-10">
+
+          {/* LEFT SIDEBAR - Stats & Quick Info */}
+          <div className="space-y-6">
+
+            {/* Quick Stats Card */}
+            <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl border border-gray-100 dark:border-gray-700/50 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 rounded-full -mr-10 -mt-10 blur-3xl"></div>
+
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <Sparkles size={20} />
                 </div>
-                <div className="flex items-center justify-between group/line">
-                  <div className="flex items-center gap-3 md:gap-5">
-                    <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center shadow-sm border border-indigo-100/50 group-hover/line:scale-110 transition-transform duration-500">
-                      <ShieldCheck size={20} md:size={24} />
-                    </div>
-                    <span className="text-[10px] md:text-sm font-bold dark:text-gray-300 uppercase tracking-widest">Sertifikatlar</span>
+                <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white italic">Faoliyat</h3>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                  <div className="flex items-center gap-3">
+                    <Award className="text-amber-500" size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Yutuqlar</span>
                   </div>
-                  <span className="text-2xl md:text-3xl font-black tabular-nums dark:text-white italic">{certificates.length}</span>
+                  <span className="text-xl font-black italic tabular-nums dark:text-white">{badges.length}</span>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700/50">
-                  <div className="flex items-center gap-3 md:gap-5">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center">
-                      <Calendar size={14} md:size={18} />
-                    </div>
-                    <span className="text-[8px] md:text-xs font-bold dark:text-gray-400 uppercase tracking-widest">A'zo bo'ldi</span>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck className="text-emerald-500" size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Sertifikatlar</span>
                   </div>
-                  <span className="text-[8px] md:text-xs font-black dark:text-indigo-400 uppercase tracking-widest">{profile?.createdAt ? format(new Date(profile.createdAt), 'MMM yyyy', { locale: uz }) : '--'}</span>
+                  <span className="text-xl font-black italic tabular-nums dark:text-white">{certificates.length}</span>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="text-indigo-500" size={20} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">A'zolik</span>
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-wider dark:text-white">{profile?.createdAt ? format(new Date(profile.createdAt), 'MMM yyyy', { locale: uz }) : '---'}</span>
                 </div>
               </div>
             </div>
 
+            {/* Back Button (Desktop) */}
             {isOwnProfile && (
               <button
-                onClick={() => navigate('/student-dashboard')}
-                className="w-full bg-white dark:bg-gray-800 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest shadow-xl border border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 transition-all flex items-center justify-center gap-3 md:gap-4 text-[8px] md:text-xs italic"
+                onClick={() => navigate('/student')}
+                className="hidden md:flex w-full bg-white dark:bg-gray-800 rounded-[2rem] p-5 text-gray-400 font-black uppercase tracking-widest shadow-lg border border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 transition-all items-center justify-center gap-3 text-[10px]"
               >
-                <ArrowLeft size={16} md:size={18} /> Bo'limlarga qaytish
+                <ArrowLeft size={16} /> Dashboardga qaytish
               </button>
             )}
           </div>
 
-          {/* Right Content */}
-          <div className="lg:col-span-2 space-y-10">
-            {/* Tabs */}
-            <div className="bg-white dark:bg-gray-800 p-2 rounded-[2rem] shadow-xl flex border border-gray-100 dark:border-gray-700/50 backdrop-blur-xl">
-              <button
-                onClick={() => setActiveTab('badges')}
-                className={`flex-1 py-5 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${activeTab === 'badges' ? 'bg-indigo-600 text-white shadow-2xl scale-105' : 'text-gray-400 hover:text-gray-500'}`}
-              >
-                <Award size={18} /> Yutuqlar ({badges.length})
+          {/* RIGHT CONTENT - Tabs */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Custom Tab Switcher */}
+            <div className="bg-white dark:bg-gray-800 p-2 rounded-[2rem] shadow-lg flex border border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+              <div className={`absolute top-2 bottom-2 w-[48%] bg-indigo-600 rounded-[1.5rem] transition-all duration-500 ease-spring ${activeTab === 'badges' ? 'left-2' : 'left-[50%]'}`}></div>
+
+              <button onClick={() => setActiveTab('badges')} className={`flex-1 py-4 md:py-5 rounded-[1.5rem] text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 relative z-10 transition-colors ${activeTab === 'badges' ? 'text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+                <Award size={16} md:size={18} /> Yutuqlar
               </button>
-              <button
-                onClick={() => setActiveTab('certificates')}
-                className={`flex-1 py-5 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${activeTab === 'certificates' ? 'bg-indigo-600 text-white shadow-2xl scale-105' : 'text-gray-400 hover:text-gray-500'}`}
-              >
-                <GraduationCap size={18} /> Sertifikatlar ({certificates.length})
+              <button onClick={() => setActiveTab('certificates')} className={`flex-1 py-4 md:py-5 rounded-[1.5rem] text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 relative z-10 transition-colors ${activeTab === 'certificates' ? 'text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+                <GraduationCap size={16} md:size={18} /> Sertifikatlar
               </button>
             </div>
 
-            {/* Tab Panels */}
+            {/* TAB CONTENT */}
             {activeTab === 'badges' ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-                {badgesLoading ? (
-                  <div className="col-span-full py-20 text-center animate-pulse text-gray-400">Yutuqlar yuklanmoqda...</div>
-                ) : badges.length === 0 ? (
-                  <div className="col-span-full bg-white dark:bg-gray-800/40 rounded-[3rem] p-20 text-center border-2 border-dashed border-gray-100 dark:border-gray-700/50">
-                    <Award size={48} className="mx-auto text-gray-200 mb-4" />
-                    <p className="text-gray-400 font-bold">Hozircha yutuqlar mavjud emas</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 animate-in slide-in-from-bottom-4 duration-500">
+                {badges.length === 0 ? (
+                  <div className="col-span-full py-20 text-center bg-gray-100 dark:bg-gray-800/50 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <Award size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Hozircha yutuqlar yo'q</p>
                   </div>
                 ) : (
                   badges.map(badge => (
-                    <div key={badge._id} className="group bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl border border-gray-100 dark:border-gray-700/50 hover:-translate-y-2 transition-all flex flex-col items-center text-center">
-                      <div className="w-24 h-24 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 mb-6 group-hover:rotate-12 transition-transform shadow-inner">
-                        <Award size={40} strokeWidth={2.5} />
+                    <div key={badge._id} className="bg-white dark:bg-gray-800 rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-700/50 flex flex-col items-center text-center hover:shadow-xl transition-all group">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center text-indigo-500 mb-4 group-hover:scale-110 group-hover:rotate-12 transition-transform">
+                        <Award size={32} md:size={40} strokeWidth={2} />
                       </div>
-                      <h4 className="font-black text-gray-900 dark:text-white uppercase tracking-tighter text-sm mb-2 italic">{badge.badge_id?.name || 'Yutuq'}</h4>
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 line-clamp-2 leading-relaxed uppercase tracking-widest">{badge.badge_id?.description}</p>
+                      <h4 className="font-black text-gray-900 dark:text-white uppercase text-[10px] md:text-xs italic leading-tight mb-2">{badge.badge_id?.name || 'Yutuq'}</h4>
+                      <p className="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-wider line-clamp-2">{badge.badge_id?.description}</p>
                     </div>
                   ))
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {certificatesLoading ? (
-                  <div className="col-span-full py-20 text-center animate-pulse text-gray-400">Sertifikatlar yuklanmoqda...</div>
-                ) : certificates.length === 0 ? (
-                  <div className="col-span-full bg-white dark:bg-gray-800/40 rounded-[3rem] p-20 text-center border-2 border-dashed border-gray-100 dark:border-gray-700/50">
-                    <GraduationCap size={48} className="mx-auto text-gray-200 mb-4" />
-                    <p className="text-gray-400 font-bold">Hozircha sertifikatlar mavjud emas</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in slide-in-from-bottom-4 duration-500">
+                {certificates.length === 0 ? (
+                  <div className="col-span-full py-20 text-center bg-gray-100 dark:bg-gray-800/50 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <GraduationCap size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Sertifikatlar mavjud emas</p>
                   </div>
                 ) : (
                   certificates.map(cert => (
-                    <div key={cert._id} className="group bg-white dark:bg-gray-800 rounded-[3rem] p-10 shadow-xl border border-gray-100 dark:border-gray-700/50 hover:-translate-y-2 transition-all overflow-hidden relative">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                      <div className="w-16 h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mb-8 shadow-xl shadow-indigo-600/30">
-                        <GraduationCap size={32} />
+                    <div key={cert._id} className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-gray-700/50 relative overflow-hidden group hover:shadow-xl transition-all">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-8 -mt-8"></div>
+                      <div className="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/20">
+                        <GraduationCap size={24} />
                       </div>
-                      <h4 className="text-2xl font-black text-gray-900 dark:text-white mb-3 italic uppercase tracking-tighter leading-none">{cert.title || 'Kursni tugatganlik to\'g\'risida'}</h4>
-                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-8 uppercase tracking-widest">{cert.course_id?.name}</p>
+                      <h4 className="font-black text-gray-900 dark:text-white text-lg md:text-xl italic uppercase tracking-tighter mb-1 leading-none">{cert.title || 'Sertifikat'}</h4>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">{cert.course_id?.name || 'Kurs nomi'}</p>
+
                       <a
                         href={cert.file_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-3 text-indigo-600 dark:text-indigo-400 font-black text-[10px] uppercase tracking-[0.3em] group-hover:gap-5 transition-all"
+                        className="w-full py-3 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white transition-all"
                       >
-                        SIKLASH VA YUKLASH <Download size={14} strokeWidth={3} />
+                        Yuklab olish <Download size={14} />
                       </a>
                     </div>
                   ))
@@ -409,51 +435,52 @@ export default function StudentProfile() {
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* ✏️ EDIT MODAL - Optimized */}
       {editModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-xl rounded-[3rem] p-12 shadow-2xl relative animate-in zoom-in-95 duration-500 border border-white/5">
-            <button onClick={() => setEditModal(false)} className="absolute top-10 right-10 p-3 text-gray-400 hover:text-white hover:bg-rose-500 rounded-2xl transition-all">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#1a1c2e] w-full max-w-md rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative animate-in zoom-in-95">
+            <button onClick={() => setEditModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-rose-500 transition-colors">
               <X size={24} />
             </button>
-            <h3 className="text-4xl font-black mb-10 dark:text-white italic uppercase tracking-tighter">Profil Sozlamalari</h3>
 
-            <form onSubmit={handleUpdateProfile} className="space-y-8">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">To'liq ism</label>
+            <h3 className="text-2xl font-black mb-8 dark:text-white italic uppercase tracking-tighter text-center">Profilni Tahrirlash</h3>
+
+            <form onSubmit={handleUpdateProfile} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">ISM FAMILIYA</label>
                 <input
                   required
                   type="text"
                   value={formData.full_name}
                   onChange={e => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full px-8 py-5 bg-gray-50 dark:bg-gray-900 border-none rounded-[2rem] text-sm font-bold dark:text-white focus:ring-4 ring-indigo-500/10 transition-all shadow-inner"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-black/20 border-2 border-transparent focus:border-indigo-500 rounded-2xl text-sm font-bold dark:text-white transition-all outline-none"
                 />
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">Telefon raqami</label>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">TELEFON RAQAM</label>
                 <input
                   required
                   type="text"
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-8 py-5 bg-gray-50 dark:bg-gray-900 border-none rounded-[2rem] text-sm font-bold dark:text-white focus:ring-4 ring-indigo-500/10 transition-all shadow-inner"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-black/20 border-2 border-transparent focus:border-indigo-500 rounded-2xl text-sm font-bold dark:text-white transition-all outline-none"
                 />
               </div>
 
-              <div className="pt-4 space-y-4">
+              <div className="pt-4 grid grid-cols-1 gap-3">
                 <button
                   type="button"
                   onClick={() => { setEditModal(false); setPassModal(true); }}
-                  className="w-full py-5 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-900/10 text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-[0.2em] text-[10px] hover:bg-indigo-100 transition-all flex items-center justify-center gap-3"
+                  className="w-full py-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-widest text-[10px] hover:bg-indigo-100 transition-all"
                 >
-                  <Lock size={16} /> Parolni yangilash
+                  XAVFSIZLIK SOZLAMALARI
                 </button>
                 <button
                   type="submit"
                   disabled={editing}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-blue-700 text-white py-6 rounded-[2rem] font-black shadow-2xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-2 transition-all italic text-lg uppercase tracking-widest disabled:opacity-50"
+                  className="w-full bg-indigo-600 text-white py-4 rounded-xl font-black shadow-lg shadow-indigo-600/30 text-xs uppercase tracking-widest disabled:opacity-50 hover:bg-indigo-700 transition-all"
                 >
-                  {editing ? 'SAQLANMOQDA...' : 'O\'ZGARISHLARNI SAQLASH'}
+                  {editing ? 'SAQLANMOQDA...' : 'SAQLASH'}
                 </button>
               </div>
             </form>
@@ -461,61 +488,51 @@ export default function StudentProfile() {
         </div>
       )}
 
-      {/* Password Modal */}
+      {/* 🔐 PASSWORD MODAL - Optimized */}
       {passModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[3rem] p-12 shadow-2xl relative animate-in zoom-in-95 border border-white/5">
-            <button onClick={() => setPassModal(false)} className="absolute top-10 right-10 p-3 text-gray-400 hover:text-white hover:bg-rose-500 rounded-2xl transition-all">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#1a1c2e] w-full max-w-md rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative animate-in zoom-in-95">
+            <button onClick={() => setPassModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-rose-500 transition-colors">
               <X size={24} />
             </button>
-            <h3 className="text-3xl font-black mb-10 dark:text-white italic uppercase tracking-tighter">Parolni o'zgartirish</h3>
+            <h3 className="text-2xl font-black mb-8 dark:text-white italic uppercase tracking-tighter text-center">Xavfsizlik</h3>
 
-            <form onSubmit={handleChangePassword} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 text-gray-500 mb-2 block">JORIY PAROL</label>
-                <input
-                  required
-                  type="password"
-                  value={passData.oldPassword}
-                  onChange={e => setPassData({ ...passData, oldPassword: e.target.value })}
-                  className="w-full px-8 py-5 bg-gray-50 dark:bg-gray-900 border-none rounded-[2rem] text-sm font-bold dark:text-white focus:ring-4 ring-indigo-500/10 shadow-inner"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 text-gray-500 mb-2 block">YANGI PAROL</label>
-                <input
-                  required
-                  type="password"
-                  value={passData.newPassword}
-                  onChange={e => setPassData({ ...passData, newPassword: e.target.value })}
-                  className="w-full px-8 py-5 bg-gray-50 dark:bg-gray-900 border-none rounded-[2rem] text-sm font-bold dark:text-white focus:ring-4 ring-indigo-500/10 shadow-inner"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 text-gray-500 mb-2 block">YANGI PAROLNI TASDIQLASH</label>
-                <input
-                  required
-                  type="password"
-                  value={passData.confirmPassword}
-                  onChange={e => setPassData({ ...passData, confirmPassword: e.target.value })}
-                  className="w-full px-8 py-5 bg-gray-50 dark:bg-gray-900 border-none rounded-[2rem] text-sm font-bold dark:text-white focus:ring-4 ring-indigo-500/10 shadow-inner"
-                  placeholder="••••••••"
-                />
-              </div>
+            <form onSubmit={handleChangePassword} className="space-y-5">
+              {['Joriy Parol', 'Yangi Parol', 'Tasdiqlash'].map((label, i) => (
+                <div key={i} className="space-y-2">
+                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-2">{label}</label>
+                  <input
+                    required
+                    type="password"
+                    value={i === 0 ? passData.oldPassword : i === 1 ? passData.newPassword : passData.confirmPassword}
+                    onChange={e => {
+                      const key = i === 0 ? 'oldPassword' : i === 1 ? 'newPassword' : 'confirmPassword';
+                      setPassData({ ...passData, [key]: e.target.value })
+                    }}
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-black/20 border-2 border-transparent focus:border-indigo-500 rounded-2xl text-sm font-bold dark:text-white transition-all outline-none"
+                    placeholder="••••••••"
+                  />
+                </div>
+              ))}
 
               <button
                 type="submit"
                 disabled={passLoading}
-                className="w-full bg-indigo-600 text-white py-6 rounded-[2rem] font-black shadow-2xl shadow-indigo-600/30 mt-6 italic text-lg uppercase tracking-widest disabled:opacity-50"
+                className="w-full bg-indigo-600 text-white py-4 rounded-xl font-black shadow-lg shadow-indigo-600/30 mt-4 text-xs uppercase tracking-widest disabled:opacity-50 hover:bg-indigo-700 transition-all"
               >
-                {passLoading ? 'YANGILANMOQDA...' : 'PAROLNI SAQLASH'}
+                {passLoading ? 'YANGILANMOQDA...' : 'PAROLNI YANGILASH'}
               </button>
             </form>
           </div>
         </div>
       )}
+
+      {/* Custom Styles for animation */}
+      <style>{`
+         @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+         .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+         .ease-spring { transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+      `}</style>
     </div>
   );
 }
