@@ -15,20 +15,40 @@ const steps = [
 ];
 
 const sessions = {};
+// To prevent processing the same message multiple times across instances (mostly helps with restarts)
+const processedMessageIds = new Set();
 
 export const initSurveyBot = () => {
+    // Avoid running the survey bot locally if we are in development and want to avoid conflicts with production
+    if (process.env.DISABLE_SURVEY_BOT === 'true') {
+        console.log('🚫 Standalone Survey Bot is disabled via environment variable');
+        return;
+    }
+
     try {
         const bot = new TelegramBot(TOKEN, { polling: true });
 
         bot.on('message', async (msg) => {
             const chatId = msg.chat.id;
             const text = msg.text;
+            const messageId = msg.message_id;
 
-            // Only respond in private chats for the survey
-            if (msg.chat.type !== 'private') return;
+            // 1. Basic checks
+            if (msg.chat.type !== 'private' || !text) return;
 
+            // 2. Prevent duplicate processing of the same message ID
+            if (processedMessageIds.has(messageId)) return;
+            processedMessageIds.add(messageId);
+
+            // Keep memory clean (keep only last 100 message IDs)
+            if (processedMessageIds.size > 100) {
+                const firstId = processedMessageIds.values().next().value;
+                processedMessageIds.delete(firstId);
+            }
+
+            // 3. Handle /start - RESET Session
             if (text === '/start') {
-                sessions[chatId] = { stepIndex: 0, data: {} };
+                sessions[chatId] = { stepIndex: 0, data: {}, isProcessing: false };
                 await bot.sendMessage(chatId, `Assalomu alaykum! Botga xush kelibsiz.\n\n${steps[0].question}`);
                 return;
             }
@@ -36,23 +56,29 @@ export const initSurveyBot = () => {
             const session = sessions[chatId];
             if (!session) return;
 
-            const currentStep = steps[session.stepIndex];
-            session.data[currentStep.key] = text;
-            session.stepIndex++;
+            // 4. Lock mechanism to prevent race conditions during rapid messages
+            if (session.isProcessing) return;
+            session.isProcessing = true;
 
-            if (session.stepIndex < steps.length) {
-                await bot.sendMessage(chatId, steps[session.stepIndex].question);
-            } else {
-                // Survey complete
-                await bot.sendMessage(chatId, "Rahmat vaqtingizni ajratganingiz uchun!");
+            try {
+                const currentStep = steps[session.stepIndex];
+                session.data[currentStep.key] = text;
+                session.stepIndex++;
 
-                // Format the data and send to group
-                const report = `
+                if (session.stepIndex < steps.length) {
+                    await bot.sendMessage(chatId, steps[session.stepIndex].question);
+                    session.isProcessing = false; // Unlock for next answer
+                } else {
+                    // Survey complete
+                    await bot.sendMessage(chatId, "Rahmat vaqtingizni ajratganingiz uchun!");
+
+                    // Format the data and send to group
+                    const report = `
 📝 <b>Yangi so'rovnoma ma'lumotlari:</b>
 
 👤 <b>F.I.SH:</b> ${session.data.fullName}
 📍 <b>Tuman:</b> ${session.data.district}
- <b>Maktab:</b> ${session.data.school}
+🏫 <b>Maktab:</b> ${session.data.school}
 🎓 <b>Sinf:</b> ${session.data.schoolClass}
 🏢 <b>MFY:</b> ${session.data.mfy}
 🏘 <b>Mahalla/Ko'cha:</b> ${session.data.street}
@@ -60,21 +86,25 @@ export const initSurveyBot = () => {
 📞 <b>Ota-ona raqami:</b> ${session.data.parentPhone}
 
 📅 <i>Jo'natilgan sana: ${new Date().toLocaleString('uz-UZ')}</i>
-                `.trim();
+                    `.trim();
 
-                try {
-                    await bot.sendMessage(GROUP_CHAT_ID, report, { parse_mode: 'HTML' });
-                } catch (groupError) {
-                    console.error('Error sending survey report to group:', groupError.message);
+                    try {
+                        await bot.sendMessage(GROUP_CHAT_ID, report, { parse_mode: 'HTML' });
+                    } catch (groupError) {
+                        console.error('Error sending survey report to group:', groupError.message);
+                    }
+
+                    delete sessions[chatId];
                 }
-
-                delete sessions[chatId];
+            } catch (err) {
+                console.error('Error processing survey step:', err);
+                session.isProcessing = false;
             }
         });
 
         bot.on('polling_error', (error) => {
             if (error.code === 'ETELEGRAM' && error.message.includes('409 Conflict')) {
-                // Ignore conflict errors - another instance might be running briefly during dev
+                console.warn('⚠️ Polling Conflict: Multiple bot instances detected. Please turn off local server if production is active.');
                 return;
             }
             console.error('Survey Bot Polling Error:', error.message);
