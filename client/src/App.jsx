@@ -29,6 +29,7 @@ import Referrals from './pages/Referrals';
 import AdminCoins from './pages/AdminCoins';
 import AdminMarket from './pages/AdminMarket';
 import StudentMarket from './pages/StudentMarket';
+import AdminEvents from './pages/AdminEvents';
 import Layout from './components/Layout';
 
 // PrivateRoute komponenti endi ishlatilmaydi, chunki AppRoutes buni boshqaradi
@@ -79,6 +80,7 @@ function AppRoutes() {
           <Route path="referrals" element={<Referrals />} />
           <Route path="coins" element={<AdminCoins />} />
           <Route path="market" element={<AdminMarket />} />
+          <Route path="events" element={<AdminEvents />} />
         </Route>
 
         {/* Catch all - redirect to appropriate dashboard */}

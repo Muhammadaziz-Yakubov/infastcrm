@@ -23,7 +23,8 @@ import {
   Activity,
   DollarSign,
   GraduationCap,
-  Users2
+  Users2,
+  CalendarEvent
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -270,6 +271,25 @@ export default function Dashboard() {
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">Imtihonlar</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Yaratish va nazor qilish</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-sm font-medium group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+              <span>Ochish</span>
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          <Link
+            to="/events"
+            className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-700 transform hover:-translate-y-1"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl">
+                <CalendarEvent className="text-white" size={20} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Tadbirlar</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Tashkil etish va boshqarish</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-sm font-medium group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">

@@ -2,6 +2,7 @@ import express from 'express';
 import Event from '../models/Event.js';
 import Student from '../models/Student.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
+import { processEventAttendance } from '../services/eventService.js';
 
 const router = express.Router();
 
@@ -144,6 +145,16 @@ router.post('/:id/attendance', authenticate, requireAdmin, async (req, res) => {
     
     await event.save();
     res.json({ message: 'Attendance updated' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Process event rewards/penalties (admin)
+router.post('/:id/process-rewards', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await processEventAttendance(req.params.id, req.user.id);
+    res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

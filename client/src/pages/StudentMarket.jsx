@@ -149,7 +149,6 @@ export default function StudentMarket() {
         <title>Market | InFast Academy</title>
         <meta name="description" content="Coinlaringizni ajoyib sovg'alarga almashtiring. InFast Academy Marketi." />
       </Helmet>
-
       {/* 🚀 Clean & Professional Header */}
       <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-600 shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 opacity-90"></div>
