@@ -29,8 +29,7 @@ import {
   Settings,
   MoreVertical,
   ArrowUpRight,
-  Coins,
-  CalendarEvent
+  Coins
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -94,7 +93,7 @@ export default function StudentDashboard() {
     { id: 'tasks', label: 'Vazifalar', icon: FileCode },
     { id: 'classmates', label: 'Guruhim', icon: Users },
     { id: 'market', label: 'Coin Market', icon: ShoppingBag },
-    { id: 'events', label: 'Tadbirlar', icon: CalendarEvent },
+    { id: 'events', label: 'Tadbirlar', icon: Calendar },
     { id: 'exams', label: 'Imtihonlar', icon: Target },
     { id: 'rating', label: 'Reyting', icon: Trophy },
     { id: 'attendance', label: 'Davomat', icon: Calendar },
@@ -441,7 +440,7 @@ export default function StudentDashboard() {
               {[
                 { id: 'overview', icon: LayoutDashboard, label: 'Asosiy' },
                 { id: 'tasks', icon: FileCode, label: 'Vazifa' },
-                { id: 'events', icon: CalendarEvent, label: 'Tadbir' },
+                { id: 'events', icon: Calendar, label: 'Tadbir' },
                 { id: 'market', icon: ShoppingBag, label: 'Market' },
                 { id: 'rating', icon: Trophy, label: 'Reyting' },
                 { id: 'profile', icon: UserCircle, label: 'Profil' }
