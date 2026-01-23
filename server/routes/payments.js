@@ -11,6 +11,8 @@ const router = express.Router();
 router.get('/', authenticate, async (req, res) => {
   try {
     const { student_id, start_date, end_date, month, year } = req.query;
+    console.log('🔍 Payments query params:', { student_id, month, year, start_date, end_date });
+    
     const filter = {};
     if (student_id) filter.student_id = student_id;
     
@@ -21,6 +23,7 @@ router.get('/', authenticate, async (req, res) => {
         $gte: startOfMonth,
         $lte: endOfMonth
       };
+      console.log(`📅 Filtering payments for ${year}-${month}: ${startOfMonth.toISOString()} to ${endOfMonth.toISOString()}`);
     } else if (start_date || end_date) {
       filter.payment_date = {};
       if (start_date) filter.payment_date.$gte = new Date(start_date);
@@ -33,8 +36,11 @@ router.get('/', authenticate, async (req, res) => {
         populate: { path: 'group_id' }
       })
       .sort({ payment_date: -1 });
+    
+    console.log(`📊 Found ${payments.length} payments`);
     res.json(payments);
   } catch (error) {
+    console.error('❌ Payments error:', error);
     res.status(500).json({ message: error.message });
   }
 });
