@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import {
     Trophy,
@@ -10,104 +10,47 @@ import {
     Zap,
     BookOpen,
     FileCode,
-    Brain,
     GraduationCap,
-    Filter,
-    ChevronDown,
     Users2,
-    Search,
     RefreshCw
 } from 'lucide-react';
 
 export default function StudentRatingView() {
     const [ratings, setRatings] = useState([]);
-    const [filters, setFilters] = useState({ groups: [], courses: [] });
-    const [selectedFilters, setSelectedFilters] = useState({ groupId: '', courseId: '' });
-    const [myGlobalRating, setMyGlobalRating] = useState(null);
+    const [myRating, setMyRating] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [filterLoading, setFilterLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        fetchInitialData();
+        fetchData();
     }, []);
-
-    useEffect(() => {
-        fetchRatings();
-    }, [selectedFilters]);
 
     const getImageUrl = (path) => {
         if (!path) return null;
         if (path.startsWith('http') || path.startsWith('data:')) return path;
-        // Adjust based on your API structure. Assuming baseURL ends with /api/
         const apiBase = api.defaults.baseURL.replace('/api/', '');
         const cleanPath = path.startsWith('/') ? path : `/${path}`;
         return `${apiBase}${cleanPath}`;
     };
 
-    const fetchInitialData = async () => {
+    const fetchData = async () => {
         try {
-            setLoading(true);
-            const [filterRes, myRes] = await Promise.all([
-                api.get('public/filters'),
+            if (!loading) setRefreshing(true);
+            else setLoading(true);
+
+            const [ratingsRes, myRes] = await Promise.all([
+                api.get('public/ratings?limit=1000'),
                 api.get('student-auth/my-rating')
             ]);
-            setFilters(filterRes.data);
-            setMyGlobalRating(myRes.data);
+            setRatings(ratingsRes.data);
+            setMyRating(myRes.data);
         } catch (error) {
-            console.error('Error fetching initial rating data:', error);
+            console.error('Error fetching rating data:', error);
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
-
-    const fetchRatings = async () => {
-        try {
-            setFilterLoading(true);
-            const params = new URLSearchParams();
-            if (selectedFilters.groupId) params.append('groupId', selectedFilters.groupId);
-            if (selectedFilters.courseId) params.append('courseId', selectedFilters.courseId);
-            params.append('limit', '1000'); // Get all students for the ranking
-
-            const res = await api.get(`public/ratings?${params.toString()}`);
-            setRatings(res.data);
-        } catch (error) {
-            console.error('Error fetching ratings:', error);
-        } finally {
-            setFilterLoading(false);
-        }
-    };
-
-    // Calculate current context rating (if filtered, find me in the filtered list)
-    const myCurrentRating = useMemo(() => {
-        if (!myGlobalRating) return null;
-        // If filtered, find me in the results
-        const meInResults = ratings.find(r => r.student_id === myGlobalRating.student_id);
-        if (meInResults) {
-            return {
-                ...meInResults,
-                totalStudents: ratings.length,
-                isGlobal: !selectedFilters.groupId && !selectedFilters.courseId
-            };
-        }
-        // If not in results (filtered out or not matched), show global info but marked as filtered
-        return {
-            ...myGlobalRating,
-            totalStudents: ratings.length,
-            isGlobal: true,
-            notFoundInFilter: true
-        };
-    }, [myGlobalRating, ratings, selectedFilters]);
-
-    const filteredList = useMemo(() => {
-        if (!searchTerm) return ratings;
-        return ratings.filter(r =>
-            r.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            r.group_name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [ratings, searchTerm]);
-
-    const top3 = ratings.slice(0, 3);
 
     if (loading) return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6">
@@ -115,6 +58,8 @@ export default function StudentRatingView() {
             <p className="text-gray-500 font-black uppercase tracking-[0.3em] animate-pulse text-sm">Reyting yuklanmoqda...</p>
         </div>
     );
+
+    const top3 = ratings.slice(0, 3);
 
     return (
         <div className="space-y-12 pb-32 animate-in fade-in duration-700">
@@ -128,63 +73,26 @@ export default function StudentRatingView() {
                         </div>
                     </div>
                     <div>
-                        <h2 className="text-3xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Elite Leaderboard</h2>
+                        <h2 className="text-4xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Elite Leaderboard</h2>
                         <p className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-[0.4em] mt-2 ml-1 opacity-70 flex items-center gap-2">
-                            <Zap size={12} className="text-yellow-400" /> Akademiya reyting tizimi
+                            <Zap size={12} className="text-yellow-400" /> Akademiya barcha talabalari reytingi
                         </p>
                     </div>
                 </div>
 
-                {/* Filters & Search */}
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-indigo-500 transition-colors" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Izlash..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-white dark:bg-gray-800 border-none rounded-2xl pl-12 pr-6 py-3.5 text-xs font-bold focus:ring-4 ring-indigo-500/10 transition-all dark:text-white shadow-xl shadow-gray-200/10 dark:shadow-none w-full md:w-48"
-                        />
-                    </div>
-
-                    <div className="relative group">
-                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-indigo-500 transition-colors" size={16} />
-                        <select
-                            value={selectedFilters.courseId}
-                            onChange={(e) => setSelectedFilters(prev => ({ ...prev, courseId: e.target.value }))}
-                            className="appearance-none bg-white dark:bg-gray-800 border-none rounded-2xl pl-12 pr-10 py-3.5 text-xs font-bold focus:ring-4 ring-indigo-500/10 transition-all dark:text-white shadow-xl shadow-gray-200/10 dark:shadow-none min-w-[160px]"
-                        >
-                            <option value="">Barcha Fanlar</option>
-                            {filters.courses.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-                        </select>
-                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
-                    </div>
-
-                    <div className="relative group">
-                        <Users2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-focus-within:text-indigo-500 transition-colors" size={16} />
-                        <select
-                            value={selectedFilters.groupId}
-                            onChange={(e) => setSelectedFilters(prev => ({ ...prev, groupId: e.target.value }))}
-                            className="appearance-none bg-white dark:bg-gray-800 border-none rounded-2xl pl-12 pr-10 py-3.5 text-xs font-bold focus:ring-4 ring-indigo-500/10 transition-all dark:text-white shadow-xl shadow-gray-200/10 dark:shadow-none min-w-[150px]"
-                        >
-                            <option value="">Barcha Guruhlar</option>
-                            {filters.groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
-                        </select>
-                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
-                    </div>
-
+                <div className="flex items-center gap-4">
                     <button
-                        onClick={() => { setSelectedFilters({ groupId: '', courseId: '' }); setSearchTerm(''); }}
-                        className="p-3.5 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-indigo-500 rounded-2xl transition-all"
+                        onClick={fetchData}
+                        className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 text-gray-900 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-gray-200/20 dark:shadow-none"
                     >
-                        <RefreshCw size={18} className={filterLoading ? 'animate-spin' : ''} />
+                        <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+                        {refreshing ? 'Yangilanmoqda...' : 'Yangilash'}
                     </button>
                 </div>
             </div>
 
             {/* Compact Personal Rank Summary */}
-            {myCurrentRating && (
+            {myRating && (
                 <div className="relative group overflow-hidden animate-in slide-in-from-top duration-700">
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/5 via-purple-600/5 to-pink-600/5 rounded-[2.2rem] blur-xl"></div>
                     <div className="relative z-10 bg-white/40 dark:bg-[#0f111a]/40 backdrop-blur-2xl rounded-[2.2rem] p-5 md:p-6 border border-white/20 dark:border-white/5 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xl">
@@ -192,33 +100,33 @@ export default function StudentRatingView() {
                             <div className="relative shrink-0">
                                 <div className="absolute -inset-1 bg-gradient-to-tr from-yellow-400 to-orange-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
                                 <div className="w-14 h-14 md:w-16 md:h-16 bg-[#1a1c2e] rounded-2xl flex items-center justify-center border border-white/10 overflow-hidden relative shadow-lg">
-                                    {myCurrentRating.profile_image ? (
-                                        <img src={getImageUrl(myCurrentRating.profile_image)} className="w-full h-full object-cover" alt="Me" />
+                                    {myRating.profile_image ? (
+                                        <img src={getImageUrl(myRating.profile_image)} className="w-full h-full object-cover" alt="Me" />
                                     ) : (
                                         <div className="flex flex-col items-center">
                                             <span className="text-white/40 text-[7px] font-black uppercase mb-0.5">Rank</span>
-                                            <span className="text-xl md:text-2xl font-black text-yellow-400 italic tabular-nums">#{myCurrentRating.rank}</span>
+                                            <span className="text-xl md:text-2xl font-black text-yellow-400 italic tabular-nums">#{myRating.rank}</span>
                                         </div>
                                     )}
                                 </div>
-                                {myCurrentRating.profile_image && (
+                                {myRating.profile_image && (
                                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-yellow-500 text-black font-black text-[8px] px-2.5 py-0.5 rounded-full shadow-lg z-20 whitespace-nowrap">
-                                        #{myCurrentRating.rank} O'RIN
+                                        #{myRating.rank} O'RIN
                                     </div>
                                 )}
                             </div>
 
                             <div className="text-center md:text-left">
                                 <h3 className="text-base md:text-xl font-black italic uppercase tracking-tight dark:text-white flex items-center gap-2 justify-center md:justify-start">
-                                    {myCurrentRating.full_name}
+                                    {myRating.full_name}
                                     <Star className="text-yellow-400 fill-yellow-400 animate-pulse" size={14} />
                                 </h3>
                                 <div className="flex items-center gap-3 mt-1 justify-center md:justify-start">
                                     <span className="text-[9px] font-black text-white px-2 py-0.5 bg-indigo-600 rounded-md uppercase tracking-widest">
-                                        {myCurrentRating.isGlobal ? 'Global' : 'Guruh'}
+                                        Sizning natijangiz
                                     </span>
                                     <span className="flex items-center gap-1.5 text-[10px] md:text-xs font-black text-indigo-500 uppercase tracking-tighter italic">
-                                        <TrendingUp size={12} /> {(myCurrentRating.total_points || myCurrentRating.totalPoints || 0).toLocaleString()} Power Points
+                                        <TrendingUp size={12} /> {(myRating.total_points || myRating.totalPoints || 0).toLocaleString()} Power Points
                                     </span>
                                 </div>
                             </div>
@@ -226,10 +134,10 @@ export default function StudentRatingView() {
 
                         <div className="flex flex-wrap justify-center gap-2 md:gap-3 border-t lg:border-t-0 lg:border-l border-gray-100 dark:border-white/5 pt-5 lg:pt-0 lg:pl-6">
                             {[
-                                { label: 'Darslar', val: myCurrentRating.stats?.lessons || 0, icon: BookOpen, color: 'text-blue-400' },
-                                { label: 'Vazifa', val: myCurrentRating.stats?.tasks || 0, icon: FileCode, color: 'text-purple-400' },
-                                { label: 'Quiz', val: myCurrentRating.stats?.quizzes || 0, icon: Zap, color: 'text-amber-400' },
-                                { label: 'Exam', val: myCurrentRating.stats?.exams || 0, icon: GraduationCap, color: 'text-rose-400' }
+                                { label: 'Darslar', val: myRating.stats?.lessons || 0, icon: BookOpen, color: 'text-blue-400' },
+                                { label: 'Vazifa', val: myRating.stats?.tasks || 0, icon: FileCode, color: 'text-purple-400' },
+                                { label: 'Quiz', val: myRating.stats?.quizzes || 0, icon: Zap, color: 'text-amber-400' },
+                                { label: 'Exam', val: myRating.stats?.exams || 0, icon: GraduationCap, color: 'text-rose-400' }
                             ].map((stat, i) => (
                                 <div key={i} className="flex flex-col items-center bg-gray-50 dark:bg-white/5 px-3 py-1.5 rounded-xl min-w-[65px] border border-transparent hover:border-indigo-500/20 transition-all">
                                     <stat.icon size={12} className={stat.color} />
@@ -242,9 +150,9 @@ export default function StudentRatingView() {
                 </div>
             )}
 
-            {/* Podium for top 3 - Only visible when not searching */}
-            {!searchTerm && top3.length > 0 && (
-                <div className={`grid grid-cols-3 gap-4 md:gap-16 items-end max-w-5xl mx-auto pt-24 px-4 relative transition-all duration-500 ${filterLoading ? 'opacity-50 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'}`}>
+            {/* Podium for top 3 */}
+            {top3.length > 0 && (
+                <div className={`grid grid-cols-3 gap-4 md:gap-16 items-end max-w-5xl mx-auto pt-24 px-4 relative transition-all duration-500 ${refreshing ? 'opacity-50 blur-sm' : 'opacity-100'}`}>
                     {/* 2nd Place */}
                     {top3[1] && (
                         <div className="flex flex-col items-center gap-6 group hover:-translate-y-2 transition-all duration-500">
@@ -324,26 +232,26 @@ export default function StudentRatingView() {
                 </div>
             )}
 
-            {/* Elite Table List - Showing Everyone starting from Rank 1 */}
-            <div className={`bg-white dark:bg-[#0f111a] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] dark:shadow-none overflow-hidden border border-gray-100 dark:border-white/5 backdrop-blur-2xl transition-all duration-500 ${filterLoading ? 'opacity-50 blur-[2px] scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
+            {/* Elite Table List */}
+            <div className={`bg-white dark:bg-[#0f111a] rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] dark:shadow-none overflow-hidden border border-gray-100 dark:border-white/5 backdrop-blur-2xl transition-all duration-500 ${refreshing ? 'opacity-50 blur-[2px]' : 'opacity-100'}`}>
                 <div className="p-8 md:p-10 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 flex items-center justify-between">
                     <h3 className="font-black text-xl md:text-2xl text-gray-900 dark:text-white flex items-center gap-4 italic uppercase tracking-tighter">
                         <TrendingUp size={28} className="text-indigo-500" />
-                        O'quvchilar Umumiy Reytingi
+                        Ro'yxat (Top 1000)
                     </h3>
                     <div className="px-5 py-2 bg-indigo-600 rounded-2xl text-[10px] md:text-xs font-black text-white uppercase tracking-widest shadow-xl shadow-indigo-600/30">
-                        {filteredList.length} TALABA
+                        {ratings.length} MEMBERS
                     </div>
                 </div>
 
-                <div className="divide-y divide-gray-100 dark:divide-white/5 max-h-[1000px] overflow-y-auto custom-scrollbar">
-                    {filteredList.length === 0 ? (
+                <div className="divide-y divide-gray-100 dark:divide-white/5 overflow-y-auto max-h-[800px] custom-scrollbar">
+                    {ratings.length === 0 ? (
                         <div className="p-20 text-center">
                             <Users className="mx-auto text-gray-200 dark:text-white/5 mb-4" size={64} />
                             <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Hech kim topilmadi</p>
                         </div>
-                    ) : (filteredList.map((rating, index) => {
-                        const isMe = myGlobalRating && rating.student_id === myGlobalRating.student_id;
+                    ) : (ratings.map((rating, index) => {
+                        const isMe = myRating && rating.student_id === myRating.student_id;
                         const uniqueId = rating.student_id || rating._id || `rating-${index}`;
 
                         return (
