@@ -380,8 +380,6 @@ router.get('/attendance', authenticateStudent, async (req, res) => {
 });
 
 // ============ STUDENT TASKS ============
-import Task from '../models/Task.js';
-import TaskSubmission from '../models/TaskSubmission.js';
 
 // Get tasks for student's group
 router.get('/tasks', authenticateStudent, async (req, res) => {
