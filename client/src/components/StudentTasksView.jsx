@@ -58,8 +58,8 @@ export default function StudentTasksView({ setFullScreen }) {
             const headers = studentToken ? { Authorization: `Bearer ${studentToken}` } : {};
 
             const [tasksRes, quizzesRes] = await Promise.all([
-                api.get('/student-auth/tasks', { headers }),
-                api.get('/student/quizzes', { headers })
+                api.get('student-auth/tasks', { headers }),
+                api.get('student/quizzes', { headers })
             ]);
 
             const tasks = tasksRes.data.map(t => ({
@@ -134,7 +134,7 @@ export default function StudentTasksView({ setFullScreen }) {
             const formData = new FormData();
             formData.append('description', submitData.description);
             submitData.files.forEach(f => formData.append('files', f));
-            const response = await api.post(`/tasks/${selectedTask._id}/submit`, formData);
+            const response = await api.post(`tasks/${selectedTask._id}/submit`, formData);
             alert('Muvaffaqiyatli jo\'natildi! 🚀');
             setShowSubmitModal(false);
             fetchData();

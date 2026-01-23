@@ -9,7 +9,7 @@ import Course from '../models/Course.js';
 class RatingService {
     async getGlobalRatings(filters = {}) {
         try {
-            const { groupId, courseId, limit = 100 } = filters;
+            const { groupId, courseId, limit = 1000 } = filters;
 
             // 1. Build student filter
             const studentFilter = { status: { $in: ['ACTIVE', 'DEBTOR'] } };
@@ -74,9 +74,7 @@ class RatingService {
                     exams: examMap.get(sid) || { total: 0, count: 0 }
                 };
 
-                // Calculation: (LessonScore*10) + (TaskScore*20) + (QuizScore*15) + (ExamScore*50)
-                // Max theoretical: (100*10) + (100*20) + (100*15) + (100*50) = 1000 + 2000 + 1500 + 5000 = 9500 per unit
-                // With multiple tasks/exams, it can reach ~100k
+                // Formula: (LessonScore*10) + (TaskScore*20) + (QuizScore*15) + (ExamScore*50)
                 const totalPoints =
                     (stats.lessons.total * 10) +
                     (stats.tasks.total * 20) +
@@ -107,9 +105,15 @@ class RatingService {
                 return a.full_name.localeCompare(b.full_name);
             });
 
-            // 6. Assign unique ranks
+            // 6. Assign Standard Competition Ranks (1-2-2-4 logic)
+            let currentRank = 0;
+            let lastPoints = -1;
             ratings.forEach((r, idx) => {
-                r.rank = idx + 1;
+                if (r.total_points !== lastPoints) {
+                    currentRank = idx + 1;
+                    lastPoints = r.total_points;
+                }
+                r.rank = currentRank;
             });
 
             return ratings.slice(0, limit);
@@ -122,7 +126,7 @@ class RatingService {
     async getFilters() {
         try {
             const [groups, courses] = await Promise.all([
-                Group.find({ status: 'ACTIVE' }).select('name').lean(),
+                Group.find({ status: { $in: ['ACTIVE', 'NABOR'] } }).select('name').lean(),
                 Course.find({ is_active: true }).select('name').lean()
             ]);
             return { groups, courses };
@@ -133,7 +137,8 @@ class RatingService {
     }
 
     async getStudentRank(studentId) {
-        const ratings = await this.getGlobalRatings({ limit: 10000 });
+        // We get top 5000 to ensure we find the student's rank globally
+        const ratings = await this.getGlobalRatings({ limit: 5000 });
         const studentRating = ratings.find(r => r.student_id.toString() === studentId.toString());
 
         if (!studentRating) {
