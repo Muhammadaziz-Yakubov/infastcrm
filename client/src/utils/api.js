@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://infastcrm-0b2r.onrender.com');
+const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://infastcrm-0b2r.onrender.com/api');
 
 const api = axios.create({
   baseURL,

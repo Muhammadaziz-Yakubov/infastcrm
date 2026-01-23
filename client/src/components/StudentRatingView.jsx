@@ -40,7 +40,7 @@ export default function StudentRatingView() {
         try {
             setLoading(true);
             const [filterRes, myRes] = await Promise.all([
-                api.get('/public/ratings/filters'),
+                api.get('/public/filters'),
                 api.get('/student-auth/my-rating')
             ]);
             setFilters(filterRes.data);
