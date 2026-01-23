@@ -132,7 +132,7 @@ export default function AdminEvents() {
 
   const handleDeleteEvent = async (eventId) => {
     if (!confirm('Tadbirni ochirishga ishonchingiz komilmi?')) return;
-    
+
     try {
       await api.delete(`/events/${eventId}`);
       fetchEvents();
@@ -148,9 +148,9 @@ export default function AdminEvents() {
   };
 
   const handleAttendanceChange = (studentId, attended) => {
-    setAttendees(prev => 
-      prev.map(attendee => 
-        attendee.student_id._id === studentId 
+    setAttendees(prev =>
+      prev.map(attendee =>
+        attendee.student_id._id === studentId
           ? { ...attendee, attended }
           : attendee
       )
@@ -176,7 +176,7 @@ export default function AdminEvents() {
 
   const processRewards = async () => {
     if (!confirm('Davomat bo\'yicha coinlarni taqsimlashga ishonchingiz komilmi? Bu amal ortga qaytarilmaydi!')) return;
-    
+
     setProcessingRewards(true);
     try {
       const result = await api.post(`/events/${selectedEvent._id}/process-rewards`);
@@ -212,11 +212,10 @@ export default function AdminEvents() {
         <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('events')}
-            className={`px-4 py-2 rounded-md font-medium transition ${
-              activeTab === 'events'
+            className={`px-4 py-2 rounded-md font-medium transition ${activeTab === 'events'
                 ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
+              }`}
           >
             <Calendar className="w-4 h-4 inline mr-2" />
             Tadbirlar
@@ -269,11 +268,11 @@ export default function AdminEvents() {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="p-5">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{event.title}</h3>
                     <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{event.description}</p>
-                    
+
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                         <Calendar className="w-4 h-4 mr-2" />
@@ -362,7 +361,7 @@ export default function AdminEvents() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Banner rasmi URL
+              Poster Rasmi URL (Uzunchoq 2:3)
             </label>
             <input
               type="url"
@@ -538,7 +537,7 @@ export default function AdminEvents() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input
@@ -551,7 +550,7 @@ export default function AdminEvents() {
                         {attendee.attended ? 'Keldi' : 'Kelmadi'}
                       </span>
                     </label>
-                    
+
                     {attendee.coin_given && (
                       <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-xs">
                         Coin berildi

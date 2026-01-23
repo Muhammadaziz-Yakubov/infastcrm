@@ -68,9 +68,9 @@ export default function StudentEvents() {
   );
 
   const isRegistrationOpen = (event) => {
-    return new Date() <= new Date(event.registration_deadline) && 
-           event.registered_count < event.max_participants &&
-           !event.is_registered;
+    return new Date() <= new Date(event.registration_deadline) &&
+      event.registered_count < event.max_participants &&
+      !event.is_registered;
   };
 
   const isEventFull = (event) => {
@@ -120,13 +120,13 @@ export default function StudentEvents() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEvents.map((event) => (
-            <div 
-              key={event._id} 
+            <div
+              key={event._id}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
               onClick={() => openEventDetail(event)}
             >
               {/* Banner Image */}
-              <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
+              <div className="aspect-[2/3] bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
                 {event.banner ? (
                   <img
                     src={event.banner}
@@ -138,7 +138,7 @@ export default function StudentEvents() {
                     <Calendar className="w-16 h-16 text-white opacity-50" />
                   </div>
                 )}
-                
+
                 {/* Status badges */}
                 <div className="absolute top-3 right-3 flex flex-col space-y-2">
                   {event.is_registered && (
@@ -147,14 +147,14 @@ export default function StudentEvents() {
                       <span>Ro'yxatdan o'tilgan</span>
                     </span>
                   )}
-                  
+
                   {isEventFull(event) && !event.is_registered && (
                     <span className="px-3 py-1 bg-red-500 text-white rounded-full text-xs font-medium flex items-center space-x-1">
                       <XCircle className="w-3 h-3" />
                       <span>To'la</span>
                     </span>
                   )}
-                  
+
                   {isRegistrationClosed(event) && !event.is_registered && (
                     <span className="px-3 py-1 bg-gray-500 text-white rounded-full text-xs font-medium flex items-center space-x-1">
                       <Clock className="w-3 h-3" />
@@ -180,7 +180,7 @@ export default function StudentEvents() {
                 <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
                   {event.description}
                 </p>
-                
+
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
@@ -303,7 +303,7 @@ export default function StudentEvents() {
                   {selectedEvent.registered_count} / {selectedEvent.max_participants} kishi
                 </p>
                 <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
-                  <div 
+                  <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${(selectedEvent.registered_count / selectedEvent.max_participants) * 100}%` }}
                   />

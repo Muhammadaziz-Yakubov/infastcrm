@@ -274,7 +274,7 @@ export default function StudentDashboard() {
                   </div>
                 </div>
 
-                {/* 📊 STATS GRID - 2x2 on small mobile */}
+                {/* 🎉 UPCOMING EVENTS */}\n                <div className="w-full overflow-hidden mb-8">\n                  <StudentEventsOverview />\n                </div>\n\n                {/* 📊 STATS GRID - 2x2 on small mobile */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
                   {[
                     { id: 'rating', label: "Bilim", val: `${data?.quizzes?.stats?.avgPercentage || 0}%`, icon: Brain, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
@@ -346,8 +346,8 @@ export default function StudentDashboard() {
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
-                    
-                    <StudentEventsOverview />
+
+                    {/* Moved to top */}
                   </div>
 
                   {/* Secondary Shortcuts */}
