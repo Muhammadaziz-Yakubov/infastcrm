@@ -173,7 +173,7 @@ export default function Attendance() {
                             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em]">Management Console</span>
                         </div>
                         <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-                            Davomat <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent italic">Elite</span>
+                            Davomat <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent italic">Guruhlar</span>
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-2 font-medium">
                             <Star className="w-4 h-4 text-amber-500 fill-amber-500" />

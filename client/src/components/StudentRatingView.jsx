@@ -73,7 +73,7 @@ export default function StudentRatingView() {
                         </div>
                     </div>
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Elite Leaderboard</h2>
+                        <h2 className="text-4xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Reyting</h2>
                         <p className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-[0.4em] mt-2 ml-1 opacity-70 flex items-center gap-2">
                             <Zap size={12} className="text-yellow-400" /> Akademiya barcha talabalari reytingi
                         </p>

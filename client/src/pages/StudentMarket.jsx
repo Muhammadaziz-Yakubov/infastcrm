@@ -141,7 +141,7 @@ export default function StudentMarket() {
       <div className="flex flex-col items-center justify-center min-h-[50vh] relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/5 to-transparent blur-3xl rounded-full animate-pulse"></div>
         <Loader2 className="w-14 h-14 text-indigo-500 animate-spin mb-6 relative z-10" />
-        <p className="text-gray-400 font-black uppercase tracking-[0.4em] text-xs animate-pulse relative z-10 italic">Elite Market yuklanmoqda...</p>
+        <p className="text-gray-400 font-black uppercase tracking-[0.4em] text-xs animate-pulse relative z-10 italic">Market yuklanmoqda...</p>
       </div>
     );
   }
@@ -172,7 +172,7 @@ export default function StudentMarket() {
             <div className="space-y-2 md:space-y-4">
               <div className="flex flex-col md:flex-row items-center gap-3">
                 <h1 className="text-4xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-2xl">
-                  Elite Market
+                  Market
                 </h1>
                 <div className="bg-yellow-400 text-gray-950 px-4 py-1.5 rounded-2xl text-[10px] md:text-[12px] font-black uppercase tracking-widest italic shadow-xl shadow-yellow-400/20 scale-90 md:scale-100">
                   VIP ACCESS
@@ -214,20 +214,23 @@ export default function StudentMarket() {
             { id: 'shop', label: 'VIP Do\'kon', icon: ShoppingCart },
             { id: 'orders', label: 'Buyurtmalar', icon: Package },
             { id: 'history', label: 'Ganjina Tarixi', icon: History }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 min-w-[140px] px-6 md:px-10 py-4 md:py-5 rounded-[2rem] font-black text-[10px] md:text-xs uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-3 relative overflow-hidden group/tab ${activeTab === tab.id
+          ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 min-w-[140px] px-6 md:px-10 py-4 md:py-5 rounded-[2rem] font-black text-[10px] md:text-xs uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-3 relative overflow-hidden group/tab ${isActive
                   ? 'bg-indigo-600 text-white shadow-[0_15px_40px_rgba(79,70,229,0.4)] scale-105'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-            >
-              <tab.icon size={18} strokeWidth={isActive ? 3 : 2} className={activeTab === tab.id ? 'animate-bounce-slow' : ''} />
-              {tab.label}
-              {activeTab === tab.id && <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>}
-            </button>
-          ))}
+                  }`}
+              >
+                <tab.icon size={18} strokeWidth={isActive ? 3 : 2} className={isActive ? 'animate-bounce-slow' : ''} />
+                {tab.label}
+                {isActive && <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>}
+              </button>
+            );
+          })}
         </div>
 
         {activeTab === 'shop' && (
@@ -320,8 +323,8 @@ export default function StudentMarket() {
                         onClick={() => setShowConfirmModal(item)}
                         disabled={!canAfford || isOutOfStock}
                         className={`w-full sm:w-auto px-10 py-5 rounded-[2rem] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] italic transition-all duration-700 relative overflow-hidden group/btn ${canAfford && !isOutOfStock
-                            ? 'bg-indigo-600 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_30px_70px_rgba(79,70,229,0.6)] hover:-translate-y-2'
-                            : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-white/5'
+                          ? 'bg-indigo-600 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_30px_70px_rgba(79,70,229,0.6)] hover:-translate-y-2'
+                          : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-white/5'
                           }`}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
