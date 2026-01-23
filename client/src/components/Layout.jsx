@@ -26,7 +26,8 @@ import {
   MessageSquare,
   Coins,
   ShoppingBag,
-  CalendarDays
+  CalendarDays,
+  Settings
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -49,7 +50,8 @@ export default function Layout() {
     { path: '/exams', icon: FileText, label: 'Imtihonlar', adminOnly: true },
     { path: '/quizzes', icon: Brain, label: 'Quiz (Dars testi)', adminOnly: true },
     { path: '/events', icon: CalendarDays, label: 'Tadbirlar', adminOnly: true },
-    { path: '/payments', icon: CreditCard, label: 'To\'lovlar' },
+    { path: '/maintenance', icon: Settings, label: 'Texnik Rejim', adminOnly: true },
+    { path: '/payments', icon: CreditCard, label: "To'lovlar" },
     { path: '/attendance', icon: ClipboardCheck, label: 'Davomat' },
     { path: '/rating', icon: Trophy, label: 'Reyting' },
     { path: '/certificates', icon: Award, label: 'Sertifikatlar', adminOnly: true },

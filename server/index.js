@@ -34,6 +34,7 @@ import examsRoutes from './routes/exams.js';
 import quizzesRoutes from './routes/quizzes.js';
 import studentExamsRoutes from './routes/studentExams.js';
 import studentQuizzesRoutes from './routes/studentQuizzes.js';
+import maintenanceRoutes from './routes/maintenance.js';
 
 // Services & Jobs
 import { setupArenaSocket } from './socket/arena.js';
@@ -41,6 +42,7 @@ import { sendDailyReminders, testBotConnection, setupWebhook, handleWebhook, sen
 import { checkPaymentStatus } from './jobs/paymentJob.js';
 import { initSurveyBot } from './surveyBotService.js';
 import { sendDebtorSmsReminders } from './jobs/debtorSmsJob.js';
+import maintenanceService from './services/maintenanceService.js';
 
 dotenv.config();
 
@@ -94,6 +96,12 @@ app.use('/api/exams', examsRoutes);
 app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/student-exams', studentExamsRoutes);
 app.use('/api/student-quizzes', studentQuizzesRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
+
+// Apply maintenance middleware to student routes
+app.use('/api/student-auth', maintenanceService.checkMaintenance());
+app.use('/api/student-exams', maintenanceService.checkMaintenance('exams'));
+app.use('/api/student-quizzes', maintenanceService.checkMaintenance('quizzes'));
 
 // Socket.io setup
 setupArenaSocket(io);
