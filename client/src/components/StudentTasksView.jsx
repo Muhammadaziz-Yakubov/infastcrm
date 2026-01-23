@@ -52,31 +52,40 @@ export default function StudentTasksView({ setFullScreen }) {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [tasksRes, quizzesRes] = await Promise.all([
-                api.get('student-auth/tasks'),
-                api.get('student/quizzes')
-            ]);
+            // Using separate try-catch for each to ensure one failure doesn't block the other
+            let tasks = [];
+            let quizzes = [];
 
-            const tasks = tasksRes.data.map(t => ({
-                ...t,
-                type: 'TASK',
-                deadline: t.deadline || null,
-                createdAt: t.createdAt,
-                sortDate: new Date(t.deadline || t.createdAt).getTime()
-            }));
+            try {
+                const tasksRes = await api.get('student-auth/tasks');
+                tasks = tasksRes.data.map(t => ({
+                    ...t,
+                    type: 'TASK',
+                    deadline: t.deadline || null,
+                    createdAt: t.createdAt,
+                    sortDate: new Date(t.deadline || t.createdAt).getTime()
+                }));
+            } catch (err) {
+                console.error('Error fetching tasks:', err);
+            }
 
-            const quizzes = quizzesRes.data.map(q => ({
-                ...q,
-                type: 'QUIZ',
-                deadline: q.end_date || null,
-                createdAt: q.createdAt,
-                sortDate: new Date(q.end_date || q.createdAt).getTime()
-            }));
+            try {
+                const quizzesRes = await api.get('student-quizzes');
+                quizzes = quizzesRes.data.map(q => ({
+                    ...q,
+                    type: 'QUIZ',
+                    deadline: q.end_date || null,
+                    createdAt: q.createdAt,
+                    sortDate: new Date(q.end_date || q.createdAt).getTime()
+                }));
+            } catch (err) {
+                console.error('Error fetching quizzes:', err);
+            }
 
             const combined = [...tasks, ...quizzes].sort((a, b) => b.sortDate - a.sortDate);
             setItems(combined);
         } catch (error) {
-            console.error('Error fetching tasks details:', error);
+            console.error('General error fetching data:', error);
         } finally {
             setLoading(false);
         }
