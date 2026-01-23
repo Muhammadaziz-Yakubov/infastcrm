@@ -25,7 +25,8 @@ import {
   Brain,
   MessageSquare,
   Coins,
-  ShoppingBag
+  ShoppingBag,
+  CalendarEvent
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -47,6 +48,7 @@ export default function Layout() {
     { path: '/tasks', icon: Target, label: 'Vazifalar', adminOnly: true },
     { path: '/exams', icon: FileText, label: 'Imtihonlar', adminOnly: true },
     { path: '/quizzes', icon: Brain, label: 'Quiz (Dars testi)', adminOnly: true },
+    { path: '/events', icon: CalendarEvent, label: 'Tadbirlar', adminOnly: true },
     { path: '/payments', icon: CreditCard, label: 'To\'lovlar' },
     { path: '/attendance', icon: ClipboardCheck, label: 'Davomat' },
     { path: '/rating', icon: Trophy, label: 'Reyting' },
