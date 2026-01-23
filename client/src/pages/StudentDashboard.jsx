@@ -29,7 +29,8 @@ import {
   Settings,
   MoreVertical,
   ArrowUpRight,
-  Coins
+  Coins,
+  CalendarEvent
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -43,6 +44,8 @@ import StudentExamsView from '../components/StudentExamsView';
 import StudentRatingView from '../components/StudentRatingView';
 import StudentClassmatesView from '../components/StudentClassmatesView';
 import StudentMarket from './StudentMarket';
+import StudentEvents from './StudentEvents';
+import StudentEventsOverview from '../components/StudentEventsOverview';
 
 export default function StudentDashboard() {
   const { tab: urlTab } = useParams();
@@ -56,7 +59,7 @@ export default function StudentDashboard() {
 
   // Sync activeTab with URL param if present
   useEffect(() => {
-    if (urlTab && ['overview', 'tasks', 'classmates', 'market', 'exams', 'rating', 'attendance', 'payments'].includes(urlTab)) {
+    if (urlTab && ['overview', 'tasks', 'classmates', 'market', 'events', 'exams', 'rating', 'attendance', 'payments'].includes(urlTab)) {
       setActiveTab(urlTab);
     }
   }, [urlTab]);
@@ -91,6 +94,7 @@ export default function StudentDashboard() {
     { id: 'tasks', label: 'Vazifalar', icon: FileCode },
     { id: 'classmates', label: 'Guruhim', icon: Users },
     { id: 'market', label: 'Coin Market', icon: ShoppingBag },
+    { id: 'events', label: 'Tadbirlar', icon: CalendarEvent },
     { id: 'exams', label: 'Imtihonlar', icon: Target },
     { id: 'rating', label: 'Reyting', icon: Trophy },
     { id: 'attendance', label: 'Davomat', icon: Calendar },
@@ -373,7 +377,7 @@ export default function StudentDashboard() {
             <div className="pb-20">
               {activeTab === 'tasks' && <StudentTasksView setFullScreen={setFullScreen} />}
               {activeTab === 'market' && <StudentMarket />}
-
+              {activeTab === 'events' && <StudentEvents />}
               {activeTab === 'exams' && <StudentExamsView setFullScreen={setFullScreen} />}
               {activeTab === 'rating' && <StudentRatingView />}
               {activeTab === 'classmates' && <StudentClassmatesView />}
@@ -437,6 +441,7 @@ export default function StudentDashboard() {
               {[
                 { id: 'overview', icon: LayoutDashboard, label: 'Asosiy' },
                 { id: 'tasks', icon: FileCode, label: 'Vazifa' },
+                { id: 'events', icon: CalendarEvent, label: 'Tadbir' },
                 { id: 'market', icon: ShoppingBag, label: 'Market' },
                 { id: 'rating', icon: Trophy, label: 'Reyting' },
                 { id: 'profile', icon: UserCircle, label: 'Profil' }

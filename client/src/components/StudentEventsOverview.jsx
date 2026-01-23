@@ -131,7 +131,10 @@ export default function StudentEventsOverview() {
                   </div>
                 </div>
 
-                <button className="w-full py-3 bg-white text-gray-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 hover:bg-purple-50">
+                <button 
+                  onClick={() => window.location.href = `/student/events`}
+                  className="w-full py-3 bg-white text-gray-900 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 hover:bg-purple-50"
+                >
                   Batafsil <ExternalLink size={14} />
                 </button>
               </div>
