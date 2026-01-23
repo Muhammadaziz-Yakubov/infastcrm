@@ -465,7 +465,7 @@ export default function StudentDashboard() {
               {[
                 { id: 'overview', icon: LayoutDashboard, label: 'Asosiy' },
                 { id: 'tasks', icon: FileCode, label: 'Vazifa' },
-                { id: 'events', icon: CalendarEvent, label: 'Tadbir' },
+                { id: 'events', icon: CalendarDays, label: 'Tadbir' },
                 { id: 'market', icon: ShoppingBag, label: 'Market' },
                 { id: 'rating', icon: Trophy, label: 'Reyting' },
                 { id: 'profile', icon: UserCircle, label: 'Profil' }
