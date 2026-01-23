@@ -60,15 +60,17 @@ export default function StudentTasksView({ setFullScreen }) {
             const tasks = tasksRes.data.map(t => ({
                 ...t,
                 type: 'TASK',
-                date: t.deadline || t.createdAt,
+                deadline: t.deadline || null,
+                createdAt: t.createdAt,
                 sortDate: new Date(t.deadline || t.createdAt).getTime()
             }));
 
             const quizzes = quizzesRes.data.map(q => ({
                 ...q,
                 type: 'QUIZ',
-                date: q.end_date,
-                sortDate: new Date(q.end_date).getTime()
+                deadline: q.end_date || null,
+                createdAt: q.createdAt,
+                sortDate: new Date(q.end_date || q.createdAt).getTime()
             }));
 
             const combined = [...tasks, ...quizzes].sort((a, b) => b.sortDate - a.sortDate);
@@ -158,7 +160,9 @@ export default function StudentTasksView({ setFullScreen }) {
         return items.filter(item => {
             const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
             const now = new Date();
-            const deadline = item.date ? new Date(item.date) : null;
+
+            // Expiry logic only applies if there is an explicit deadline
+            const deadline = item.deadline ? new Date(item.deadline) : null;
             const isExpired = deadline && now > deadline;
             const isRecentlyExpired = isExpired && (now - deadline) < 600000;
 
@@ -250,7 +254,7 @@ export default function StudentTasksView({ setFullScreen }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                     {filteredItems.map(item => {
                         const now = new Date();
-                        const deadline = item.date ? new Date(item.date) : null;
+                        const deadline = item.deadline ? new Date(item.deadline) : null;
                         const isExpired = deadline && now > deadline;
                         const isSubmitted = item.submission || item.status === 'FINISHED' || item.status === 'GRADED';
 
@@ -314,9 +318,9 @@ export default function StudentTasksView({ setFullScreen }) {
                                                     <Clock size={16} />
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-[8px] font-black text-gray-300 dark:text-white/20 uppercase tracking-widest leading-none mb-1">MUDDAT</span>
+                                                    <span className="text-[8px] font-black text-gray-300 dark:text-white/20 uppercase tracking-widest leading-none mb-1">{item.deadline ? 'MUDDAT' : 'TOPHIRILDI'}</span>
                                                     <span className={`text-[11px] font-black uppercase tracking-tight italic ${isExpired ? 'text-rose-500' : 'text-gray-500 dark:text-white/60'}`}>
-                                                        {item.date ? format(new Date(item.date), 'dd MMM, HH:mm', { locale: uz }) : 'MUDDATSIZ'}
+                                                        {item.deadline ? format(new Date(item.deadline), 'dd MMM, HH:mm', { locale: uz }) : format(new Date(item.createdAt), 'dd MMM, HH:mm', { locale: uz })}
                                                     </span>
                                                 </div>
                                             </div>
