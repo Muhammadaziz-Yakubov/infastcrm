@@ -325,7 +325,31 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  {/* Secondary Shortcuts */}
+                {/* 🎉 Upcoming Events */}
+                <div className="space-y-4 md:space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg">
+                        <Calendar size={16} md:size={24} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Tadbirlar</h3>
+                        <p className="text-[8px] md:text-xs font-black text-purple-500 uppercase tracking-widest mt-1 italic">Yaqin keladigan tadbirlar</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTabChange('events')}
+                      className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 text-sm font-medium flex items-center space-x-1 transition"
+                    >
+                      <span>Barchasi</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <StudentEventsOverview />
+                </div>
+
+                {/* Secondary Shortcuts */}
                   <div className="grid grid-cols-2 gap-3 md:gap-8">
                     {[
                       { id: 'tasks', label: "Vazifalar", count: data?.tasks?.pendingCount || 0, icon: FileCode, color: 'text-blue-500', bg: 'bg-blue-500/10' },

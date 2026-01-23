@@ -44,9 +44,10 @@ export default function StudentTasksView({ setFullScreen }) {
     const getImageUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http') || url.startsWith('data:')) return url;
-        // In local api.js we handle /api prefix, but image urls are directly served by server
-        const backendUrl = import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com';
-        return `${backendUrl.replace('/api', '')}/${url.startsWith('/') ? url.slice(1) : url}`;
+        // Use the same base URL as API but remove /api for static files
+        const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api/' : 'https://infastcrm-0b2r.onrender.com/api/');
+        const staticBaseUrl = baseURL.replace('/api/', '/');
+        return `${staticBaseUrl}${url.startsWith('/') ? url.slice(1) : url}`;
     };
 
     const fetchData = useCallback(async () => {
