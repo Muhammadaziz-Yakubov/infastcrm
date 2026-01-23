@@ -314,20 +314,33 @@ export default function StudentDashboard() {
                   </div>
 
                   {/* Quick Shortcuts */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <button onClick={() => setActiveTab('payments')} className="bg-white dark:bg-gray-800 rounded-[2rem] p-4 md:p-6 border border-gray-100 dark:border-gray-700 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center gap-2 md:gap-3 group">
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
                         <Wallet size={20} md:size={24} />
                       </div>
-                      <p className="font-black text-[10px] md:text-sm dark:text-white uppercase tracking-widest">To{"'"}lovlar</p>
+                      <p className="font-black text-[10px] md:text-xs dark:text-white uppercase tracking-widest">To'lovlar</p>
                     </button>
                     <button onClick={() => setActiveTab('attendance')} className="bg-white dark:bg-gray-800 rounded-[2rem] p-4 md:p-6 border border-gray-100 dark:border-gray-700 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center gap-2 md:gap-3 group">
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
                         <Calendar size={20} md:size={24} />
                       </div>
-                      <p className="font-black text-[10px] md:text-sm dark:text-white uppercase tracking-widest">Davomat</p>
+                      <p className="font-black text-[10px] md:text-xs dark:text-white uppercase tracking-widest">Davomat</p>
                     </button>
-                    <button onClick={() => setActiveTab('exams')} className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white shadow-xl shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center gap-3 md:gap-4 col-span-2 group">
+                    <button onClick={() => setActiveTab('market')} className="bg-white dark:bg-gray-800 rounded-[2rem] p-4 md:p-6 border border-gray-100 dark:border-gray-700 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center gap-2 md:gap-3 group">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                        <ShoppingBag size={20} md:size={24} />
+                      </div>
+                      <p className="font-black text-[10px] md:text-xs dark:text-white uppercase tracking-widest">Market</p>
+                    </button>
+                    <button onClick={() => setActiveTab('classmates')} className="bg-white dark:bg-gray-800 rounded-[2rem] p-4 md:p-6 border border-gray-100 dark:border-gray-700 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center gap-2 md:gap-3 group">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                        <Users size={20} md:size={24} />
+                      </div>
+                      <p className="font-black text-[10px] md:text-xs dark:text-white uppercase tracking-widest">Guruh</p>
+                    </button>
+
+                    <button onClick={() => setActiveTab('exams')} className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white shadow-xl shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center gap-3 md:gap-4 col-span-2 md:col-span-4 group">
                       <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center">
                         <Target size={24} md:size={32} />
                       </div>
@@ -408,8 +421,8 @@ export default function StudentDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-5">
                           <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${r.status === 'PRESENT' ? 'bg-emerald-500 text-white shadow-emerald-500/20' :
-                              r.status === 'LATE' ? 'bg-amber-500 text-white shadow-amber-500/20' :
-                                'bg-rose-500 text-white shadow-rose-500/20'
+                            r.status === 'LATE' ? 'bg-amber-500 text-white shadow-amber-500/20' :
+                              'bg-rose-500 text-white shadow-rose-500/20'
                             }`}>
                             {r.status === 'PRESENT' ? <CheckCircle2 size={24} md:size={28} /> :
                               r.status === 'LATE' ? <Clock size={24} md:size={28} /> :
@@ -453,11 +466,17 @@ export default function StudentDashboard() {
           </div>
         </main>
 
-        {/* MOBILE BOTTOM NAVIGATION - iOS Modern Style */}
+        {/* MOBILE BOTTOM NAVIGATION - Elite Floating Dock */}
         {!fullScreen && (
-          <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 h-20 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] shrink-0 overflow-hidden">
-            <div className="flex justify-around items-center h-full max-w-lg mx-auto">
-              {visibleTabs.map((tab) => {
+          <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
+            <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 h-20 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex justify-around items-center px-4">
+              {[
+                { id: 'overview', icon: LayoutDashboard, label: 'Asos' },
+                { id: 'tasks', icon: FileCode, label: 'Dars' },
+                { id: 'exams', icon: Target, label: 'Sinf' },
+                { id: 'rating', icon: Trophy, label: 'Top' },
+                { id: 'profile', icon: UserCircle, label: 'Men' }
+              ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
                 return (
@@ -467,20 +486,24 @@ export default function StudentDashboard() {
                       if (tab.id === 'profile') navigate('/student/profile');
                       else setActiveTab(tab.id);
                     }}
-                    className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all relative ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}
+                    className={`flex flex-col items-center justify-center flex-1 h-full gap-1.5 transition-all relative ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}
                   >
-                    <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-110' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                    <div className={`p-2.5 rounded-2xl transition-all duration-500 ${isActive
+                      ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/40 scale-110 -translate-y-1'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
                       <Icon size={22} strokeWidth={isActive ? 3 : 2} />
                     </div>
-                    <span className={`text-[8px] font-black uppercase tracking-widest transition-all ${isActive ? 'opacity-100 scale-100' : 'opacity-70 scale-95'}`}>
-                      {tab.label.split(' ')[0]}
+                    <span className={`text-[8px] font-black uppercase tracking-[0.15em] transition-all ${isActive ? 'opacity-100 scale-100' : 'opacity-60 scale-95'}`}>
+                      {tab.label}
                     </span>
-                    {isActive && <div className="absolute top-1 right-1/4 w-1 h-1 rounded-full bg-red-500 animate-ping"></div>}
+                    {isActive && (
+                      <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-indigo-600"></div>
+                    )}
                   </button>
                 );
               })}
-            </div>
-          </nav>
+            </nav>
+          </div>
         )}
       </div>
     </div>
