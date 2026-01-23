@@ -30,7 +30,7 @@ import {
   MoreVertical,
   ArrowUpRight,
   Coins,
-  CalendarEvent
+  CalendarDays
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -94,7 +94,7 @@ export default function StudentDashboard() {
     { id: 'tasks', label: 'Vazifalar', icon: FileCode },
     { id: 'classmates', label: 'Guruhim', icon: Users },
     { id: 'market', label: 'Coin Market', icon: ShoppingBag },
-    { id: 'events', label: 'Tadbirlar', icon: CalendarEvent },
+    { id: 'events', label: 'Tadbirlar', icon: CalendarDays },
     { id: 'exams', label: 'Imtihonlar', icon: Target },
     { id: 'rating', label: 'Reyting', icon: Trophy },
     { id: 'attendance', label: 'Davomat', icon: Calendar },
@@ -331,7 +331,7 @@ export default function StudentDashboard() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg">
-                          <CalendarEvent size={16} md:size={24} />
+                          <CalendarDays size={16} md:size={24} />
                         </div>
                         <div>
                           <h3 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Tadbirlar</h3>
