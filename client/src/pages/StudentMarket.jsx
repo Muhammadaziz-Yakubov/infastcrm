@@ -12,17 +12,13 @@ import {
   TrendingDown,
   ShoppingCart,
   Gift,
-  Star,
-  Sparkles,
   Search,
   ChevronRight,
   Zap,
   Tag,
   Loader2,
-  AlertCircle,
   X,
   CreditCard,
-  Gem,
   Award
 } from 'lucide-react';
 import { format, isValid } from 'date-fns';
@@ -107,15 +103,15 @@ export default function StudentMarket() {
 
   const getStatusBadge = (status) => {
     const badges = {
-      'PENDING': { color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', icon: Clock, label: 'Kutilmoqda' },
-      'CONFIRMED': { color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: CheckCircle, label: 'Berildi' },
-      'CANCELLED': { color: 'text-rose-400 bg-rose-400/10 border-rose-400/20', icon: XCircle, label: 'Bekor qilindi' }
+      'PENDING': { color: 'text-amber-600 bg-amber-50', icon: Clock, label: 'Kutilmoqda' },
+      'CONFIRMED': { color: 'text-emerald-600 bg-emerald-50', icon: CheckCircle, label: 'Berildi' },
+      'CANCELLED': { color: 'text-rose-600 bg-rose-50', icon: XCircle, label: 'Bekor qilindi' }
     };
     const badge = badges[status] || badges['PENDING'];
     const Icon = badge.icon;
     return (
-      <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.1em] border backdrop-blur-md ${badge.color}`}>
-        <Icon size={14} strokeWidth={3} />
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider ${badge.color}`}>
+        <Icon size={14} />
         {badge.label}
       </span>
     );
@@ -138,298 +134,209 @@ export default function StudentMarket() {
 
   if (loading && items.length === 0 && orders.length === 0 && history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/5 to-transparent blur-3xl rounded-full animate-pulse"></div>
-        <Loader2 className="w-14 h-14 text-indigo-500 animate-spin mb-6 relative z-10" />
-        <p className="text-gray-400 font-black uppercase tracking-[0.4em] text-xs animate-pulse relative z-10 italic">Market yuklanmoqda...</p>
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="w-10 h-10 text-indigo-500 animate-spin mb-4" />
+        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Market yuklanmoqda...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 md:space-y-14 animate-in fade-in duration-1000 px-1 sm:px-0 pb-20">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20 px-4 md:px-0">
 
-      {/* 🏆 ULTRA PREMIUM HEADER */}
-      <div className="relative group overflow-hidden rounded-[3rem] md:rounded-[4rem] shadow-[0_40px_100px_rgba(0,0,0,0.1)] dark:shadow-none">
-        {/* Animated Background layers */}
-        <div className="absolute inset-0 bg-gray-900"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 opacity-90 transition-all duration-700 group-hover:opacity-100"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-
-        {/* Glow Spheres */}
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-yellow-500/20 rounded-full blur-[100px] animate-pulse"></div>
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-indigo-500/20 rounded-full blur-[100px] animate-pulse"></div>
-
-        <div className="relative z-10 p-8 md:p-14 lg:p-16 flex flex-col lg:flex-row items-center justify-between gap-12 text-center lg:text-left">
-          <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-10">
-            <div className="relative group/icon">
-              <div className="absolute inset-0 bg-yellow-400 blur-3xl opacity-30 group-hover/icon:opacity-50 transition-opacity animate-pulse"></div>
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-[2.5rem] md:rounded-[3.2rem] bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-600 flex items-center justify-center shadow-[0_20px_50px_rgba(234,179,8,0.4)] border border-white/20 relative z-10 transform group-hover/icon:rotate-12 transition-all duration-500 overflow-hidden">
-                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover/icon:translate-x-full transition-transform duration-1000"></div>
-                <ShoppingBag className="text-white drop-shadow-2xl" size={48} md:size={64} strokeWidth={2.5} />
-              </div>
+      {/* 🚀 Clean & Professional Header */}
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-600 shadow-xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 opacity-90"></div>
+        <div className="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
+              <ShoppingBag className="text-white" size={32} md:size={40} />
             </div>
-            <div className="space-y-2 md:space-y-4">
-              <div className="flex flex-col md:flex-row items-center gap-3">
-                <h1 className="text-4xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-2xl">
-                  Market
-                </h1>
-                <div className="bg-yellow-400 text-gray-950 px-4 py-1.5 rounded-2xl text-[10px] md:text-[12px] font-black uppercase tracking-widest italic shadow-xl shadow-yellow-400/20 scale-90 md:scale-100">
-                  VIP ACCESS
-                </div>
-              </div>
-              <p className="text-indigo-200/60 font-black text-xs md:text-base uppercase tracking-[0.3em] flex items-center justify-center lg:justify-start gap-4">
-                <Sparkles size={18} className="text-yellow-400 animate-spin-slow" /> Tangalaringizni orzularga qaytaring
-              </p>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tight">Market</h1>
+              <p className="text-indigo-100 font-bold text-sm">Tangalaringizni orzularga almashtiring</p>
             </div>
           </div>
 
-          {/* 💰 VAULT DISPLAY - The Big Coin Focus */}
-          <div className="flex flex-col items-center lg:items-end w-full lg:w-auto">
-            <div className="relative group/vault">
-              <div className="absolute -inset-8 bg-yellow-400/20 blur-[60px] opacity-0 group-hover/vault:opacity-100 transition-opacity duration-700"></div>
-              <div className="bg-white/5 backdrop-blur-[40px] border border-white/10 rounded-[3rem] px-8 md:px-12 py-8 md:py-10 flex flex-col items-center lg:items-end relative z-10 shadow-2xl overflow-hidden min-w-[300px] md:min-w-[400px]">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400/5 rounded-full blur-3xl"></div>
-                <span className="text-yellow-400/60 font-black text-[10px] md:text-[12px] uppercase tracking-[0.5em] mb-3 md:mb-5 italic">Sizning Boyligingiz</span>
-                <div className="flex items-center gap-4 md:gap-6 text-6xl md:text-8xl font-black text-white tabular-nums tracking-tighter italic drop-shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-40 animate-pulse"></div>
-                    <Coins className="text-yellow-400 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] relative z-10" size={56} md:size={80} />
-                  </div>
-                  {(balance ?? 0).toLocaleString()}
-                </div>
-                <div className="mt-8 md:mt-10 w-full h-2 md:h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 ring-4 ring-white/5">
-                  <div className="h-full bg-gradient-to-r from-yellow-300 via-yellow-500 to-orange-600 animate-shimmer" style={{ width: `${Math.min((balance / 5000) * 100, 100)}%` }}></div>
-                </div>
-              </div>
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl px-10 py-6 flex flex-col items-center md:items-end min-w-[240px]">
+            <span className="text-white/70 font-black text-[10px] uppercase tracking-[0.2em] mb-1">SIZNING COINLARINGIZ</span>
+            <div className="flex items-center gap-3 text-4xl md:text-6xl font-black text-white tabular-nums italic">
+              <Coins className="text-yellow-400" size={32} md:size={48} />
+              {(balance ?? 0).toLocaleString()}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 🧭 NAVIGATION & TOOLS - High Tech Glass */}
-      <div className="flex flex-col xl:flex-row items-center justify-between gap-8 md:gap-10">
-        <div className="flex bg-gray-900/50 p-2 rounded-[2.5rem] border border-white/5 backdrop-blur-2xl w-full xl:w-auto overflow-x-auto no-scrollbar shadow-xl ring-2 ring-black/5">
+      {/* 🧭 Solid Navigation */}
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+        <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl w-full lg:w-auto shadow-inner">
           {[
-            { id: 'shop', label: 'VIP Do\'kon', icon: ShoppingCart },
-            { id: 'orders', label: 'Buyurtmalar', icon: Package },
-            { id: 'history', label: 'Ganjina Tarixi', icon: History }
-          ].map(tab => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-[140px] px-6 md:px-10 py-4 md:py-5 rounded-[2rem] font-black text-[10px] md:text-xs uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-3 relative overflow-hidden group/tab ${isActive
-                  ? 'bg-indigo-600 text-white shadow-[0_15px_40px_rgba(79,70,229,0.4)] scale-105'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
-              >
-                <tab.icon size={18} strokeWidth={isActive ? 3 : 2} className={isActive ? 'animate-bounce-slow' : ''} />
-                {tab.label}
-                {isActive && <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>}
-              </button>
-            );
-          })}
+            { id: 'shop', label: 'Do\'kon' },
+            { id: 'orders', label: 'Buyurtmalar' },
+            { id: 'history', label: 'Coin Tarixi' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === tab.id
+                  ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-lg scale-105'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {activeTab === 'shop' && (
-          <div className="relative w-full xl:w-[450px] group">
-            <div className="absolute inset-0 bg-indigo-500/10 blur-2xl group-focus-within:bg-indigo-500/20 transition-all rounded-[2rem]"></div>
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors" size={22} />
+          <div className="relative w-full lg:w-80 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
             <input
               type="text"
-              placeholder="Ganjinalarni axtarish..."
+              placeholder="Mahsulotlarni izlash..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full bg-white dark:bg-gray-900/50 border-2 border-gray-100 dark:border-white/5 rounded-[2.2rem] pl-16 pr-8 py-5 md:py-6 text-sm md:text-base font-black italic tracking-tight focus:ring-0 focus:border-indigo-500/50 transition-all dark:text-white shadow-2xl relative z-10 placeholder:text-gray-500"
+              className="w-full bg-white dark:bg-gray-800 border-2 border-transparent rounded-2xl pl-12 pr-4 py-3.5 text-sm font-bold focus:ring-0 focus:border-indigo-500/50 transition-all dark:text-white shadow-sm"
             />
           </div>
         )}
       </div>
 
-      {/* 💎 MAIN EXPERIENCE AREA */}
+      {/* 📦 Main Content Grid */}
       <div className="min-h-[400px]">
         {activeTab === 'shop' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
-            {filteredItems.map((item, idx) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+            {filteredItems.map(item => {
               const canAfford = balance >= item.price;
               const isOutOfStock = item.stock === 0;
               return (
-                <div
-                  key={item._id}
-                  className="group bg-white dark:bg-[#0c0e14] rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.02)] dark:shadow-none hover:shadow-[0_50px_100px_rgba(79,70,229,0.12)] transition-all duration-700 flex flex-col h-full overflow-hidden relative border-b-8 border-b-transparent hover:border-b-indigo-500"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <div className="h-64 md:h-72 relative overflow-hidden shrink-0">
+                <div key={item._id} className="group bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden relative">
+                  <div className="h-52 relative overflow-hidden bg-gray-50 dark:bg-gray-900 flex items-center justify-center shrink-0">
                     {item.image ? (
-                      <img src={getImageUrl(item.image)} alt={item.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                      <img src={getImageUrl(item.image)} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center">
-                        <Gem size={80} className="text-indigo-500/20 group-hover:scale-125 transition-transform duration-700" strokeWidth={1} />
+                      <div className="w-full h-full bg-indigo-50 dark:bg-indigo-900/10 flex items-center justify-center">
+                        <Gift size={48} className="text-indigo-200 dark:text-indigo-800" />
                       </div>
                     )}
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0c0e14] via-transparent to-black/20"></div>
-
-                    <div className="absolute top-6 left-6 z-20">
-                      <div className="bg-indigo-600/90 backdrop-blur-md text-white px-5 py-2 rounded-2xl border border-white/20 shadow-xl overflow-hidden group/badge">
-                        <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover/badge:translate-x-full transition-transform"></div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] italic relative z-10">Premium</span>
-                      </div>
-                    </div>
-
                     {item.stock !== -1 && item.stock <= 5 && !isOutOfStock && (
-                      <div className="absolute top-6 right-6 z-20">
-                        <div className="bg-rose-500 text-white text-[10px] font-black px-5 py-2 rounded-2xl shadow-xl border border-white/20 uppercase tracking-[0.15em] animate-pulse italic">
-                          Limited: {item.stock} ta
-                        </div>
+                      <div className="absolute top-4 right-4 bg-rose-500 text-white text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider animate-pulse border border-white/20">
+                        {item.stock} ta qoldi
                       </div>
                     )}
 
                     {isOutOfStock && (
-                      <div className="absolute inset-0 bg-gray-950/80 backdrop-blur-md z-30 flex items-center justify-center">
-                        <span className="bg-white/10 text-white px-10 py-4 rounded-[2rem] border-2 border-white/10 font-black uppercase tracking-[0.3em] text-xs rotate-[-12deg] shadow-2xl">
-                          TUGADI 🚫
-                        </span>
+                      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-10 flex items-center justify-center">
+                        <span className="bg-white/10 text-white px-6 py-2 rounded-full border border-white/20 font-black uppercase tracking-widest text-[10px] rotate-[-12deg]">TUGADI 🚫</span>
                       </div>
-                    )}
-
-                    {/* Elite Glow when affordable */}
-                    {canAfford && !isOutOfStock && (
-                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-[80%] h-1 bg-yellow-400 blur-md opacity-20 group-hover:opacity-60 transition-opacity"></div>
                     )}
                   </div>
 
-                  <div className="p-8 md:p-10 space-y-8 flex flex-col flex-1 relative z-20">
-                    <div className="flex-1 space-y-4">
-                      <h3 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter leading-tight group-hover:text-indigo-500 transition-colors">{item.name}</h3>
-                      <p className="text-xs md:text-sm text-gray-400 dark:text-white/40 font-bold leading-relaxed line-clamp-2 md:line-clamp-3 italic">
-                        {item.description || 'Bu VIP mahsulot sizga o\'zgacha imtiyozlar va bilimlar olamini taqdim etadi.'}
-                      </p>
+                  <div className="p-7 space-y-4 flex flex-col flex-1">
+                    <div className="flex-1 space-y-2">
+                      <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase italic leading-tight line-clamp-1">{item.name}</h3>
+                      <p className="text-xs text-gray-400 font-medium line-clamp-2 leading-relaxed">{item.description || 'Bu mahsulot haqida qo\'shimcha ma\'lumot mavjud emas'}</p>
                     </div>
 
-                    <div className="pt-8 border-t border-gray-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
-                      <div className="flex flex-col group/coin">
-                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 leading-none">VIP NARXI</span>
-                        <div className="flex items-center gap-3 text-3xl md:text-4xl font-black text-yellow-600 dark:text-yellow-500 tabular-nums italic drop-shadow-[0_0_10px_rgba(234,179,8,0.2)]">
-                          <Coins size={30} className="text-yellow-400 group-hover/coin:rotate-12 transition-transform" strokeWidth={2.5} />
-                          {(item.price ?? 0).toLocaleString()}
+                    <div className="flex items-center justify-between pt-5 border-t border-gray-50 dark:border-gray-700/50">
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">NARXI</span>
+                        <div className="flex items-center gap-2 text-xl font-black text-indigo-600 dark:text-indigo-400 tabular-nums italic">
+                          <Coins size={18} className="text-yellow-500" />
+                          {(item.price ?? 0).toLocaleString()} <span className="text-[10px] ml-1">COIN</span>
                         </div>
                       </div>
-
                       <button
                         onClick={() => setShowConfirmModal(item)}
                         disabled={!canAfford || isOutOfStock}
-                        className={`w-full sm:w-auto px-10 py-5 rounded-[2rem] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] italic transition-all duration-700 relative overflow-hidden group/btn ${canAfford && !isOutOfStock
-                          ? 'bg-indigo-600 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_30px_70px_rgba(79,70,229,0.6)] hover:-translate-y-2'
-                          : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-white/5'
+                        className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${canAfford && !isOutOfStock
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 active:scale-95'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                           }`}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
-                        <span className="relative z-10 flex items-center justify-center gap-3">
-                          {isOutOfStock ? 'YUBORILDI' : !canAfford ? 'GANJINA KAM' : 'HARID QILISH'}
-                          {canAfford && !isOutOfStock && <Zap size={16} fill="white" />}
-                        </span>
+                        Sotib olish
                       </button>
                     </div>
                   </div>
                 </div>
               );
             })}
+            {filteredItems.length === 0 && (
+              <div className="col-span-full py-20 text-center bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-4 border-dashed border-gray-100 dark:border-gray-700">
+                <Tag size={48} className="mx-auto text-gray-200 dark:text-gray-700 mb-4" />
+                <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Mahsulotlar topilmadi</p>
+              </div>
+            )}
           </div>
         ) : activeTab === 'orders' ? (
-          <div className="space-y-6 md:space-y-8">
+          <div className="grid grid-cols-1 gap-4">
             {orders.map(order => (
-              <div key={order._id} className="group bg-white dark:bg-[#0c0e14] p-8 md:p-12 rounded-[3.5rem] shadow-2xl border border-gray-100 dark:border-white/5 flex flex-col lg:flex-row items-center justify-between gap-10 transition-all hover:shadow-indigo-500/10">
-                <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 w-full lg:w-auto">
-                  <div className="w-20 h-20 md:w-28 md:h-28 rounded-3xl md:rounded-[2.5rem] bg-indigo-600/10 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0 border border-indigo-500/10 shadow-[inset_0_2px_15px_rgba(79,70,229,0.1)] group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
-                    <Award size={40} md:size={56} strokeWidth={1.5} />
+              <div key={order._id} className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-6 group hover:border-indigo-500/30 transition-all">
+                <div className="flex items-center gap-6 w-full md:w-auto">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-500 shrink-0 border border-indigo-100/50 dark:border-indigo-800/30 shadow-inner group-hover:scale-110 transition-transform">
+                    <Package size={28} />
                   </div>
-                  <div className="text-center md:text-left flex-1 space-y-3">
-                    <h3 className="font-black text-2xl md:text-4xl text-gray-900 dark:text-white uppercase italic tracking-tighter group-hover:text-indigo-600 transition-colors leading-none">{order.item_name}</h3>
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-5 pt-2">
-                      <div className="flex items-center gap-2.5 bg-gray-50 dark:bg-white/5 px-5 py-2.5 rounded-2xl border border-gray-100 dark:border-white/5">
-                        <Clock size={16} className="text-indigo-400" />
-                        <p className="text-[10px] md:text-[12px] text-gray-500 font-black uppercase tracking-widest italic">{formatDateSafely(order.createdAt, 'dd MMMM, yyyy | HH:mm')}</p>
-                      </div>
+                  <div>
+                    <h3 className="font-black text-gray-900 dark:text-white uppercase italic text-base tracking-tight">{order.item_name}</h3>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <Clock size={12} className="text-gray-400" />
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{formatDateSafely(order.createdAt, 'dd MMMM, HH:mm')}</p>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center justify-between lg:justify-end gap-10 w-full lg:w-auto pt-10 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-white/5">
-                  <div className="flex flex-col items-center lg:items-end group/coinitem">
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 italic">GANJINA SARFI</span>
-                    <div className="flex items-center gap-3 font-black text-3xl md:text-5xl text-yellow-600 dark:text-yellow-500 italic drop-shadow-[0_0_10px_rgba(234,179,8,0.2)]">
-                      <Coins size={28} md:size={36} className="text-yellow-400" />
-                      {(order.item_price ?? 0).toLocaleString()}
-                    </div>
+                <div className="flex items-center justify-between md:justify-end gap-10 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-50 dark:border-gray-700/50">
+                  <div className="flex items-center gap-2 font-black text-indigo-600 dark:text-indigo-400 italic">
+                    <Coins size={18} className="text-yellow-500" />
+                    <span className="text-lg">{(order.item_price ?? 0).toLocaleString()} <span className="text-[10px] ml-1">COIN</span></span>
                   </div>
-                  <div className="flex items-center gap-6">
-                    {getStatusBadge(order.status)}
-                    <div className="w-14 h-14 bg-gray-50 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-300 dark:text-gray-600 group-hover:bg-indigo-600 group-hover:text-white transition-all cursor-pointer shadow-xl">
-                      <ChevronRight size={24} strokeWidth={3} />
-                    </div>
-                  </div>
+                  {getStatusBadge(order.status)}
                 </div>
               </div>
             ))}
             {orders.length === 0 && (
-              <div className="py-32 text-center bg-white dark:bg-[#0c0e14] rounded-[4rem] border-4 border-dashed border-gray-100 dark:border-white/5 flex flex-col items-center justify-center">
-                <Package size={80} className="text-gray-200 dark:text-white/5 mb-8 animate-bounce-slow" strokeWidth={1} />
-                <h3 className="text-3xl font-black text-gray-300 dark:text-white/10 uppercase italic tracking-tighter">Hozircha buyurtmalar bo'sh</h3>
-                <p className="text-gray-400/50 mt-4 font-bold uppercase tracking-[0.3em] text-xs">Marketni ko'rib chiqing va birinchi haridni amalga oshiring!</p>
+              <div className="py-24 text-center bg-gray-50 dark:bg-gray-800/50 rounded-[2.5rem] border-4 border-dashed border-gray-100 dark:border-gray-700">
+                <Package size={56} className="mx-auto text-gray-200 dark:text-gray-700 mb-4" />
+                <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Buyurtmalar hozircha yo'q</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="bg-white dark:bg-[#0c0e14] rounded-[3.5rem] shadow-2xl border border-gray-100 dark:border-white/5 overflow-hidden">
-            <div className="p-10 md:p-14 border-b border-gray-50 dark:border-white/5 bg-gray-50/30 dark:bg-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div>
-                <h3 className="font-black text-3xl md:text-4xl text-gray-900 dark:text-white italic uppercase tracking-tighter flex items-center gap-6">
-                  <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-600/30">
-                    <History size={24} />
-                  </div>
-                  Ganjina Tarixi
-                </h3>
-              </div>
-              <div className="bg-emerald-500/10 text-emerald-500 px-6 py-3 rounded-2xl text-[10px] md:text-[12px] font-black uppercase tracking-[0.3em] italic border border-emerald-500/20 shadow-xl shadow-emerald-500/5">
-                SECURE VAULT SESSION
-              </div>
-            </div>
-
-            <div className="divide-y divide-gray-100 dark:divide-white/5">
-              {history.map((item, idx) => (
-                <div key={item._id} className="p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-700 group">
-                  <div className="flex items-center gap-6 md:gap-10 w-full md:w-auto">
-                    <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[1.8rem] flex items-center justify-center shrink-0 border-2 transition-all duration-700 group-hover:rotate-[-5deg] ${item.amount > 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white' : 'bg-rose-500/10 border-rose-500/20 text-rose-500 group-hover:bg-rose-500 group-hover:text-white'}`}>
-                      {item.amount > 0 ? <TrendingUp size={32} /> : <TrendingDown size={32} />}
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
+              {history.map(item => (
+                <div key={item._id} className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors group">
+                  <div className="flex items-center gap-6 w-full md:w-auto">
+                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-all ${item.amount > 0 ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 border-emerald-100 dark:border-emerald-500/20' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 border-rose-100 dark:border-rose-500/20'}`}>
+                      {item.amount > 0 ? <TrendingUp size={24} /> : <TrendingDown size={24} />}
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <p className="font-black text-xl md:text-3xl text-gray-900 dark:text-white italic uppercase tracking-tighter group-hover:text-indigo-600 transition-colors">{item.reason}</p>
-                      <div className="flex flex-wrap items-center gap-4">
-                        <span className="text-[10px] md:text-[12px] text-gray-400 font-bold uppercase tracking-widest italic">{formatDateSafely(item.createdAt, 'dd.MM.yyyy | HH:mm')}</span>
-                        <div className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-800"></div>
-                        <span className="text-[10px] md:text-[12px] text-indigo-500 font-black uppercase tracking-[0.2em] italic underline underline-offset-4 decoration-indigo-500/20">{getReasonTypeLabel(item.reason_type)}</span>
+                    <div>
+                      <p className="font-black text-base md:text-lg text-gray-900 dark:text-white uppercase italic tracking-tight group-hover:text-indigo-600 transition-colors">{item.reason}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{formatDateSafely(item.createdAt, 'dd.MM.yyyy HH:mm')}</span>
+                        <div className="w-1 h-1 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                        <span className="text-[10px] text-indigo-500 font-black uppercase tracking-wider italic">{getReasonTypeLabel(item.reason_type)}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between md:justify-end gap-10 w-full md:w-auto pt-8 md:pt-0 border-t md:border-t-0 border-gray-100 dark:border-white/5">
-                    <div className="text-center md:text-right space-y-1">
-                      <p className={`font-black text-4xl md:text-6xl tabular-nums italic drop-shadow-sm ${item.amount > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {item.amount > 0 ? '+' : ''}{(item.amount ?? 0).toLocaleString()}
-                        <Coins size={36} md:size={48} className="inline ml-3" strokeWidth={2.5} />
+                  <div className="flex items-center justify-between md:justify-end gap-10 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-50 dark:border-gray-700/50">
+                    <div className="text-center md:text-right">
+                      <p className={`font-black text-xl md:text-3xl tabular-nums italic ${item.amount > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {item.amount > 0 ? '+' : ''}{(item.amount ?? 0).toLocaleString()} <span className="text-xs ml-1">Coin</span>
                       </p>
-                      <p className="text-[10px] md:text-[12px] text-gray-400 font-black uppercase tracking-[0.4em] italic mt-2 opacity-60">XISOB: {(item.balance_after ?? 0).toLocaleString()}</p>
+                      <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest mt-1 opacity-70">Xisobingizda: {(item.balance_after ?? 0).toLocaleString()}</p>
                     </div>
-                    <ChevronRight size={32} className="text-gray-200 dark:text-white/5 group-hover:translate-x-3 group-hover:text-indigo-500 transition-all duration-500" strokeWidth={3} />
+                    <div className="w-10 h-10 bg-gray-50 dark:bg-gray-900 rounded-xl flex items-center justify-center text-gray-300 dark:text-gray-600 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                      <ChevronRight size={20} />
+                    </div>
                   </div>
                 </div>
               ))}
               {history.length === 0 && (
-                <div className="text-center py-40 flex flex-col items-center justify-center opacity-20 hover:opacity-100 transition-opacity duration-1000">
-                  <History className="w-24 h-24 mb-8" strokeWidth={1} />
-                  <h3 className="text-2xl font-black uppercase tracking-[0.5em] italic">Vault is silent</h3>
+                <div className="text-center py-24 bg-white dark:bg-gray-800">
+                  <History className="w-16 h-16 text-gray-100 dark:text-gray-700 mx-auto mb-4" />
+                  <p className="text-gray-300 dark:text-gray-600 font-black uppercase tracking-widest text-xs">Tarix bo'sh</p>
                 </div>
               )}
             </div>
@@ -437,70 +344,41 @@ export default function StudentMarket() {
         )}
       </div>
 
-      {/* 🚀 ELITE CHECKOUT MODAL */}
+      {/* 🚀 Clean Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-500">
-          <div className="bg-[#0c0e14] w-full max-w-xl rounded-[4rem] p-10 md:p-14 shadow-[0_0_150px_rgba(79,70,229,0.4)] animate-in zoom-in-95 relative border border-white/10 overflow-hidden">
-            {/* Decorative Background for Modal */}
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-indigo-500 to-purple-600"></div>
-            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-600/10 rounded-full blur-[100px]"></div>
-
-            <button onClick={() => setShowConfirmModal(null)} className="absolute top-10 right-10 text-gray-500 hover:text-rose-500 transition-all hover:rotate-90 duration-500 scale-125">
-              <X size={32} strokeWidth={3} />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl animate-in zoom-in-95 relative border border-gray-100 dark:border-gray-700">
+            <button onClick={() => setShowConfirmModal(null)} className="absolute top-8 right-8 text-gray-400 hover:text-rose-500 transition-all scale-110">
+              <X size={24} />
             </button>
 
-            <div className="flex flex-col items-center mb-12">
-              <div className="w-24 h-24 bg-yellow-400/10 rounded-[2.5rem] flex items-center justify-center text-yellow-500 mb-8 border border-yellow-400/20 shadow-[0_0_40px_rgba(234,179,8,0.1)] group transition-transform hover:rotate-12 duration-500">
-                <Gem size={48} strokeWidth={2.5} className="animate-pulse" />
-              </div>
-              <h3 className="text-4xl md:text-5xl font-black text-white uppercase italic text-center tracking-tighter leading-none mb-4">Haridni<br />Tasdiqlash</h3>
-              <div className="h-1.5 w-20 bg-indigo-600 rounded-full"></div>
+            <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-500 mb-6 mx-auto border border-indigo-100 dark:border-indigo-800/30">
+              <ShoppingBag size={32} />
             </div>
 
-            <p className="text-gray-400 text-lg md:text-xl leading-relaxed mb-12 text-center italic font-medium max-w-sm mx-auto">
-              Siz "<span className="text-white font-black not-italic">{showConfirmModal.name}</span>" VIP mahsulotini
-              <span className="text-yellow-500 font-black ml-2 inline-flex items-center gap-2 underline underline-offset-8 decoration-yellow-500/20">
-                <Coins size={22} /> {(showConfirmModal.price ?? 0).toLocaleString()}
+            <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase italic text-center mb-4 tracking-tighter">Sotib olish</h3>
+
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-10 text-center italic font-medium px-4">
+              Haqiqatdan ham "<span className="font-black text-gray-900 dark:text-white not-italic">{showConfirmModal.name}</span>" mahsulotini
+              <span className="text-indigo-600 font-black ml-1 inline-flex items-center gap-1 underline underline-offset-4 decoration-indigo-600/20 italic">
+                {(showConfirmModal.price ?? 0).toLocaleString()} <Coins size={14} className="text-yellow-500" />
               </span>
-              ganjinaga harid qilmoqchimisiz?
+              ga harid qilasizmi?
             </p>
 
-            <div className="flex flex-col gap-5">
+            <div className="grid grid-cols-1 gap-3">
               <button
                 onClick={() => handlePurchase(showConfirmModal._id)}
                 disabled={purchasing}
-                className="w-full py-7 rounded-[2.5rem] font-black text-sm md:text-base uppercase tracking-[0.3em] bg-indigo-600 text-white hover:bg-indigo-700 shadow-[0_25px_60px_rgba(79,70,229,0.4)] hover:shadow-[0_35px_80px_rgba(79,70,229,0.6)] flex items-center justify-center gap-4 transition-all active:scale-95 disabled:opacity-50 group/buy"
+                className="w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
               >
-                {purchasing ? (
-                  <Loader2 className="animate-spin" size={24} strokeWidth={3} />
-                ) : (
-                  <>TASDIQLASH <ArrowRight className="group-hover/buy:translate-x-3 transition-transform" size={24} strokeWidth={3} /></>
-                )}
+                {purchasing ? <Loader2 size={18} className="animate-spin" /> : <>TASDIQLASH <CheckCircle size={18} /></>}
               </button>
-              <button onClick={() => setShowConfirmModal(null)} className="w-full py-6 rounded-[2.5rem] font-black text-xs md:text-sm uppercase tracking-[0.3em] text-gray-500 hover:text-white transition-all hover:bg-white/5">
-                BEKOR QILISH
-              </button>
+              <button onClick={() => setShowConfirmModal(null)} className="w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-widest text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all">Bekor qilish</button>
             </div>
           </div>
         </div>
       )}
-
-      {/* CSS CUSTOM CLASSES (Injecting into the same file for ease) */}
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(79, 70, 229, 0.1); border-radius: 20px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(79, 70, 229, 0.2); }
-        
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-        .animate-shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); background-size: 200% 100%; animation: shimmer 3s infinite linear; }
-        
-        .animate-spin-slow { animation: spin 8s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        .animate-bounce-slow { animation: bounce-custom 3s infinite; }
-        @keyframes bounce-custom { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-      `}</style>
     </div>
   );
 }
