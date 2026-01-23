@@ -471,10 +471,10 @@ export default function StudentDashboard() {
           <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
             <nav className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 h-20 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex justify-around items-center px-4">
               {[
-                { id: 'overview', icon: LayoutDashboard, label: 'Asos' },
-                { id: 'tasks', icon: FileCode, label: 'Dars' },
-                { id: 'rating', icon: Trophy, label: 'Top' },
-                { id: 'profile', icon: UserCircle, label: 'Men' }
+                { id: 'overview', icon: LayoutDashboard, label: 'Asosiy' },
+                { id: 'tasks', icon: FileCode, label: 'Vazifalar' },
+                { id: 'rating', icon: Trophy, label: 'Reyting' },
+                { id: 'profile', icon: UserCircle, label: 'Profil' }
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
