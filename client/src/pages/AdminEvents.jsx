@@ -95,6 +95,7 @@ export default function AdminEvents() {
       fetchEvents();
     } catch (error) {
       console.error('Error saving event:', error);
+      alert(error.response?.data?.message || 'Xatolik yuz berdi: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -255,7 +256,7 @@ export default function AdminEvents() {
               {events.map((event) => (
                 <div key={event._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition">
                   {event.banner && (
-                    <div className="h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                    <div className="aspect-[2/3] w-full bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                       <img
                         src={event.banner}
                         alt={event.title}
@@ -388,7 +389,7 @@ export default function AdminEvents() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Ro\'yxatdan o\'tish muddati
+                Ro'yxatdan o'tish muddati
               </label>
               <input
                 type="datetime-local"
