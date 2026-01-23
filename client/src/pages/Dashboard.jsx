@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { 
-  Users, 
-  Calendar, 
-  AlertCircle, 
-  Wallet, 
+import {
+  Users,
+  Calendar,
+  AlertCircle,
+  Wallet,
   UserCheck,
   UserPlus,
   Clock,
@@ -24,7 +24,7 @@ import {
   DollarSign,
   GraduationCap,
   Users2,
-  CalendarEvent
+  CalendarDays
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -166,9 +166,8 @@ export default function Dashboard() {
           <Link
             key={index}
             to={stat.link}
-            className={`group relative overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${
-              stat.alert ? 'ring-2 ring-red-200 dark:ring-red-800' : ''
-            }`}
+            className={`group relative overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${stat.alert ? 'ring-2 ring-red-200 dark:ring-red-800' : ''
+              }`}
           >
             <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-90`}></div>
             <div className="relative p-8 text-white">
@@ -285,7 +284,7 @@ export default function Dashboard() {
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl">
-                <CalendarEvent className="text-white" size={20} />
+                <CalendarDays className="text-white" size={20} />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">Tadbirlar</h3>
