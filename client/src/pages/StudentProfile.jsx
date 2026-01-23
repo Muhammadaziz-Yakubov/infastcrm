@@ -198,16 +198,62 @@ export default function StudentProfile() {
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  // Image compression utility
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setImagePreview(base64String);
-        setFormData(prev => ({ ...prev, profile_image: base64String }));
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Max dimensions
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 0.7 quality
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = event.target.result;
       };
       reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Rasm hajmi juda katta!");
+        return;
+      }
+      try {
+        const compressedBase64 = await compressImage(file);
+        setImagePreview(compressedBase64);
+        setFormData(prev => ({ ...prev, profile_image: compressedBase64 }));
+      } catch (error) {
+        console.error("Compression error:", error);
+        alert("Rasmni qayta ishlashda xatolik");
+      }
     }
   };
 
@@ -239,8 +285,8 @@ export default function StudentProfile() {
             <div className="relative group shrink-0">
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-[2.5rem] blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
               <div className="w-32 h-32 md:w-52 md:h-52 rounded-[2rem] md:rounded-[3rem] border-[6px] md:border-[8px] border-white dark:border-[#1a1c2e] bg-gray-800 shadow-2xl relative overflow-hidden group-hover:rotate-2 transition-transform duration-500">
-                {profile?.profile_image || imagePreview ? (
-                  <img src={getImageUrl(profile?.profile_image || imagePreview)} className="w-full h-full object-cover" alt="" />
+                {imagePreview || profile?.profile_image ? (
+                  <img src={getImageUrl(imagePreview || profile?.profile_image)} className="w-full h-full object-cover" alt="" />
                 ) : (
                   <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-white/50">
                     <User size={48} md:size={80} strokeWidth={1} />
@@ -276,7 +322,7 @@ export default function StudentProfile() {
                     </span>
                   )}
                 </div>
-                <h1 className="text-3xl md:text-6xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-xl truncate px-2 md:px-0">
+                <h1 className="text-3xl md:text-6xl font-black text-white uppercase italic tracking-normal leading-none drop-shadow-xl truncate px-2 md:px-0">
                   {profile?.full_name}
                 </h1>
                 <p className="text-white/60 font-bold text-xs md:text-sm mt-2 flex items-center justify-center md:justify-start gap-2">
