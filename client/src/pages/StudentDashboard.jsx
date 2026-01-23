@@ -473,7 +473,6 @@ export default function StudentDashboard() {
               {[
                 { id: 'overview', icon: LayoutDashboard, label: 'Asos' },
                 { id: 'tasks', icon: FileCode, label: 'Dars' },
-                { id: 'exams', icon: Target, label: 'Sinf' },
                 { id: 'rating', icon: Trophy, label: 'Top' },
                 { id: 'profile', icon: UserCircle, label: 'Men' }
               ].map((tab) => {
