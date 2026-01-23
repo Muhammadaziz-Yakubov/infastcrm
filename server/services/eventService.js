@@ -1,8 +1,6 @@
 import Event from '../models/Event.js';
 import Student from '../models/Student.js';
-import CoinService from './CoinService.js';
-
-const coinService = new CoinService();
+import coinService from './CoinService.js';
 
 export const processEventAttendance = async (eventId, adminId = null) => {
   try {
