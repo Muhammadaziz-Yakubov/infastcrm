@@ -18,9 +18,11 @@ api.interceptors.request.use(
 
     // Add appropriate token if not already present
     if (!config.headers?.Authorization) {
-      if (studentToken) {
+      const isStudentSite = window.location.pathname.startsWith('/student');
+
+      if (isStudentSite && studentToken) {
         config.headers.Authorization = `Bearer ${studentToken}`;
-      } else if (adminToken) {
+      } else if (!isStudentSite && adminToken) {
         config.headers.Authorization = `Bearer ${adminToken}`;
       }
     }
@@ -57,4 +59,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
