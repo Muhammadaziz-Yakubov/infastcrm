@@ -227,49 +227,71 @@ export default function StudentTasks() {
 
       {showSubmitModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl p-4 md:p-6 shadow-2xl mx-4">
-            <h3 className="text-lg md:text-xl font-bold mb-4">Vazifa yuborish</h3>
-            <textarea onChange={e => setSubmitData({ ...submitData, description: e.target.value })} className="w-full p-3 border rounded-xl mb-4 h-32 text-sm" placeholder="Izoh..." />
-            
-            {/* File upload with preview */}
-            <div className="mb-6">
-              <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                Fayllarni tanlash
-              </label>
-              <input 
-                type="file" 
-                multiple 
-                accept="image/*,.pdf,.doc,.docx,.txt"
-                onChange={handleFileChange} 
-                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-              />
-              
-              {/* File previews */}
-              {submitData.files.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {submitData.files.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        {getFileIcon(file)}
-                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
-                        <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(1)}KB)</span>
-                      </div>
-                      <button 
-                        onClick={() => removeFile(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <button onClick={handleSubmitTask} disabled={submitting} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold disabled:opacity-50">
-              {submitting ? 'Yuborilmoqda...' : 'Yuborish'}
+          <div className="bg-white dark:bg-gray-800 w-full max-w-md mx-4 sm:mx-auto sm:max-w-lg rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setShowSubmitModal(false)} className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-rose-500 rounded-xl sm:rounded-2xl transition-all">
+              <X size={18} sm:size={20} md:size={24} />
             </button>
-            <button onClick={() => setShowSubmitModal(false)} className="w-full mt-2 text-gray-500 py-2">Bekor qilish</button>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 dark:text-white">Vazifa yuborish</h3>
+            
+            <div className="space-y-4 sm:space-y-6">
+              <div className="space-y-2 sm:space-y-3">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Izoh...
+                </label>
+                <textarea 
+                  onChange={e => setSubmitData({ ...submitData, description: e.target.value })} 
+                  className="w-full p-3 sm:p-4 border rounded-xl sm:rounded-2xl h-24 sm:h-32 text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-indigo-500" 
+                  placeholder="Izoh..." 
+                />
+              </div>
+              
+              <div className="space-y-2 sm:space-y-3">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Fayllarni tanlash
+                </label>
+                <input 
+                  type="file" 
+                  multiple 
+                  accept="image/*,.pdf,.doc,.docx,.txt"
+                  onChange={handleFileChange} 
+                  className="w-full text-xs sm:text-sm file:mr-2 sm:file:mr-4 file:py-1 sm:file:py-2 file:px-2 sm:file:px-4 file:rounded-lg sm:file:rounded-xl file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                />
+                
+                {submitData.files.length > 0 && (
+                  <div className="mt-2 sm:mt-3 space-y-1 sm:space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
+                    {submitData.files.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          {getFileIcon(file)}
+                          <span className="text-xs sm:text-sm truncate max-w-[120px] sm:max-w-[200px]">{file.name}</span>
+                          <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(1)}KB)</span>
+                        </div>
+                        <button 
+                          onClick={() => removeFile(index)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                        >
+                          <X size={14} sm:size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <button 
+                onClick={handleSubmitTask} 
+                disabled={submitting} 
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold disabled:opacity-50 text-sm sm:text-base transition-all"
+              >
+                {submitting ? 'Yuborilmoqda...' : 'Yuborish'}
+              </button>
+              <button 
+                onClick={() => setShowSubmitModal(false)} 
+                className="w-full text-gray-500 dark:text-gray-400 py-2 text-xs sm:text-sm hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+              >
+                Bekor qilish
+              </button>
+            </div>
           </div>
         </div>
       )}

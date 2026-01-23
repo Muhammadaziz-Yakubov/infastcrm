@@ -389,24 +389,24 @@ export default function StudentTasksView({ setFullScreen }) {
 
             {showSubmitModal && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative animate-in zoom-in-95 duration-500 border border-white/5">
-                        <button onClick={() => setShowSubmitModal(false)} className="absolute top-8 right-8 p-3 text-gray-400 hover:text-white hover:bg-rose-500 rounded-2xl transition-all">
-                            <X size={24} />
+                    <div className="bg-white dark:bg-gray-800 w-full max-w-lg mx-4 sm:mx-auto sm:max-w-xl lg:max-w-lg rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 lg:p-10 shadow-2xl relative animate-in zoom-in-95 duration-500 border border-white/5 max-h-[90vh] overflow-y-auto">
+                        <button onClick={() => setShowSubmitModal(false)} className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-rose-500 rounded-xl sm:rounded-2xl transition-all">
+                            <X size={20} sm:size={24} />
                         </button>
-                        <h3 className="text-4xl font-black mb-10 dark:text-white italic uppercase tracking-tighter">Vazifani yuborish</h3>
+                        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-6 sm:mb-8 lg:mb-10 dark:text-white italic uppercase tracking-tighter">Vazifani yuborish</h3>
 
-                        <div className="space-y-8">
+                        <div className="space-y-6 sm:space-y-8">
                             <div className="space-y-3">
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">Sizning izohingiz</label>
+                                <label className="block text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">Sizning izohingiz</label>
                                 <textarea
                                     onChange={e => setSubmitData({ ...submitData, description: e.target.value })}
-                                    className="w-full p-8 bg-gray-50 dark:bg-gray-900/50 border-none rounded-[2rem] h-40 text-sm font-bold focus:ring-4 ring-indigo-500/10 transition-all resize-none dark:text-white placeholder:text-gray-500 shadow-inner"
+                                    className="w-full p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900/50 border-none rounded-[1.5rem] sm:rounded-[2rem] h-32 sm:h-40 text-sm font-bold focus:ring-4 ring-indigo-500/10 transition-all resize-none dark:text-white placeholder:text-gray-500 shadow-inner"
                                     placeholder="Vazifa bo'yicha qo'shimcha ma'lumot qoldiring (masalan: havola yoki tushuntirish)..."
                                 />
                             </div>
 
                             <div className="space-y-3">
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">Fayllarni yuklang</label>
+                                <label className="block text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">Fayllarni yuklang</label>
                                 <div className="relative group">
                                     <input
                                         type="file"
@@ -423,11 +423,11 @@ export default function StudentTasksView({ setFullScreen }) {
                                         }}
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                     />
-                                    <div className="w-full border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[2.5rem] p-12 flex flex-col items-center gap-4 group-hover:border-indigo-500/50 group-hover:bg-indigo-50/10 transition-all duration-500 shadow-inner">
-                                        <div className="w-20 h-20 rounded-[1.8rem] bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all duration-500 shadow-xl group-hover:shadow-indigo-500/20">
-                                            <Upload size={32} strokeWidth={2.5} />
+                                    <div className="w-full border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[1.8rem] sm:rounded-[2.5rem] p-8 sm:p-10 lg:p-12 flex flex-col items-center gap-3 sm:gap-4 group-hover:border-indigo-500/50 group-hover:bg-indigo-50/10 transition-all duration-500 shadow-inner">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[1.8rem] bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all duration-500 shadow-xl group-hover:shadow-indigo-500/20">
+                                            <Upload size={24} sm:size={28} lg:size={32} strokeWidth={2.5} />
                                         </div>
-                                        <p className="text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">{submitData.files.length > 0 ? `${submitData.files.length} TTA FAYL TANLANDI` : 'FAYLLARNI SHUYERGA TASHLANG (MAKS 5 TTA)'}</p>
+                                        <p className="text-xs sm:text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">{submitData.files.length > 0 ? `${submitData.files.length} TTA FAYL TANLANDI` : 'FAYLLARNI SHUYERGA TASHLANG (MAKS 5 TTA)'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -435,7 +435,7 @@ export default function StudentTasksView({ setFullScreen }) {
                             <button
                                 onClick={handleSubmitTask}
                                 disabled={submitting}
-                                className="w-full bg-gradient-to-r from-indigo-600 to-blue-700 text-white py-6 rounded-[2rem] font-black shadow-2xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-2 active:scale-95 transition-all disabled:opacity-50 mt-4 text-xl italic uppercase tracking-[0.2em]"
+                                className="w-full bg-gradient-to-r from-indigo-600 to-blue-700 text-white py-4 sm:py-5 lg:py-6 rounded-[1.5rem] sm:rounded-[2rem] font-black shadow-2xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 sm:hover:-translate-y-2 active:scale-95 transition-all disabled:opacity-50 mt-4 text-base sm:text-lg lg:text-xl italic uppercase tracking-[0.2em]"
                             >
                                 {submitting ? 'YUBORILMOQDA...' : 'VAZIFANI TOPSHIRISH'}
                             </button>
