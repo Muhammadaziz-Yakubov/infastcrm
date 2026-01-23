@@ -12,7 +12,13 @@ import {
     FileCode,
     Calendar,
     ChevronRight,
-    Target as TargetIcon
+    Target as TargetIcon,
+    AlertCircle,
+    FileText,
+    Image as ImageIcon,
+    Download,
+    Trash2,
+    Check
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -26,6 +32,8 @@ export default function StudentTasksView({ setFullScreen }) {
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [submitData, setSubmitData] = useState({ description: '', files: [] });
     const [submitting, setSubmitting] = useState(false);
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [error, setError] = useState(null);
 
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [showQuizRunner, setShowQuizRunner] = useState(false);
@@ -36,30 +44,17 @@ export default function StudentTasksView({ setFullScreen }) {
     const getImageUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http') || url.startsWith('data:')) return url;
+        // In local api.js we handle /api prefix, but image urls are directly served by server
         const backendUrl = import.meta.env.VITE_API_URL || 'https://infastcrm-0b2r.onrender.com';
-        const cleanUrl = url.startsWith('/') ? url : '/' + url;
-        return `${backendUrl}${cleanUrl}`;
+        return `${backendUrl.replace('/api', '')}/${url.startsWith('/') ? url.slice(1) : url}`;
     };
-
-    useEffect(() => { fetchData(); }, []);
-
-    // Auto-refresh calculation for "Recently Closed" status every 5 minutes instead of 1 minute
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setItems(prev => [...prev]);
-        }, 300000); // 5 minutes
-        return () => clearInterval(interval);
-    }, []);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const studentToken = localStorage.getItem('studentToken');
-            const headers = studentToken ? { Authorization: `Bearer ${studentToken}` } : {};
-
             const [tasksRes, quizzesRes] = await Promise.all([
-                api.get('student-auth/tasks', { headers }),
-                api.get('student/quizzes', { headers })
+                api.get('student-auth/tasks'),
+                api.get('student/quizzes')
             ]);
 
             const tasks = tasksRes.data.map(t => ({
@@ -79,11 +74,13 @@ export default function StudentTasksView({ setFullScreen }) {
             const combined = [...tasks, ...quizzes].sort((a, b) => b.sortDate - a.sortDate);
             setItems(combined);
         } catch (error) {
-            console.error('Error fetching tasks components:', error);
+            console.error('Error fetching tasks details:', error);
         } finally {
             setLoading(false);
         }
     }, []);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
 
     const handleItemClick = (item) => {
         if (item.type === 'TASK') {
@@ -108,12 +105,7 @@ export default function StudentTasksView({ setFullScreen }) {
         }
 
         if (quiz.start_date && now < new Date(quiz.start_date)) {
-            alert(`Boshlanish vaqti: ${format(new Date(quiz.start_date), 'dd MMM HH:mm', { locale: uz })}`);
-            return;
-        }
-        if (quiz.end_date && now > new Date(quiz.end_date) && quiz.status !== 'STARTED') {
-            alert('Muddati tugagan');
-            return;
+            return; // Start date not reached
         }
 
         setSelectedItemId(quiz._id);
@@ -123,29 +115,44 @@ export default function StudentTasksView({ setFullScreen }) {
         if (typeof setFullScreen === 'function') setFullScreen(true);
     };
 
-    const handleSubmitTask = useCallback(async (e) => {
-        e.preventDefault();
-        if (submitData.files.length > 5) {
-            alert('Maksimal 5 ta fayl yuklash mumkin');
+    const removeFile = (index) => {
+        setSubmitData(prev => ({
+            ...prev,
+            files: prev.files.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleSubmitTask = async (e) => {
+        if (e) e.preventDefault();
+        setError(null);
+
+        if (submitData.files.length === 0 && !submitData.description.trim()) {
+            setError('Iltimos, vazifani jo\'natish uchun fayl yuklang yoki izoh qoldiring!');
             return;
         }
+
         setSubmitting(true);
         try {
             const formData = new FormData();
             formData.append('description', submitData.description);
             submitData.files.forEach(f => formData.append('files', f));
-            const response = await api.post(`tasks/${selectedTask._id}/submit`, formData);
-            alert('Muvaffaqiyatli jo\'natildi! 🚀');
-            setShowSubmitModal(false);
-            fetchData();
+
+            await api.post(`tasks/${selectedTask._id}/submit`, formData);
+
+            setSubmitSuccess(true);
+            setTimeout(() => {
+                setShowSubmitModal(false);
+                setSubmitSuccess(false);
+                setSubmitData({ description: '', files: [] });
+                fetchData();
+            }, 2000);
         } catch (error) {
-            console.error('Submission error:', error);
-            const errorMsg = error.response?.data?.message || error.message || 'Xatolik yuz berdi';
-            alert(`Xatolik: ${errorMsg}`);
+            console.error('Submission total error:', error);
+            setError(error.response?.data?.message || 'Vazifani jo\'natishda xatolik yuz berdi. Iltimos qaytadan urinib ko\'ring.');
         } finally {
             setSubmitting(false);
         }
-    }, [submitData, selectedTask, fetchData]);
+    };
 
     const filteredItems = useMemo(() => {
         return items.filter(item => {
@@ -153,51 +160,76 @@ export default function StudentTasksView({ setFullScreen }) {
             const now = new Date();
             const deadline = item.date ? new Date(item.date) : null;
             const isExpired = deadline && now > deadline;
-            const isRecentlyExpired = isExpired && (now - deadline) < 600000; // 10 minutes in ms
+            const isRecentlyExpired = isExpired && (now - deadline) < 600000;
 
-            // The user wants tasks to stay in "Active" until they expire (deadline + 10 mins)
-            // even if they are submitted.
             if (activeTab === 'completed') {
                 return matchesSearch && (isExpired && !isRecentlyExpired);
             }
-            // Active tab: Show items that are NOT expired OR are recently expired (within 10 mins)
             return matchesSearch && (!isExpired || isRecentlyExpired);
         });
     }, [items, searchTerm, activeTab]);
 
-    if (loading) return <div className="text-center py-20 animate-pulse text-gray-500">Vazifalar yuklanmoqda...</div>;
+    if (loading) return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="animate-pulse bg-white dark:bg-gray-800 rounded-[2.5rem] h-[450px] border border-gray-100 dark:border-gray-700/50">
+                    <div className="h-48 bg-gray-100 dark:bg-gray-700 rounded-t-[2.5rem]"></div>
+                    <div className="p-8 space-y-4">
+                        <div className="h-6 w-3/4 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+                        <div className="h-4 w-full bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+                        <div className="h-4 w-1/2 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+                        <div className="pt-10 flex justify-between">
+                            <div className="h-10 w-24 bg-gray-100 dark:bg-gray-700 rounded-xl"></div>
+                            <div className="h-10 w-24 bg-gray-100 dark:bg-gray-700 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     return (
-        <div className="space-y-6">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4">
-                <div>
-                    <h2 className="text-2xl md:text-4xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 to-blue-600 bg-clip-text text-transparent">Vazifalar Markazi</h2>
-                    <p className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1 ml-1 opacity-70">Bilimingizni sinovdan o'tkazing va natijalarga erishing</p>
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Elegant Top Header */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 pb-6 border-b border-gray-100 dark:border-white/5">
+                <div className="flex items-center gap-6">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-indigo-500 blur-2xl opacity-20 animate-pulse"></div>
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-[2.2rem] bg-gradient-to-br from-indigo-600 via-blue-600 to-indigo-700 flex items-center justify-center shadow-2xl relative overflow-hidden group transition-all duration-500">
+                            <TargetIcon className="text-white group-hover:scale-110 transition-transform" size={32} />
+                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 className="text-3xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">Challenge Hub</h2>
+                        <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-white/40 uppercase tracking-[0.4em] mt-2 ml-1 flex items-center gap-2">
+                            Akademiya topshiriqlar platformasi
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="bg-gray-100 dark:bg-gray-800/50 p-1 rounded-[1.2rem] md:rounded-[1.5rem] flex backdrop-blur-xl border border-white/5 shadow-inner">
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="bg-gray-100 dark:bg-white/5 p-1.5 rounded-3xl flex backdrop-blur-xl border border-white/5 ring-1 ring-black/5 dark:ring-white/5">
                         <button
                             onClick={() => setActiveTab('active')}
-                            className={`px-4 md:px-8 py-2 md:py-3 rounded-[0.9rem] md:rounded-[1.2rem] text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'active' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-xl scale-105' : 'text-gray-400 hover:text-gray-500'}`}
+                            className={`px-6 md:px-10 py-3 rounded-2xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-500 ${activeTab === 'active' ? 'bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-xl scale-105' : 'text-gray-400 hover:text-gray-600 dark:hover:text-white/60'}`}
                         >
                             Faollik
                         </button>
                         <button
                             onClick={() => setActiveTab('completed')}
-                            className={`px-4 md:px-8 py-2 md:py-3 rounded-[0.9rem] md:rounded-[1.2rem] text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === 'completed' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-xl scale-105' : 'text-gray-400 hover:text-gray-500'}`}
+                            className={`px-6 md:px-10 py-3 rounded-2xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-500 ${activeTab === 'completed' ? 'bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-xl scale-105' : 'text-gray-400 hover:text-gray-600 dark:hover:text-white/60'}`}
                         >
                             Yakunlangan
                         </button>
                     </div>
 
-                    <div className="relative group hidden lg:block">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-indigo-500" size={16} />
+                    <div className="relative group lg:w-72">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
                         <input
                             type="text"
-                            placeholder="Vazifalarni izlash..."
-                            className="w-64 bg-gray-100 dark:bg-gray-800/50 border-none rounded-[1.2rem] pl-12 pr-6 py-3.5 text-xs font-bold focus:ring-4 ring-indigo-500/10 transition-all dark:text-white placeholder:text-gray-500"
+                            placeholder="Izlash..."
+                            className="w-full bg-white dark:bg-white/5 border-none rounded-[1.5rem] pl-12 pr-6 py-4 text-xs font-bold focus:ring-4 ring-indigo-500/10 transition-all dark:text-white shadow-xl shadow-gray-200/5 dark:shadow-none"
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
@@ -205,212 +237,194 @@ export default function StudentTasksView({ setFullScreen }) {
                 </div>
             </div>
 
-            {/* Grid Section */}
+            {/* Content Area */}
             {filteredItems.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800/40 rounded-[2rem] md:rounded-[3rem] p-12 md:p-24 text-center border border-dashed border-gray-200 dark:border-gray-700/50 backdrop-blur-sm">
-                    <div className="w-16 h-16 md:w-24 md:h-24 bg-gray-50 dark:bg-gray-900/50 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 md:mb-8 text-gray-300 shadow-inner">
-                        {activeTab === 'active' ? <Calendar size={32} md:size={48} strokeWidth={1.5} /> : <CheckCircle size={32} md:size={48} strokeWidth={1.5} />}
+                <div className="bg-white dark:bg-white/[0.02] rounded-[3.5rem] p-16 md:p-32 text-center border-4 border-dashed border-gray-50 dark:border-white/5 flex flex-col items-center justify-center">
+                    <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-50 dark:bg-white/5 rounded-[3rem] flex items-center justify-center mb-10 text-gray-200 dark:text-white/10 rotate-12 group hover:rotate-0 transition-transform duration-700">
+                        {activeTab === 'active' ? <Calendar size={56} strokeWidth={1} /> : <CheckCircle size={56} strokeWidth={1} />}
                     </div>
-                    <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white mb-2 md:mb-3 tracking-tight">Hozircha hech narsa yo'q</h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-xs md:text-sm max-w-xs mx-auto font-medium">Bu bo'limda sizga oid vazifa yoki topshiriqlar topilmadi.</p>
+                    <h3 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight italic uppercase italic">Topshiriqlar topilmadi</h3>
+                    <p className="text-gray-400 dark:text-white/40 text-sm md:text-lg max-w-sm font-medium tracking-tight">Hozircha bu bo'limda hech qanday topshiriq mavjud emas. Yangidurslarini kuting!</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredItems.map(item => (
-                        <div
-                            key={`${item.type}-${item._id}`}
-                            onClick={() => {
-                                const now = new Date();
-                                const deadline = item.date ? new Date(item.date) : null;
-                                if (deadline && now > deadline && item.status !== 'STARTED') {
-                                    alert('Vaqti tugadi');
-                                    return;
-                                }
-                                handleItemClick(item);
-                            }}
-                            className={`group bg-white dark:bg-gray-800 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-1 ${(item.date && new Date() > new Date(item.date) && activeTab === 'active') ? 'opacity-75 grayscale-[0.5]' : ''
-                                }`}
-                        >
-                            <div className="h-48 relative overflow-hidden">
-                                {item.image_url ? (
-                                    <img
-                                        src={getImageUrl(item.image_url)}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        alt={item.title}
-                                    />
-                                ) : (
-                                    <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${item.type === 'QUIZ' ? 'from-indigo-500 to-blue-600' : 'from-orange-400 to-amber-500'}`}>
-                                        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                                        <div className="relative z-10 text-white flex flex-col items-center gap-2">
-                                            {item.type === 'QUIZ' ? <Brain size={40} /> : <FileCode size={40} />}
-                                        </div>
-                                    </div>
-                                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                    {filteredItems.map(item => {
+                        const now = new Date();
+                        const deadline = item.date ? new Date(item.date) : null;
+                        const isExpired = deadline && now > deadline;
+                        const isSubmitted = item.submission || item.status === 'FINISHED' || item.status === 'GRADED';
 
-                                <div className="absolute top-5 left-5 z-20">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] bg-black/40 backdrop-blur-md text-white px-4 py-1.5 rounded-xl border border-white/20">
-                                        {item.type}
-                                    </span>
-                                </div>
-
-                                {item.date && new Date() > new Date(item.date) && (new Date() - new Date(item.date)) < 600000 && (
-                                    <div className="absolute bottom-5 left-5 bg-rose-600 text-white text-[10px] font-black px-4 py-2 rounded-xl shadow-xl shadow-rose-500/30 animate-pulse z-20 uppercase tracking-widest border border-white/20">
-                                        10 minut vaqti tugadi
-                                    </div>
-                                )}
-
-                                {((item.type === 'QUIZ'
-                                    ? (item.status === 'FINISHED' || item.submission?.status === 'FINISHED' || item.status === 'GRADED')
-                                    : (item.submission || item.status === 'COMPLETED' || item.status === 'CLOSED')) && activeTab === 'active') && (
-                                        <div className="absolute bottom-5 right-5 bg-emerald-600 text-white text-[10px] font-black px-4 py-2 rounded-xl shadow-xl shadow-emerald-500/30 z-20 uppercase tracking-widest border border-white/20">
-                                            Siz topshirib bo'ldingiz
+                        return (
+                            <div
+                                key={`${item.type}-${item._id}`}
+                                onClick={() => isExpired && !item.submission ? null : handleItemClick(item)}
+                                className={`group bg-white dark:bg-[#0f111a] rounded-[3rem] overflow-hidden border border-gray-100 dark:border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.03)] dark:shadow-none hover:shadow-[0_40px_80px_rgba(79,70,229,0.1)] transition-all duration-700 cursor-pointer flex flex-col h-full relative ${isExpired && !item.submission ? 'opacity-60 grayscale-[0.5] cursor-not-allowed' : 'hover:-translate-y-3'}`}
+                            >
+                                <div className="h-56 relative overflow-hidden shrink-0">
+                                    {item.image_url ? (
+                                        <img
+                                            src={getImageUrl(item.image_url)}
+                                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                                            alt={item.title}
+                                        />
+                                    ) : (
+                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${item.type === 'QUIZ' ? 'from-indigo-600 to-indigo-800' : 'from-rose-500 to-orange-600'}`}>
+                                            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                                            <div className="relative z-10 text-white/20">
+                                                {item.type === 'QUIZ' ? <Brain size={100} strokeWidth={1} /> : <FileCode size={100} strokeWidth={1} />}
+                                            </div>
                                         </div>
                                     )}
 
-                                {(item.status === 'FINISHED' || item.submitted || item.status === 'GRADED' || item.submission) && (
-                                    <div className="absolute top-5 right-5 bg-emerald-500 text-white p-2.5 rounded-xl shadow-xl shadow-emerald-500/20 z-20 border border-white/20">
-                                        <CheckCircle size={18} strokeWidth={3} />
+                                    {/* Glass Overlay Badges */}
+                                    <div className="absolute top-6 left-6 z-20 flex gap-2">
+                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl border border-white/20 shadow-xl backdrop-blur-md ${item.type === 'QUIZ' ? 'bg-indigo-600 text-white' : 'bg-orange-600 text-white'}`}>
+                                            {item.type}
+                                        </span>
                                     </div>
-                                )}
-                            </div>
 
-                            <div className="p-5 md:p-8">
-                                <h3 className="font-black text-gray-900 dark:text-white mb-2 md:mb-3 truncate text-lg md:text-xl tracking-tight leading-tight uppercase italic">{item.title}</h3>
-                                <p className="text-[11px] md:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-6 md:mb-8 h-8 md:h-10 font-bold leading-relaxed">{item.description || 'Tavsif mavjud emas'}</p>
-
-                                {item.status === 'STARTED' && (
-                                    <div className="mb-6 bg-indigo-50 dark:bg-indigo-900/20 px-5 py-3.5 rounded-2xl flex items-center justify-between group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 transition-all border border-indigo-100 dark:border-indigo-900/10 shadow-sm shadow-indigo-500/5">
-                                        <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] animate-pulse">Davom etmoqda</span>
-                                        <div className="flex items-center gap-2 text-[10px] font-black text-indigo-700 dark:text-indigo-300">
-                                            DAVOM ETTIRISH <ChevronRight size={14} strokeWidth={3} />
+                                    {isSubmitted && (
+                                        <div className="absolute top-6 right-6 z-20">
+                                            <div className="bg-emerald-500 text-white p-2.5 rounded-xl shadow-2xl shadow-emerald-500/30 border border-white/20 animate-in zoom-in-50">
+                                                <CheckCircle size={20} strokeWidth={3} />
+                                            </div>
                                         </div>
+                                    )}
+
+                                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                </div>
+
+                                <div className="p-8 md:p-10 flex flex-col flex-1">
+                                    <div className="flex-1">
+                                        <h3 className="font-black text-gray-900 dark:text-white mb-4 line-clamp-1 text-2xl tracking-tighter uppercase italic group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{item.title}</h3>
+                                        <p className="text-xs md:text-sm text-gray-400 dark:text-white/40 line-clamp-2 mb-8 font-bold leading-relaxed">{item.description || 'Vazifa shartlari bilan yaqindan tanishib chiqing.'}</p>
                                     </div>
-                                )}
 
-                                <div className="flex items-center justify-between pt-4 md:pt-6 border-t border-gray-50 dark:border-gray-700/50">
-                                    <div className="flex items-center gap-2 md:gap-3 text-[9px] md:text-[11px] font-black text-gray-400 uppercase tracking-widest">
-                                        <div className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-400 border border-gray-100 dark:border-gray-700/50">
-                                            <Clock size={12} md:size={14} strokeWidth={2.5} />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[7px] md:text-[8px] text-gray-300 dark:text-gray-500 mb-0.5">MUDDAT</span>
-                                            <span className="text-gray-500 dark:text-gray-400">{item.date ? format(new Date(item.date), 'dd MMM HH:mm', { locale: uz }) : 'MUDDATSIZ'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-[7px] md:text-[8px] font-black text-gray-300 dark:text-gray-500 uppercase tracking-widest mb-0.5 uppercase">ball</span>
-                                        <div className="font-black text-lg md:text-xl text-indigo-600 dark:text-indigo-400 tabular-nums tracking-tighter">
-                                            {item.score !== undefined || item.submission?.score !== undefined
-                                                ? `${item.score ?? item.submission?.score}`
-                                                : `${item.max_score || 100}`}
+                                    <div className="space-y-6">
+                                        {item.status === 'STARTED' && (
+                                            <div className="bg-indigo-50 dark:bg-indigo-600/10 px-6 py-4 rounded-[1.5rem] flex items-center justify-between group-hover:bg-indigo-600 group-hover:scale-[1.02] transition-all border border-indigo-100 dark:border-indigo-600/20 shadow-lg shadow-indigo-600/5 group-hover:shadow-indigo-600/20 group-hover:text-white">
+                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">Davom etish</span>
+                                                <ChevronRight size={16} strokeWidth={3} />
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center justify-between pt-6 border-t border-gray-50 dark:border-white/5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 dark:text-white/20 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 border border-gray-100 dark:border-white/10">
+                                                    <Clock size={16} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-[8px] font-black text-gray-300 dark:text-white/20 uppercase tracking-widest leading-none mb-1">MUDDAT</span>
+                                                    <span className={`text-[11px] font-black uppercase tracking-tight italic ${isExpired ? 'text-rose-500' : 'text-gray-500 dark:text-white/60'}`}>
+                                                        {item.date ? format(new Date(item.date), 'dd MMM, HH:mm', { locale: uz }) : 'MUDDATSIZ'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[8px] font-black text-gray-300 dark:text-white/20 uppercase tracking-widest leading-none mb-1">SCORE</span>
+                                                <div className="flex items-center gap-1.5 font-black text-2xl text-indigo-600 dark:text-indigo-400 tracking-tighter tabular-nums drop-shadow-sm group-hover:scale-110 transition-transform origin-right">
+                                                    <Target size={18} />
+                                                    {item.submission?.score !== undefined ? item.submission.score : (item.score ?? item.max_score ?? 100)}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
-            {/* Modals Section */}
+            {/* Premium Task Details Modal */}
             {showTaskModal && selectedTask && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-500">
-                        <div className="px-6 md:px-10 pb-6 md:pb-10 overflow-y-auto space-y-6 md:space-y-8 custom-scrollbar">
-                            {/* File/Image Preview */}
-                            <div className="p-4 md:p-8 shrink-0">
-                                <div className="relative h-48 md:h-72 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden group/img shadow-2xl bg-gray-100 dark:bg-gray-800">
-                                    {selectedTask.image_url ? (
-                                        selectedTask.image_url.match(/\.(jpeg|jpg|png|gif|webp)$|data:image/) ? (
-                                            <img src={getImageUrl(selectedTask.image_url)} className="w-full h-full object-cover" alt="" />
-                                        ) : (
-                                            <div className="w-full h-full flex flex-col items-center justify-center bg-indigo-600 text-white p-10 text-center">
-                                                <div className="p-5 bg-white/20 rounded-3xl mb-4">
-                                                    <FileCode size={48} />
-                                                </div>
-                                                <p className="font-black italic uppercase tracking-widest text-sm mb-4">Biriktirilgan fayl mavjud</p>
-                                                <a
-                                                    href={getImageUrl(selectedTask.image_url)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="px-8 py-3 bg-white text-indigo-600 rounded-2xl font-black uppercase text-xs hover:scale-105 transition-all shadow-xl"
-                                                >
-                                                    Faylni Yuklab Olish
-                                                </a>
-                                            </div>
-                                        )
-                                    ) : (
-                                        <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center text-white/20">
-                                            <FileCode size={80} md:size={120} strokeWidth={1} />
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-                                    <button onClick={() => setShowTaskModal(false)} className="absolute top-4 md:top-8 right-4 md:right-8 p-2.5 md:p-3.5 bg-black/20 hover:bg-black/40 text-white rounded-xl md:rounded-2xl transition-all backdrop-blur-xl border border-white/10 group-hover:scale-110 z-30">
-                                        <X size={18} md:size={20} />
-                                    </button>
-                                    <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 right-6 md:right-10 text-white z-20">
-                                        <span className="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-lg md:rounded-xl bg-orange-500 shadow-xl shadow-orange-500/20 text-[8px] md:text-[10px] font-black mb-2 md:mb-4 uppercase tracking-widest border border-white/20">Vazifa Tafsilotlari</span>
-                                        <h2 className="text-xl md:text-3xl font-black truncate leading-tight tracking-tight italic uppercase">{selectedTask.title}</h2>
-                                    </div>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xl animate-in fade-in duration-500">
+                    <div className="bg-white dark:bg-[#0f111a] w-full max-w-2xl rounded-[3.5rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 flex flex-col max-h-[92vh] animate-in zoom-in-95 slide-in-from-bottom-10 duration-700">
+                        <div className="relative shrink-0 h-64 md:h-80">
+                            {selectedTask.image_url ? (
+                                <img src={getImageUrl(selectedTask.image_url)} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                                <div className={`w-full h-full bg-gradient-to-br ${selectedTask.type === 'TASK' ? 'from-orange-500 to-rose-600' : 'from-indigo-600 to-blue-700'} flex items-center justify-center text-white/10`}>
+                                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                                    {selectedTask.type === 'TASK' ? <FileText size={160} strokeWidth={1} /> : <Brain size={160} strokeWidth={1} />}
                                 </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0f111a] via-[#0f111a]/20 to-transparent"></div>
+
+                            <button onClick={() => setShowTaskModal(false)} className="absolute top-8 right-8 w-12 h-12 bg-black/40 hover:bg-black/80 text-white rounded-2xl transition-all backdrop-blur-xl border border-white/20 flex items-center justify-center group/btn z-50">
+                                <X size={20} className="group-hover/btn:rotate-90 transition-transform duration-500" />
+                            </button>
+
+                            <div className="absolute bottom-10 left-10 right-10 text-white">
+                                <span className="inline-block px-4 py-1.5 rounded-xl bg-indigo-500 shadow-2xl shadow-indigo-500/40 text-[10px] font-black mb-4 uppercase tracking-[0.2em] border border-white/20">Task Overview</span>
+                                <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter leading-[0.9]">{selectedTask.title}</h2>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-12 pb-12 space-y-10 py-6">
+                            <div className="p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 shadow-inner">
+                                <div className="flex items-center gap-3 mb-4 text-indigo-500">
+                                    <FileText size={18} />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em]">Topshiriq tavsifi</span>
+                                </div>
+                                <p className="text-gray-700 dark:text-gray-300 leading-relaxed font-bold text-sm md:text-lg italic whitespace-pre-line tracking-tight">{selectedTask.description || 'Ushbu vazifa uchun maxsus tavsif qo\'shilmagan.'}</p>
                             </div>
 
-                            <div className="bg-orange-50/50 dark:bg-orange-900/5 p-6 md:p-10 rounded-[1.8rem] md:rounded-[2.5rem] border border-orange-100/50 dark:border-orange-900/10 shadow-inner">
-                                <h4 className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-orange-500 mb-2 md:mb-4 ml-1">Vazifa Tavsifi</h4>
-                                <p className="text-gray-700 dark:text-gray-300 leading-[1.6] md:leading-[1.8] font-bold text-sm md:text-lg italic whitespace-pre-line">{selectedTask.description || 'Vazifa haqida qo\'shimcha ma\'lumotlar mavjud emas.'}</p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700/50">
-                                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-2">TUGASH MUDDATI</p>
-                                    <p className="text-lg font-black dark:text-white uppercase tracking-tight">{selectedTask.date ? format(new Date(selectedTask.date), 'dd MMMM, HH:mm', { locale: uz }) : 'MUDDATSIZ'}</p>
+                            <div className="grid grid-cols-2 gap-8">
+                                <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl flex flex-col items-center">
+                                    <Clock className="text-indigo-500 mb-3" size={24} />
+                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">MUDDAT</span>
+                                    <span className="text-base font-black dark:text-white uppercase italic">{selectedTask.date ? format(new Date(selectedTask.date), 'dd MMMM, HH:mm', { locale: uz }) : 'MUDDATSIZ'}</span>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700/50">
-                                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-2">MAKSIMAL BALL</p>
-                                    <div className="flex items-center gap-3">
-                                        <TargetIcon size={24} className="text-indigo-500" />
-                                        <p className="text-2xl font-black dark:text-white">{selectedTask.max_score || 100}</p>
-                                    </div>
+                                <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl flex flex-col items-center">
+                                    <TargetIcon className="text-emerald-500 mb-3" size={24} />
+                                    <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">MAX BALL</span>
+                                    <span className="text-2xl font-black dark:text-white tabular-nums italic">{selectedTask.max_score || 100}</span>
                                 </div>
                             </div>
 
                             {selectedTask.submission && (
-                                <div className="space-y-4">
-                                    <div className="bg-emerald-500 p-8 rounded-[2.5rem] flex items-center justify-between shadow-2xl shadow-emerald-500/20 border border-white/20">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-16 h-16 rounded-[1.5rem] bg-white/20 flex items-center justify-center text-white backdrop-blur-md">
-                                                <CheckCircle size={32} strokeWidth={2.5} />
+                                <div className="space-y-6">
+                                    <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-10 rounded-[3rem] shadow-2xl shadow-emerald-500/20 text-white flex items-center justify-between border border-white/20">
+                                        <div className="flex items-center gap-8">
+                                            <div className="w-20 h-20 rounded-[2rem] bg-white/20 flex items-center justify-center text-white backdrop-blur-md border border-white/30 shadow-inner">
+                                                <CheckCircle size={40} strokeWidth={2.5} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-emerald-100 uppercase tracking-[0.3em] mb-1">Muvaffaqiyatli topshirildi</p>
-                                                <p className="text-2xl font-black text-white italic uppercase">Bajarildi</p>
+                                                <p className="text-[11px] font-black text-emerald-100 uppercase tracking-[0.3em] mb-1">Vazifa baholangan</p>
+                                                <p className="text-3xl font-black italic uppercase tracking-tighter">Bajarildi ✅</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[10px] font-black text-emerald-100 uppercase tracking-widest mb-1">OLINGAN BALL</p>
-                                            <p className="text-3xl font-black text-white">{selectedTask.submission.score !== null ? selectedTask.submission.score : '--'}</p>
+                                            <p className="text-[11px] font-black text-emerald-100 uppercase tracking-widest mb-1">BALL</p>
+                                            <p className="text-5xl font-black tabular-nums">{selectedTask.submission.score ?? '--'}</p>
                                         </div>
                                     </div>
 
-                                    {selectedTask.submission.submitted_files && (
-                                        <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700/50">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">YUBORILGAN FAYLLAR</p>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {selectedTask.submission.submitted_files?.length > 0 && (
+                                        <div className="p-8 rounded-[2.5rem] bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5">
+                                            <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-3">
+                                                <Download size={14} /> Yuborilgan fayllar
+                                            </h5>
+                                            <div className="grid grid-cols-1 gap-4">
                                                 {selectedTask.submission.submitted_files.map((file, idx) => (
                                                     <a
                                                         key={idx}
                                                         href={getImageUrl(file.file_path)}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all border border-gray-100 dark:border-gray-700 shadow-sm"
+                                                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all border border-transparent hover:border-indigo-500/20 group/file"
                                                     >
-                                                        <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                                                            <Upload size={18} />
+                                                        <div className="flex items-center gap-4 overflow-hidden">
+                                                            <div className="w-12 h-12 rounded-xl bg-white dark:bg-[#0f111a] flex items-center justify-center text-indigo-500 shadow-sm">
+                                                                <FileCode size={20} />
+                                                            </div>
+                                                            <div className="overflow-hidden">
+                                                                <p className="text-sm font-black dark:text-white truncate uppercase italic">{file.original_name}</p>
+                                                                <p className="text-[9px] text-gray-400 font-bold tracking-widest">{(file.file_size / 1024 / 1024).toFixed(2)} MB</p>
+                                                            </div>
                                                         </div>
-                                                        <div className="grow overflow-hidden">
-                                                            <p className="text-xs font-black dark:text-white truncate uppercase italic">{file.original_name}</p>
-                                                            <p className="text-[9px] text-gray-400 uppercase tracking-tighter">{(file.file_size / 1024 / 1024).toFixed(2)} MB</p>
-                                                        </div>
+                                                        <ChevronRight className="text-gray-300 group-hover/file:text-indigo-500 group-hover/file:translate-x-1 transition-all" />
                                                     </a>
                                                 ))}
                                             </div>
@@ -420,75 +434,123 @@ export default function StudentTasksView({ setFullScreen }) {
                             )}
                         </div>
 
-                        <div className="p-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-xl border-t dark:border-gray-700/50 shrink-0">
+                        <div className="p-10 px-12 bg-gray-50/80 dark:bg-[#1a1c2e]/50 backdrop-blur-3xl border-t dark:border-white/5">
                             {!selectedTask.submission && selectedTask.status !== 'CLOSED' ? (
                                 <button
                                     onClick={() => { setShowTaskModal(false); setShowSubmitModal(true); }}
-                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[2rem] font-black shadow-2xl shadow-indigo-600/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-4 text-lg italic uppercase tracking-widest"
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 rounded-[2.5rem] font-black shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_30px_60px_rgba(79,70,229,0.5)] active:scale-95 hover:-translate-y-1 transition-all flex items-center justify-center gap-4 text-xl italic uppercase tracking-widest"
                                 >
-                                    <Upload size={24} strokeWidth={2.5} />
+                                    <Upload size={24} strokeWidth={3} />
                                     Topshirishni boshlash
                                 </button>
                             ) : (
-                                <button onClick={() => setShowTaskModal(false)} className="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white py-5 rounded-[2rem] font-black italic uppercase tracking-widest">Yopish</button>
+                                <button onClick={() => setShowTaskModal(false)} className="w-full bg-gray-200 dark:bg-white/5 text-gray-700 dark:text-white py-6 rounded-[2.5rem] font-black italic uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-white/10 transition-colors">Ma'lumotlarni yopish</button>
                             )}
                         </div>
                     </div>
                 </div>
             )}
 
+            {/* Submission Modal - Enhanced with File List Refinement */}
             {showSubmitModal && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-gray-800 w-full max-w-lg mx-4 sm:mx-auto sm:max-w-xl lg:max-w-lg rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 lg:p-10 shadow-2xl relative animate-in zoom-in-95 duration-500 border border-white/5 max-h-[90vh] overflow-y-auto">
-                        <button onClick={() => setShowSubmitModal(false)} className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-rose-500 rounded-xl sm:rounded-2xl transition-all">
-                            <X size={20} sm:size={24} />
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-in fade-in duration-500">
+                    <div className="bg-white dark:bg-[#0f111a] w-full max-w-lg rounded-[3.5rem] p-10 shadow-[0_0_150px_rgba(0,0,0,0.8)] border border-white/5 relative animate-in zoom-in-95 duration-700 max-h-[92vh] flex flex-col">
+                        <button onClick={() => { setShowSubmitModal(false); setError(null); setSubmitSuccess(false); }} className="absolute top-10 right-10 w-10 h-10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-rose-500 rounded-2xl transition-all z-20">
+                            <X size={24} />
                         </button>
-                        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-6 sm:mb-8 lg:mb-10 dark:text-white italic uppercase tracking-tighter">Vazifani yuborish</h3>
 
-                        <div className="space-y-6 sm:space-y-8">
-                            <div className="space-y-3">
-                                <label className="block text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">Sizning izohingiz</label>
-                                <textarea
-                                    onChange={e => setSubmitData({ ...submitData, description: e.target.value })}
-                                    className="w-full p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900/50 border-none rounded-[1.5rem] sm:rounded-[2rem] h-32 sm:h-40 text-sm font-bold focus:ring-4 ring-indigo-500/10 transition-all resize-none dark:text-white placeholder:text-gray-500 shadow-inner"
-                                    placeholder="Vazifa bo'yicha qo'shimcha ma'lumot qoldiring (masalan: havola yoki tushuntirish)..."
-                                />
-                            </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                            <h3 className="text-4xl font-black mb-12 dark:text-white italic uppercase tracking-tighter leading-none mt-2">Vazifani<br />Jo'natish</h3>
 
-                            <div className="space-y-3">
-                                <label className="block text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] ml-2">Fayllarni yuklang</label>
-                                <div className="relative group">
-                                    <input
-                                        type="file"
-                                        multiple
-                                        accept="image/*,video/*,.pdf,.doc,.docx,.zip"
-                                        onChange={e => {
-                                            const files = Array.from(e.target.files);
-                                            if (files.length > 5) {
-                                                alert("Maksimal 5 ta fayl yuklash mumkin");
-                                                e.target.value = "";
-                                                return;
-                                            }
-                                            setSubmitData({ ...submitData, files });
-                                        }}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    />
-                                    <div className="w-full border-4 border-dashed border-gray-100 dark:border-gray-700 rounded-[1.8rem] sm:rounded-[2.5rem] p-8 sm:p-10 lg:p-12 flex flex-col items-center gap-3 sm:gap-4 group-hover:border-indigo-500/50 group-hover:bg-indigo-50/10 transition-all duration-500 shadow-inner">
-                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[1.8rem] bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all duration-500 shadow-xl group-hover:shadow-indigo-500/20">
-                                            <Upload size={24} sm:size={28} lg:size={32} strokeWidth={2.5} />
-                                        </div>
-                                        <p className="text-xs sm:text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center">{submitData.files.length > 0 ? `${submitData.files.length} TTA FAYL TANLANDI` : 'FAYLLARNI SHUYERGA TASHLANG (MAKS 5 TTA)'}</p>
+                            {submitSuccess ? (
+                                <div className="py-12 flex flex-col items-center justify-center text-center space-y-6 animate-in zoom-in duration-500">
+                                    <div className="w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-[0_20px_60px_rgba(16,185,129,0.4)] border-8 border-emerald-500/20">
+                                        <Check size={64} strokeWidth={4} />
                                     </div>
+                                    <h4 className="text-3xl font-black dark:text-white italic uppercase tracking-tighter">Muvaffaqiyatli!</h4>
+                                    <p className="text-gray-400 font-bold italic tracking-tight">Sizning topshirig'ingiz qabul qilindi va tekshiruvga yuborildi. 🚀</p>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="space-y-10">
+                                    {error && (
+                                        <div className="p-6 bg-rose-500/10 border border-rose-500/20 rounded-3xl flex items-center gap-4 text-rose-500 animate-in slide-in-from-top-4">
+                                            <AlertCircle className="shrink-0" size={24} />
+                                            <p className="text-xs font-black uppercase tracking-widest leading-relaxed">{error}</p>
+                                        </div>
+                                    )}
 
-                            <button
-                                onClick={handleSubmitTask}
-                                disabled={submitting}
-                                className="w-full bg-gradient-to-r from-indigo-600 to-blue-700 text-white py-4 sm:py-5 lg:py-6 rounded-[1.5rem] sm:rounded-[2rem] font-black shadow-2xl shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 sm:hover:-translate-y-2 active:scale-95 transition-all disabled:opacity-50 mt-4 text-base sm:text-lg lg:text-xl italic uppercase tracking-[0.2em]"
-                            >
-                                {submitting ? 'YUBORILMOQDA...' : 'VAZIFANI TOPSHIRISH'}
-                            </button>
+                                    <div className="space-y-4">
+                                        <label className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] ml-2">
+                                            <FileText size={14} className="text-indigo-500" /> Izoh qoldiring
+                                        </label>
+                                        <textarea
+                                            value={submitData.description}
+                                            onChange={e => setSubmitData({ ...submitData, description: e.target.value })}
+                                            className="w-full p-8 bg-gray-50 dark:bg-white/5 border-none rounded-[2.5rem] h-48 text-base font-bold dark:text-white placeholder:text-gray-500 focus:ring-4 ring-indigo-500/10 transition-all resize-none shadow-inner"
+                                            placeholder="Masalan: Github havola yoki tushuntirish matni..."
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <label className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] ml-2">
+                                            <Upload size={14} className="text-indigo-500" /> Fayllarni biriktiring
+                                        </label>
+
+                                        {submitData.files.length > 0 && (
+                                            <div className="space-y-3 mb-6">
+                                                {submitData.files.map((file, i) => (
+                                                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 animate-in slide-in-from-left-4">
+                                                        <div className="flex items-center gap-4 overflow-hidden">
+                                                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#0f111a] flex items-center justify-center text-indigo-500">
+                                                                {file.type.startsWith('image/') ? <ImageIcon size={20} /> : <FileCode size={20} />}
+                                                            </div>
+                                                            <p className="text-xs font-black dark:text-white truncate uppercase italic">{file.name}</p>
+                                                        </div>
+                                                        <button onClick={() => removeFile(i)} className="p-2 text-gray-400 hover:text-rose-500 transition-colors">
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <div className="relative group">
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar"
+                                                onChange={e => {
+                                                    const newFiles = Array.from(e.target.files);
+                                                    const combined = [...submitData.files, ...newFiles];
+                                                    if (combined.length > 5) {
+                                                        setError("Maksimal 5 ta fayl yuklash mumkin!");
+                                                        e.target.value = "";
+                                                        return;
+                                                    }
+                                                    setSubmitData({ ...submitData, files: combined });
+                                                    setError(null);
+                                                }}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            />
+                                            <div className="w-full border-4 border-dashed border-gray-100 dark:border-white/10 rounded-[2.5rem] p-12 flex flex-col items-center gap-4 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/5 transition-all duration-700 shadow-inner">
+                                                <div className="w-20 h-20 rounded-[1.8rem] bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-12 transition-all duration-700 shadow-2xl group-hover:shadow-indigo-500/30">
+                                                    <Upload size={32} strokeWidth={3} />
+                                                </div>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Fayllarni tanlash yoki shuyerga tashlang</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={handleSubmitTask}
+                                        disabled={submitting}
+                                        className="w-full py-6 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-[2.5rem] font-black shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_30px_60px_rgba(79,70,229,0.6)] hover:-translate-y-2 active:scale-95 transition-all disabled:opacity-50 text-xl italic uppercase tracking-[0.2em] relative overflow-hidden group/submit"
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover/submit:translate-x-full transition-transform duration-1000"></div>
+                                        <span className="relative z-10">{submitting ? 'YUBORILMOQDA...' : 'TOPSHIRIQLARNI YUBORISH'}</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
