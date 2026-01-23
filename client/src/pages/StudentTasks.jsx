@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import ExamRunner from '../components/ExamRunner';
@@ -42,9 +42,7 @@ export default function StudentTasks() {
   const [quizReadOnly, setQuizReadOnly] = useState(false);
   const [quizType, setQuizType] = useState('QUIZ');
 
-  useEffect(() => { fetchData(); }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const studentToken = localStorage.getItem('studentToken');
@@ -76,7 +74,9 @@ export default function StudentTasks() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleItemClick = (item) => {
     if (item.type === 'TASK') {
@@ -128,9 +128,11 @@ export default function StudentTasks() {
     }
   };
 
-  const filteredItems = items.filter(item =>
-    item.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredItems = useMemo(() => {
+    return items.filter(item =>
+      item.title?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [items, searchTerm]);
 
   const getFileIcon = (file) => {
     const type = file.type || file.mime_type;

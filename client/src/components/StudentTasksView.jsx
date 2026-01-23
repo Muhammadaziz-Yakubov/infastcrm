@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../utils/api';
 import ExamRunner from './ExamRunner';
 import {
@@ -43,15 +43,15 @@ export default function StudentTasksView({ setFullScreen }) {
 
     useEffect(() => { fetchData(); }, []);
 
-    // Auto-refresh calculation for "Recently Closed" status every minute
+    // Auto-refresh calculation for "Recently Closed" status every 5 minutes instead of 1 minute
     useEffect(() => {
         const interval = setInterval(() => {
             setItems(prev => [...prev]);
-        }, 60000);
+        }, 300000); // 5 minutes
         return () => clearInterval(interval);
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const studentToken = localStorage.getItem('studentToken');
@@ -83,7 +83,7 @@ export default function StudentTasksView({ setFullScreen }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     const handleItemClick = (item) => {
         if (item.type === 'TASK') {
@@ -123,7 +123,7 @@ export default function StudentTasksView({ setFullScreen }) {
         if (typeof setFullScreen === 'function') setFullScreen(true);
     };
 
-    const handleSubmitTask = async (e) => {
+    const handleSubmitTask = useCallback(async (e) => {
         e.preventDefault();
         if (submitData.files.length > 5) {
             alert('Maksimal 5 ta fayl yuklash mumkin');
@@ -142,23 +142,25 @@ export default function StudentTasksView({ setFullScreen }) {
         } finally {
             setSubmitting(false);
         }
-    };
+    }, [submitData, selectedTask, fetchData]);
 
-    const filteredItems = items.filter(item => {
-        const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
-        const now = new Date();
-        const deadline = item.date ? new Date(item.date) : null;
-        const isExpired = deadline && now > deadline;
-        const isRecentlyExpired = isExpired && (now - deadline) < 600000; // 10 minutes in ms
+    const filteredItems = useMemo(() => {
+        return items.filter(item => {
+            const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
+            const now = new Date();
+            const deadline = item.date ? new Date(item.date) : null;
+            const isExpired = deadline && now > deadline;
+            const isRecentlyExpired = isExpired && (now - deadline) < 600000; // 10 minutes in ms
 
-        // The user wants tasks to stay in "Active" until they expire (deadline + 10 mins)
-        // even if they are submitted.
-        if (activeTab === 'completed') {
-            return matchesSearch && (isExpired && !isRecentlyExpired);
-        }
-        // Active tab: Show items that are NOT expired OR are recently expired (within 10 mins)
-        return matchesSearch && (!isExpired || isRecentlyExpired);
-    });
+            // The user wants tasks to stay in "Active" until they expire (deadline + 10 mins)
+            // even if they are submitted.
+            if (activeTab === 'completed') {
+                return matchesSearch && (isExpired && !isRecentlyExpired);
+            }
+            // Active tab: Show items that are NOT expired OR are recently expired (within 10 mins)
+            return matchesSearch && (!isExpired || isRecentlyExpired);
+        });
+    }, [items, searchTerm, activeTab]);
 
     if (loading) return <div className="text-center py-20 animate-pulse text-gray-500">Vazifalar yuklanmoqda...</div>;
 
