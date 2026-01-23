@@ -6,6 +6,8 @@ const GROUP_CHAT_ID = '-1003717097048';
 const steps = [
     { key: 'fullName', question: 'Ism, familiya va otasining ismini kiriting:' },
     { key: 'district', question: 'Qaysi tumanda yashaysiz?' },
+    { key: 'school', question: 'Qaysi maktabda o\'qiysiz?' },
+    { key: 'schoolClass', question: 'Qaysi sinfda o\'qiysiz?' },
     { key: 'mfy', question: 'Qaysi MFY (Mahalla fuqarolar yig\'ini) dan ekanligingizni kiriting?' },
     { key: 'street', question: 'Mahalla/Ko\'cha nomini kiriting:' },
     { key: 'house', question: 'Uy raqamingizni kiriting:' },
@@ -50,7 +52,9 @@ export const initSurveyBot = () => {
 
 👤 <b>F.I.SH:</b> ${session.data.fullName}
 📍 <b>Tuman:</b> ${session.data.district}
-🏢 <b>MFY:</b> ${session.data.mfy}
+� <b>Maktab:</b> ${session.data.school}
+🎓 <b>Sinf:</b> ${session.data.schoolClass}
+�🏢 <b>MFY:</b> ${session.data.mfy}
 🏘 <b>Mahalla/Ko'cha:</b> ${session.data.street}
 🏠 <b>Uy raqami:</b> ${session.data.house}
 📞 <b>Ota-ona raqami:</b> ${session.data.parentPhone}
