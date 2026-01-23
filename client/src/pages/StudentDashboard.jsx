@@ -55,6 +55,11 @@ export default function StudentDashboard() {
   const { student, studentLogout } = useAuth();
   const navigate = useNavigate();
   const [fullScreen, setFullScreen] = useState(false);
+  const [dashboardCache, setDashboardCache] = useState(null);
+
+  // Cache for dashboard data
+  const CACHE_KEY = 'student_dashboard_cache';
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   // Sync activeTab with URL param if present
   useEffect(() => {
@@ -73,11 +78,41 @@ export default function StudentDashboard() {
   }, []);
 
   const fetchDashboard = async () => {
+    // Check cache first
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cacheTimestamp = localStorage.getItem(`${CACHE_KEY}_timestamp`);
+    
+    if (cachedData && cacheTimestamp) {
+      const cacheAge = Date.now() - parseInt(cacheTimestamp);
+      if (cacheAge < CACHE_DURATION) {
+        setData(JSON.parse(cachedData));
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const response = await api.get('/student-auth/dashboard');
-      setData(response.data);
+      const dashboardData = response.data;
+      
+      // Cache the data
+      localStorage.setItem(CACHE_KEY, JSON.stringify(dashboardData));
+      localStorage.setItem(`${CACHE_KEY}_timestamp`, Date.now().toString());
+      
+      setData(dashboardData);
     } catch (error) {
       console.error('❌ Error fetching dashboard:', error);
+      // Set default data to prevent UI issues
+      setData({
+        student: null,
+        group: null,
+        payments: [],
+        totalPaid: 0,
+        attendance: { records: [], stats: { total: 0, present: 0, absent: 0, late: 0, percentage: 0 } },
+        quizzes: { lastResults: [], stats: { total: 0, avgPercentage: 0 } },
+        tasks: { pendingCount: 0, submittedCount: 0, gradedCount: 0, totalCount: 0 },
+        exams: { stats: { count: 0, avgScore: 0 } }
+      });
     } finally {
       setLoading(false);
     }
@@ -118,6 +153,23 @@ export default function StudentDashboard() {
           <div className="absolute inset-0 w-20 h-20 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
         <p className="mt-6 text-gray-400 font-black uppercase tracking-widest text-[10px] animate-pulse italic">InFast yuklanmoqda...</p>
+      </div>
+    );
+  }
+
+  // Show error state if no student data
+  if (!student && !loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-[#0f111a]">
+        <div className="text-center space-y-4">
+          <p className="text-gray-500 dark:text-gray-400">Siz tizimga kirmadingiz</p>
+          <button
+            onClick={() => navigate('/student-login')}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          >
+            Login ga qaytish
+          </button>
+        </div>
       </div>
     );
   }

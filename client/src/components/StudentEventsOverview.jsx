@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 export default function StudentEventsOverview() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchUpcomingEvents();
@@ -15,12 +16,20 @@ export default function StudentEventsOverview() {
     try {
       const response = await api.get('/events/upcoming');
       setEvents(response.data);
+      setError(null);
     } catch (error) {
       console.error('Error fetching upcoming events:', error);
+      setError(true);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Don't render anything if there's an error
+  if (error) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -35,7 +44,7 @@ export default function StudentEventsOverview() {
   }
 
   if (events.length === 0) {
-    return null; // Don't show anything if no events
+    return null;
   }
 
   return (

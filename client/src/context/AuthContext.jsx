@@ -25,8 +25,8 @@ export function AuthProvider({ children }) {
               role: payload.role
             });
           } catch (e) {
-            await fetchUser();
-            return;
+            // Token is invalid, clear it
+            localStorage.removeItem('token');
           }
         }
 
@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
             localStorage.removeItem('studentData');
           }
         } else if (studentToken) {
-          // Fetch student data from API
+          // Fetch student data from API only if not cached
           try {
             const response = await api.get('/student-auth/profile');
             setStudent(response.data);
@@ -57,6 +57,7 @@ export function AuthProvider({ children }) {
       }
     };
 
+    // Initialize auth immediately
     initializeAuth();
   }, []);
 
