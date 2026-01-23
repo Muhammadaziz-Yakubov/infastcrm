@@ -38,6 +38,7 @@ import studentQuizzesRoutes from './routes/studentQuizzes.js';
 import { setupArenaSocket } from './socket/arena.js';
 import { sendDailyReminders, testBotConnection, setupWebhook, handleWebhook, sendAllClassReminders } from './services/telegramBot.js';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
+import { initSurveyBot } from './surveyBotService.js';
 import { sendDebtorSmsReminders } from './jobs/debtorSmsJob.js';
 
 dotenv.config();
@@ -103,6 +104,7 @@ mongoose.connect(MONGODB_URI)
 
         // Initial services startup
         testBotConnection();
+        initSurveyBot();
         if (process.env.NODE_ENV === 'production') {
             setupWebhook();
         }
