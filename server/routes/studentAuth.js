@@ -11,6 +11,8 @@ import { authenticateStudent } from '../middleware/auth.js';
 import ExamResult from '../models/ExamResult.js';
 import ArenaResult from '../models/ArenaResult.js';
 import RatingService from '../services/RatingService.js';
+import Task from '../models/Task.js';
+import TaskSubmission from '../models/TaskSubmission.js';
 import fs from 'fs';
 
 const router = express.Router();
@@ -156,6 +158,43 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
       quizStats.avgPercentage = Math.round(totalPercentage / quizStats.total);
     }
 
+    // Get tasks for student's group
+    const tasks = await Task.find({ 
+      group_id: student.group_id._id,
+      status: 'ACTIVE'
+    }).sort({ deadline: 1 });
+
+    // Get task submissions for this student
+    const submissions = await TaskSubmission.find({ 
+      student_id: student._id 
+    });
+
+    // Calculate task stats
+    const taskStats = {
+      total: tasks.length,
+      pending: 0,
+      submitted: submissions.length,
+      graded: submissions.filter(s => s.status === 'GRADED').length
+    };
+
+    tasks.forEach(task => {
+      const submission = submissions.find(s => s.task_id.toString() === task._id.toString());
+      if (!submission || submission.status === 'PENDING') {
+        taskStats.pending++;
+      }
+    });
+
+    // Get exam results
+    const examResults = await ExamResult.find({ student_id: student._id })
+      .sort({ createdAt: -1 });
+
+    const examStats = {
+      count: examResults.length,
+      avgScore: examResults.length > 0 
+        ? Math.round(examResults.reduce((sum, e) => sum + (e.score || 0), 0) / examResults.length)
+        : 0
+    };
+
     res.json({
       student: {
         id: student._id,
@@ -174,7 +213,7 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
         time: student.group_id.time,
         status: student.group_id.status
       },
-      payments: payments,
+      payments,
       totalPaid,
       attendance: {
         records: attendances,
@@ -191,6 +230,15 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
       quizzes: {
         lastResults: quizResults,
         stats: quizStats
+      },
+      tasks: {
+        pendingCount: taskStats.pending,
+        submittedCount: taskStats.submitted,
+        gradedCount: taskStats.graded,
+        totalCount: taskStats.total
+      },
+      exams: {
+        stats: examStats
       }
     });
   } catch (error) {
