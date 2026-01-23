@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import Modal from '../components/Modal';
-import { 
-  ShoppingBag, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Check, 
-  X, 
+import {
+  ShoppingBag,
+  Plus,
+  Edit,
+  Trash2,
+  Check,
+  X,
   Package,
   Clock,
   CheckCircle,
@@ -77,7 +77,7 @@ export default function AdminMarket() {
     try {
       const params = {};
       if (orderFilter) params.status = orderFilter;
-      
+
       const response = await api.get('/market/admin/orders', { params });
       setOrders(response.data);
     } catch (error) {
@@ -114,7 +114,7 @@ export default function AdminMarket() {
 
   const handleDeleteItem = async (itemId) => {
     if (!confirm('Bu mahsulotni o\'chirmoqchimisiz?')) return;
-    
+
     try {
       await api.delete(`/market/admin/items/${itemId}`);
       fetchItems();
@@ -137,7 +137,7 @@ export default function AdminMarket() {
 
   const handleCancelOrder = async () => {
     if (!cancellingOrder) return;
-    
+
     try {
       await api.post(`/market/admin/orders/${cancellingOrder._id}/cancel`, {
         reason: cancelReason
@@ -243,8 +243,8 @@ export default function AdminMarket() {
       <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setActiveTab('items')}
-          className={`pb-2 px-4 font-medium ${activeTab === 'items' 
-            ? 'text-purple-600 border-b-2 border-purple-600' 
+          className={`pb-2 px-4 font-medium ${activeTab === 'items'
+            ? 'text-purple-600 border-b-2 border-purple-600'
             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
         >
           <Package className="w-4 h-4 inline mr-2" />
@@ -252,8 +252,8 @@ export default function AdminMarket() {
         </button>
         <button
           onClick={() => setActiveTab('orders')}
-          className={`pb-2 px-4 font-medium ${activeTab === 'orders' 
-            ? 'text-purple-600 border-b-2 border-purple-600' 
+          className={`pb-2 px-4 font-medium ${activeTab === 'orders'
+            ? 'text-purple-600 border-b-2 border-purple-600'
             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
         >
           <ShoppingBag className="w-4 h-4 inline mr-2" />
@@ -429,9 +429,9 @@ export default function AdminMarket() {
       )}
 
       {/* Item Modal */}
-      <Modal 
-        isOpen={showItemModal} 
-        onClose={() => { setShowItemModal(false); setEditingItem(null); }} 
+      <Modal
+        isOpen={showItemModal}
+        onClose={() => { setShowItemModal(false); setEditingItem(null); }}
         title={editingItem ? 'Mahsulotni Tahrirlash' : 'Yangi Mahsulot'}
       >
         <form onSubmit={handleSubmitItem} className="space-y-4">
@@ -506,15 +506,47 @@ export default function AdminMarket() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Rasm URL
+              Rasm (URL yoki Fayl)
             </label>
-            <input
-              type="url"
-              value={formData.image}
-              onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="https://..."
-            />
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={formData.image}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="https://..."
+              />
+              <label className="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-2 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600">
+                <Image className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData({ ...formData, image: reader.result });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            {formData.image && (
+              <div className="mt-2 relative w-full h-32 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                <img src={formData.image} alt="Preview" className="w-full h-full object-contain" />
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, image: '' })}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4">
@@ -557,9 +589,9 @@ export default function AdminMarket() {
       </Modal>
 
       {/* Cancel Order Modal */}
-      <Modal 
-        isOpen={showCancelModal} 
-        onClose={() => { setShowCancelModal(false); setCancellingOrder(null); setCancelReason(''); }} 
+      <Modal
+        isOpen={showCancelModal}
+        onClose={() => { setShowCancelModal(false); setCancellingOrder(null); setCancelReason(''); }}
         title="Buyurtmani Bekor Qilish"
       >
         <div className="space-y-4">
