@@ -183,75 +183,60 @@ export default function StudentRatingView() {
                 </div>
             </div>
 
-            {/* Premium Personal Rank Card */}
+            {/* Compact Personal Rank Summary */}
             {myCurrentRating && (
-                <div className="group relative bg-[#0f111a] rounded-[3rem] p-8 md:p-12 text-white shadow-[0_30px_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/5 transition-all duration-500">
-                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full -mr-40 -mt-40 blur-[120px] group-hover:bg-indigo-600/20 transition-all duration-1000"></div>
-                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-600/10 rounded-full -ml-20 -mb-20 blur-[100px]"></div>
-
-                    <div className="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-12">
-                        <div className="flex flex-col md:flex-row items-center gap-8 w-full xl:w-auto">
-                            <div className="relative group/avatar">
-                                <div className="absolute -inset-1 bg-gradient-to-tr from-yellow-400 to-orange-600 rounded-[2.5rem] blur opacity-25 group-hover/avatar:opacity-50 transition-opacity"></div>
-                                <div className="w-24 h-24 md:w-32 md:h-32 bg-[#1a1c2e] rounded-[2.2rem] flex flex-col items-center justify-center border border-white/10 shadow-2xl relative z-10 overflow-hidden">
+                <div className="relative group overflow-hidden animate-in slide-in-from-top duration-700">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/5 via-purple-600/5 to-pink-600/5 rounded-[2.2rem] blur-xl"></div>
+                    <div className="relative z-10 bg-white/40 dark:bg-[#0f111a]/40 backdrop-blur-2xl rounded-[2.2rem] p-5 md:p-6 border border-white/20 dark:border-white/5 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xl">
+                        <div className="flex items-center gap-5">
+                            <div className="relative shrink-0">
+                                <div className="absolute -inset-1 bg-gradient-to-tr from-yellow-400 to-orange-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                                <div className="w-14 h-14 md:w-16 md:h-16 bg-[#1a1c2e] rounded-2xl flex items-center justify-center border border-white/10 overflow-hidden relative shadow-lg">
                                     {myCurrentRating.profile_image ? (
                                         <img src={getImageUrl(myCurrentRating.profile_image)} className="w-full h-full object-cover" alt="Me" />
                                     ) : (
-                                        <>
-                                            <span className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1 italic">O'rin</span>
-                                            <span className="text-4xl md:text-6xl font-black italic tracking-tighter text-yellow-400">#{myCurrentRating.rank}</span>
-                                        </>
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-white/40 text-[7px] font-black uppercase mb-0.5">Rank</span>
+                                            <span className="text-xl md:text-2xl font-black text-yellow-400 italic tabular-nums">#{myCurrentRating.rank}</span>
+                                        </div>
                                     )}
                                 </div>
                                 {myCurrentRating.profile_image && (
-                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-yellow-500 text-black font-black text-xs px-4 py-1 rounded-full shadow-xl shadow-yellow-500/30 z-20 whitespace-nowrap">
+                                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-yellow-500 text-black font-black text-[8px] px-2.5 py-0.5 rounded-full shadow-lg z-20 whitespace-nowrap">
                                         #{myCurrentRating.rank} O'RIN
                                     </div>
                                 )}
                             </div>
+
                             <div className="text-center md:text-left">
-                                <h3 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight mb-4 flex items-center gap-3 justify-center md:justify-start">
+                                <h3 className="text-base md:text-xl font-black italic uppercase tracking-tight dark:text-white flex items-center gap-2 justify-center md:justify-start">
                                     {myCurrentRating.full_name}
-                                    <Star className="text-yellow-400 fill-yellow-400 animate-pulse" size={24} />
+                                    <Star className="text-yellow-400 fill-yellow-400 animate-pulse" size={14} />
                                 </h3>
-                                <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                                    <div className="px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                        <Users size={14} className="text-indigo-400" /> {myCurrentRating.totalStudents} TA O'QUVCHI
-                                    </div>
-                                    <div className="px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                        <TrendingUp size={14} className="text-emerald-400" /> {myCurrentRating.total_points || myCurrentRating.totalPoints} POWER
-                                    </div>
-                                    <div className="px-5 py-2.5 bg-indigo-600/20 text-indigo-400 rounded-2xl border border-indigo-500/20 text-[10px] font-black uppercase tracking-widest">
-                                        {myCurrentRating.isGlobal ? 'GLOBAL REYTING' : 'GURUH REYTINGI'}
-                                    </div>
+                                <div className="flex items-center gap-3 mt-1 justify-center md:justify-start">
+                                    <span className="text-[9px] font-black text-white px-2 py-0.5 bg-indigo-600 rounded-md uppercase tracking-widest">
+                                        {myCurrentRating.isGlobal ? 'Global' : 'Guruh'}
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-[10px] md:text-xs font-black text-indigo-500 uppercase tracking-tighter italic">
+                                        <TrendingUp size={12} /> {(myCurrentRating.total_points || myCurrentRating.totalPoints || 0).toLocaleString()} Power Points
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-auto">
+                        <div className="flex flex-wrap justify-center gap-2 md:gap-3 border-t lg:border-t-0 lg:border-l border-gray-100 dark:border-white/5 pt-5 lg:pt-0 lg:pl-6">
                             {[
                                 { label: 'Darslar', val: myCurrentRating.stats?.lessons || 0, icon: BookOpen, color: 'text-blue-400' },
                                 { label: 'Vazifa', val: myCurrentRating.stats?.tasks || 0, icon: FileCode, color: 'text-purple-400' },
                                 { label: 'Quiz', val: myCurrentRating.stats?.quizzes || 0, icon: Zap, color: 'text-amber-400' },
-                                { label: 'Imtihon', val: myCurrentRating.stats?.exams || 0, icon: GraduationCap, color: 'text-rose-400' }
+                                { label: 'Exam', val: myCurrentRating.stats?.exams || 0, icon: GraduationCap, color: 'text-rose-400' }
                             ].map((stat, i) => (
-                                <div key={i} className="bg-white/5 p-4 rounded-3xl border border-white/5 flex flex-col items-center gap-1 min-w-[100px] hover:bg-white/10 transition-colors">
-                                    <stat.icon size={16} className={stat.color} />
-                                    <span className="text-[8px] font-black text-white/40 uppercase mt-1">{stat.label}</span>
-                                    <span className="text-xl font-black tabular-nums">{stat.val}</span>
+                                <div key={i} className="flex flex-col items-center bg-gray-50 dark:bg-white/5 px-3 py-1.5 rounded-xl min-w-[65px] border border-transparent hover:border-indigo-500/20 transition-all">
+                                    <stat.icon size={12} className={stat.color} />
+                                    <span className="text-sm font-black dark:text-white mt-0.5 tabular-nums">{stat.val}</span>
+                                    <span className="text-[7px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</span>
                                 </div>
                             ))}
-                        </div>
-
-                        <div className="flex flex-col items-center xl:items-end gap-2 w-full xl:w-auto border-t xl:border-t-0 xl:border-l border-white/5 pt-8 xl:pt-0 xl:pl-12">
-                            <span className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1 italic opacity-60">Total Score</span>
-                            <div className="flex items-center gap-6">
-                                <div className="text-right">
-                                    <span className="text-5xl md:text-7xl font-black tracking-tighter italic bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent tabular-nums">
-                                        {(myCurrentRating.total_points || myCurrentRating.totalPoints || 0).toLocaleString()}
-                                    </span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
