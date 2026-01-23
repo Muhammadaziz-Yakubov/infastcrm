@@ -84,6 +84,7 @@ export default function StudentDashboard() {
   const tabs = [
     { id: 'overview', label: 'Umumiy', icon: LayoutDashboard },
     { id: 'tasks', label: 'Vazifalar', icon: FileCode },
+    { id: 'classmates', label: 'Guruh', icon: Users },
     { id: 'market', label: 'Market', icon: ShoppingBag },
     { id: 'exams', label: 'Imtihonlar', icon: Target },
     { id: 'rating', label: 'Reyting', icon: Trophy },
@@ -91,8 +92,8 @@ export default function StudentDashboard() {
     // Hidden tabs
     { id: 'payments', label: "To'lovlar", icon: Wallet, hidden: true },
     { id: 'attendance', label: 'Davomat', icon: Calendar, hidden: true },
-    { id: 'classmates', label: 'Guruh', icon: Users, hidden: true },
   ];
+
 
   if (loading) {
     return (
