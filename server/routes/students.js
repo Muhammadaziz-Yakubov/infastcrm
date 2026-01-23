@@ -2,6 +2,7 @@ import express from 'express';
 import Student from '../models/Student.js';
 import Group from '../models/Group.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
@@ -45,7 +46,15 @@ router.get('/', authenticate, async (req, res) => {
     
     // Reset filter for this request
     filter = {};
-    if (group_id) filter.group_id = group_id;
+    if (group_id) {
+      try {
+        // Convert to ObjectId for proper MongoDB query
+        filter.group_id = new mongoose.Types.ObjectId(group_id);
+      } catch (error) {
+        console.error('❌ Invalid group_id format:', group_id);
+        filter.group_id = group_id; // Fallback to string
+      }
+    }
     
     // Handle special payment filters
     if (payment_filter === 'PAYMENT_DUE') {
@@ -87,12 +96,12 @@ router.get('/', authenticate, async (req, res) => {
       .populate('group_id', 'name status')
       .sort({ full_name: 1 })
       .lean()
-      .maxTimeMS(5000) // 5 second timeout
+      .maxTimeMS(10000) // Increased from 5000 to 10000
       .allowDiskUse(true); // For complex queries
     
     // Additional validation: if group_id is specified, verify students belong to active groups
     if (group_id) {
-      const group = await Group.findById(group_id).select('status').maxTimeMS(2000);
+      const group = await Group.findById(new mongoose.Types.ObjectId(group_id)).select('status').maxTimeMS(2000);
       if (group && group.status !== 'ACTIVE') {
         console.log(`⚠️ Group ${group_id} is not ACTIVE (${group.status}), but returning students anyway`);
       }
@@ -102,7 +111,7 @@ router.get('/', authenticate, async (req, res) => {
         console.log(`❌ No students found for group ${group_id} with filter:`, filter);
         
         // Try without status filter to see if students exist with different status
-        const allStudentsInGroup = await Student.find({ group_id })
+        const allStudentsInGroup = await Student.find({ group_id: new mongoose.Types.ObjectId(group_id) })
           .select('full_name status')
           .maxTimeMS(3000);
           

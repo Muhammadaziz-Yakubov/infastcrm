@@ -39,7 +39,7 @@ router.post('/', authenticate, async (req, res) => {
     const group = new Group(req.body);
     await group.save();
     await group.populate('course_id');
-    
+
     // Send test message to Telegram group if chat_id provided
     if (group.telegram_chat_id) {
       try {
@@ -55,14 +55,14 @@ router.post('/', authenticate, async (req, res) => {
 🤖 InFast CRM bot guruhga muvaffaqiyatli ulandi!
 Endi guruhga avtomatik eslatmalar yuboriladi.
         `.trim();
-        
+
         await sendTelegramMessageToChat(group.telegram_chat_id, testMessage);
         console.log(`✅ Test message sent to group ${group.name}`);
       } catch (telegramError) {
         console.error(`❌ Failed to send test message to group ${group.name}:`, telegramError.message);
       }
     }
-    
+
     res.status(201).json(group);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -100,10 +100,10 @@ router.post('/:id/activate', authenticate, async (req, res) => {
 
     // Count students in group
     const studentCount = await Student.countDocuments({ group_id: group._id });
-    
+
     if (studentCount < group.min_students) {
-      return res.status(400).json({ 
-        message: `Minimum ${group.min_students} students required. Current: ${studentCount}` 
+      return res.status(400).json({
+        message: `Minimum ${group.min_students} students required. Current: ${studentCount}`
       });
     }
 
@@ -119,11 +119,11 @@ router.post('/:id/activate', authenticate, async (req, res) => {
     // Convert all leads to students
     const leads = await Lead.find({ group_id: group._id });
     for (const lead of leads) {
-      const existingStudent = await Student.findOne({ 
-        phone: lead.phone, 
-        group_id: group._id 
+      const existingStudent = await Student.findOne({
+        phone: lead.phone,
+        group_id: group._id
       });
-      
+
       if (!existingStudent) {
         const student = new Student({
           full_name: lead.name,
@@ -160,15 +160,15 @@ router.post('/:id/send-attendance', authenticate, requireAdmin, async (req, res)
   try {
     const { date } = req.body;
     console.log(`📤 Sending attendance message for group ${req.params.id} on date ${date}`);
-    
+
     // Refresh group data before sending
     const group = await Group.findById(req.params.id).populate('course_id');
     if (!group) {
       return res.status(404).json({ message: 'Group not found' });
     }
-    
+
     console.log(`📋 Group found: ${group.name} with chat_id: ${group.telegram_chat_id}`);
-    
+
     await sendAttendanceSummary(req.params.id, date);
     res.json({ message: 'Attendance message sent successfully' });
   } catch (error) {
@@ -182,16 +182,16 @@ router.post('/:id/send-scores', authenticate, requireAdmin, async (req, res) => 
   try {
     const { date } = req.body;
     console.log(`📤 Sending scores message for group ${req.params.id} on date ${date}`);
-    
+
     const group = await Group.findById(req.params.id).populate('course_id');
     if (!group) {
       return res.status(404).json({ message: 'Group not found' });
     }
-    
+
     if (!group.telegram_chat_id) {
       return res.status(404).json({ message: 'Group has no chat ID' });
     }
-    
+
     console.log(`📋 Group found: ${group.name} with chat_id: ${group.telegram_chat_id}`);
 
     // Get today's attendance records
@@ -237,6 +237,17 @@ router.post('/:id/send-scores', authenticate, requireAdmin, async (req, res) => 
     res.json({ message: 'Scores message sent successfully' });
   } catch (error) {
     console.error('Error sending scores message:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get students in group
+router.get('/:id/students', authenticate, async (req, res) => {
+  try {
+    const students = await Student.find({ group_id: req.params.id })
+      .sort({ full_name: 1 });
+    res.json(students);
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
