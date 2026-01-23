@@ -18,11 +18,11 @@ const sessions = {};
 // To prevent processing the same message multiple times across instances (mostly helps with restarts)
 const processedMessageIds = new Set();
 
-export const initSurveyBot = () => {
+export const initSurveyBot = async () => {
     // Avoid running the survey bot locally if we are in development and want to avoid conflicts with production
     if (process.env.DISABLE_SURVEY_BOT === 'true') {
         console.log('🚫 Standalone Survey Bot is disabled via environment variable');
-        return;
+        return Promise.resolve();
     }
 
     try {
@@ -34,9 +34,8 @@ export const initSurveyBot = () => {
         });
 
         // Start polling with error handling
-        bot.startPolling().catch(err => {
-            console.log('⚠️ Survey bot polling failed:', err.message);
-        });
+        await bot.startPolling();
+        console.log('✅ Standalone Survey Bot successfully initialized and running');
 
         bot.on('message', async (msg) => {
             const chatId = msg.chat.id;
@@ -120,8 +119,9 @@ export const initSurveyBot = () => {
             console.error('Survey Bot Polling Error:', error.message);
         });
 
-        console.log('✅ Standalone Survey Bot successfully initialized and running');
+        return Promise.resolve();
     } catch (error) {
         console.error('❌ Failed to initialize Standalone Survey Bot:', error.message);
+        return Promise.reject(error);
     }
 };
