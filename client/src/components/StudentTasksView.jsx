@@ -220,7 +220,7 @@ export default function StudentTasksView({ setFullScreen }) {
                         </div>
                     </div>
                     <div>
-                        <h2 className="text-3xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">Challenge Hub</h2>
+                        <h2 className="text-3xl md:text-5xl font-black dark:text-white tracking-tighter italic uppercase bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600 bg-clip-text text-transparent">Vazifalar</h2>
                         <p className="text-[10px] md:text-xs font-black text-gray-400 dark:text-white/40 uppercase tracking-[0.4em] mt-2 ml-1 flex items-center gap-2">
                             Akademiya topshiriqlar platformasi
                         </p>

@@ -409,25 +409,32 @@ router.get('/attendance', authenticateStudent, async (req, res) => {
 // Get tasks for student's group
 router.get('/tasks', authenticateStudent, async (req, res) => {
   try {
-    const tasks = await Task.find({
-      group_id: req.student.group_id._id,
-      status: 'ACTIVE'
-    })
-      .populate('group_id')
-      .sort({ createdAt: -1 });
+    const groupId = req.student.group_id?._id || req.student.group_id;
 
-    // Get student's submissions
-    const submissions = await TaskSubmission.find({
-      student_id: req.student._id
-    });
+    const [tasks, submissions] = await Promise.all([
+      Task.find({
+        group_id: groupId,
+        status: 'ACTIVE'
+      })
+        .select('title description image_url group_id deadline max_score status createdAt')
+        .sort({ createdAt: -1 })
+        .lean(),
 
-    // Add submission status to each task
+      TaskSubmission.find({
+        student_id: req.student._id
+      })
+        .select('task_id status score submitted_at feedback')
+        .lean()
+    ]);
+
+    const submissionByTaskId = new Map(
+      submissions.map(s => [s.task_id.toString(), s])
+    );
+
     const tasksWithStatus = tasks.map(task => {
-      const submission = submissions.find(
-        s => s.task_id.toString() === task._id.toString()
-      );
+      const submission = submissionByTaskId.get(task._id.toString());
       return {
-        ...task.toObject(),
+        ...task,
         submission: submission ? {
           _id: submission._id,
           status: submission.status,

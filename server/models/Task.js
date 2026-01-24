@@ -41,5 +41,7 @@ const taskSchema = new mongoose.Schema({
   timestamps: true
 });
 
+taskSchema.index({ group_id: 1, status: 1, createdAt: -1 });
+
 export default mongoose.model('Task', taskSchema);
 
