@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Modal from '../components/Modal';
@@ -22,7 +22,11 @@ import {
   AlertCircle,
   Wallet,
   Banknote,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Target,
+  BookOpen,
+  CalendarCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -36,6 +40,7 @@ export default function Students() {
   const [showPassword, setShowPassword] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const statusFilter = searchParams.get('status');
   const groupFilter = searchParams.get('group_id');
@@ -436,7 +441,12 @@ export default function Students() {
                         <UserCheck className="text-white" size={20} />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{student.full_name}</p>
+                        <button
+                          onClick={() => navigate(`/student/profile/${student._id}`)}
+                          className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left"
+                        >
+                          {student.full_name}
+                        </button>
                         {student.parent_phone && (
                           <p className="text-xs text-gray-500 dark:text-gray-400">Ota-ona: {student.parent_phone}</p>
                         )}
@@ -473,8 +483,30 @@ export default function Students() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => navigate(`/student/profile/${student._id}`)}
+                        className="p-2 text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        title="Profil"
+                      >
+                        <User size={18} />
+                      </button>
+                      <button
+                        onClick={() => navigate(`/student/tasks`)}
+                        className="p-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                        title="Vazifalar"
+                      >
+                        <BookOpen size={18} />
+                      </button>
+                      <button
+                        onClick={() => navigate(`/attendance`)}
+                        className="p-2 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                        title="Davomat"
+                      >
+                        <CalendarCheck size={18} />
+                      </button>
                       <Link
                         to={`/payments?student_id=${student._id}`}
+                        onClick={(e) => e.stopPropagation()}
                         className="p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                         title="To'lov qo'shish"
                       >
@@ -483,13 +515,19 @@ export default function Students() {
                       {isAdmin && (
                         <>
                           <button
-                            onClick={() => handleEdit(student)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(student);
+                            }}
                             className="p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                           >
                             <Edit size={18} />
                           </button>
                           <button
-                            onClick={() => handleDelete(student._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(student._id);
+                            }}
                             className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           >
                             <Trash2 size={18} />
