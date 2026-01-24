@@ -36,7 +36,7 @@ const setCachedStudents = (cacheKey, data) => {
 };
 
 // Get all students
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireAdmin, async (req, res) => {
   // Declare filter outside try block for fallback access
   let filter = {};
 
@@ -161,7 +161,7 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // Get single student
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const student = await Student.findById(req.params.id).populate('group_id');
     if (!student) {
@@ -174,7 +174,7 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Check if login is unique
-router.get('/check-login/:login', authenticate, async (req, res) => {
+router.get('/check-login/:login', authenticate, requireAdmin, async (req, res) => {
   try {
     const existing = await Student.findOne({ login: req.params.login });
     res.json({ exists: !!existing });

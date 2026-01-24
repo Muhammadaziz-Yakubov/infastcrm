@@ -42,9 +42,10 @@ import { uz } from 'date-fns/locale';
 export default function StudentProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { student, studentLogin } = useAuth();
+  const { student, studentLogin, user } = useAuth();
 
   const isOwnProfile = !id;
+  const isAdmin = !!user && user.role === 'ADMIN';
 
   const [profile, setProfile] = useState(null);
   const [badges, setBadges] = useState([]);
@@ -78,9 +79,14 @@ export default function StudentProfile() {
   const fetchProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const endpoint = isOwnProfile
-        ? '/student-auth/profile'
-        : `/student-auth/view/${id}`;
+      let endpoint;
+      if (isOwnProfile) {
+        endpoint = '/student-auth/profile';
+      } else if (isAdmin) {
+        endpoint = `/students/${id}`;
+      } else {
+        endpoint = `/student-auth/view/${id}`;
+      }
 
       const res = await api.get(endpoint);
       setProfile(res.data);
@@ -96,17 +102,17 @@ export default function StudentProfile() {
     } catch (error) {
       console.error('Error fetching profile:', error);
       if (error.response?.status !== 401) {
-        navigate('/student');
+        navigate(isAdmin ? '/' : '/student');
       }
     } finally {
       setLoading(false);
     }
-  }, [id, isOwnProfile, navigate]);
+  }, [id, isOwnProfile, isAdmin, navigate]);
 
   const fetchBadges = useCallback(async () => {
     setBadgesLoading(true);
     try {
-      const endpoint = isOwnProfile ? '/badges/student' : `/badges/view/${id}`;
+      const endpoint = isOwnProfile ? '/badges/student' : (isAdmin ? `/badges/view/${id}` : `/badges/view/${id}`);
       const res = await api.get(endpoint);
       setBadges(res.data);
     } catch (error) {
@@ -114,12 +120,12 @@ export default function StudentProfile() {
     } finally {
       setBadgesLoading(false);
     }
-  }, [id, isOwnProfile]);
+  }, [id, isOwnProfile, isAdmin]);
 
   const fetchCertificates = useCallback(async () => {
     setCertificatesLoading(true);
     try {
-      const endpoint = isOwnProfile ? '/certificates/student' : `/certificates/view/${id}`;
+      const endpoint = isOwnProfile ? '/certificates/student' : (isAdmin ? `/certificates/view/${id}` : `/certificates/view/${id}`);
       const res = await api.get(endpoint);
       setCertificates(res.data);
     } catch (error) {
@@ -127,7 +133,7 @@ export default function StudentProfile() {
     } finally {
       setCertificatesLoading(false);
     }
-  }, [id, isOwnProfile]);
+  }, [id, isOwnProfile, isAdmin]);
 
   const fetchRanking = useCallback(async () => {
     try {

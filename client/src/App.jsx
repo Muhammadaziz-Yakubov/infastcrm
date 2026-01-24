@@ -60,13 +60,13 @@ function AppRoutes() {
         <Route path="/student/code-editor/:taskId" element={<StudentCodeEditor />} />
         <Route path="/student/profile" element={<StudentProfile />} />
         <Route path="/student/profile/:id" element={<StudentProfile />} />
+        <Route path="/student/classmates" element={<Classmates />} />
 
         {/* Protected Admin Routes */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="courses" element={<Courses />} />
           <Route path="groups" element={<Groups />} />
-          <Route path="students" element={<Students />} />
           <Route path="leads" element={<Leads />} />
           <Route path="marketing" element={<Marketing />} />
           <Route path="exams" element={<Exams />} />
@@ -85,6 +85,9 @@ function AppRoutes() {
           <Route path="/maintenance" element={<Maintenance />} />
         </Route>
 
+        {/* Students route outside Layout */}
+        <Route path="/students" element={<Students />} />
+
         {/* Catch all - redirect to appropriate dashboard */}
         <Route path="*" element={<Navigate to={user ? "/" : "/student"} replace />} />
       </Routes>
@@ -99,7 +102,7 @@ function AppRoutes() {
       <Route path="/student-login" element={<StudentLogin />} />
 
       {/* Redirect student routes to student-login */}
-      <Route path="/student/*" element={<Navigate to="/student-login" replace />} />
+      <Route path="/student" element={<Navigate to="/student-login" replace />} />
 
       {/* Redirect all other routes to admin login */}
       <Route path="*" element={<Navigate to="/login" replace />} />

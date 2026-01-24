@@ -16,10 +16,7 @@ export default function StudentClassmatesView() {
 
     const fetchClassmates = async () => {
         try {
-            const token = localStorage.getItem('studentToken');
-            const res = await api.get('/student-auth/classmates', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get('/student-auth/classmates');
             setClassmates(res.data);
         } catch (error) {
             console.error('Error fetching classmates:', error);

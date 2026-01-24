@@ -66,9 +66,12 @@ export default function Students() {
   });
 
   useEffect(() => {
-    fetchGroups();
-    fetchStudents();
-  }, [statusFilter, groupFilter, paymentFilter]);
+    // Only fetch if user is admin
+    if (isAdmin) {
+      fetchGroups();
+      fetchStudents();
+    }
+  }, [statusFilter, groupFilter, paymentFilter, isAdmin]);
 
 
   const fetchGroups = async () => {
@@ -87,10 +90,20 @@ export default function Students() {
       if (groupFilter) params.group_id = groupFilter;
       if (paymentFilter) params.payment_filter = paymentFilter;
       
+      console.log('🔍 Fetching students with params:', params);
       const response = await api.get('/students', { params });
+      console.log('📊 Students response:', response.data);
       setStudents(response.data);
     } catch (error) {
-      console.error('Error fetching students:', error);
+      console.error('❌ Error fetching students:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error data:', error.response?.data);
+      
+      // Don't redirect here - let the component handle auth
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('🔒 Authentication error in fetchStudents');
+      }
     } finally {
       setLoading(false);
     }
@@ -270,6 +283,24 @@ export default function Students() {
     student.phone.includes(searchTerm)
   );
 
+  // Redirect if not admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Ruxsat berilmagan</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Bu sahifaga faqat adminlar kirishi mumkin</p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          >
+            Login ga qaytish
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -432,8 +463,9 @@ export default function Students() {
               {filteredStudents.map((student, index) => (
                 <tr 
                   key={student._id} 
-                  className="table-row-hover"
+                  className="table-row-hover cursor-pointer"
                   style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={() => navigate(`/student/profile/${student._id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
@@ -441,12 +473,7 @@ export default function Students() {
                         <UserCheck className="text-white" size={20} />
                       </div>
                       <div>
-                        <button
-                          onClick={() => navigate(`/student/profile/${student._id}`)}
-                          className="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left"
-                        >
-                          {student.full_name}
-                        </button>
+                        <p className="font-medium text-gray-900 dark:text-white">{student.full_name}</p>
                         {student.parent_phone && (
                           <p className="text-xs text-gray-500 dark:text-gray-400">Ota-ona: {student.parent_phone}</p>
                         )}
@@ -484,21 +511,30 @@ export default function Students() {
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => navigate(`/student/profile/${student._id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/student/profile/${student._id}`);
+                        }}
                         className="p-2 text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         title="Profil"
                       >
                         <User size={18} />
                       </button>
                       <button
-                        onClick={() => navigate(`/student/tasks`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/student/tasks`);
+                        }}
                         className="p-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                         title="Vazifalar"
                       >
                         <BookOpen size={18} />
                       </button>
                       <button
-                        onClick={() => navigate(`/attendance`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/attendance`);
+                        }}
                         className="p-2 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                         title="Davomat"
                       >
