@@ -98,11 +98,6 @@ app.use('/api/student-exams', studentExamsRoutes);
 app.use('/api/student-quizzes', studentQuizzesRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 
-// Apply maintenance middleware to protect routes (but allow maintenance endpoints)
-app.use('/api/student-auth', maintenanceService.checkMaintenance());
-app.use('/api/student-exams', maintenanceService.checkMaintenance('exams'));
-app.use('/api/student-quizzes', maintenanceService.checkMaintenance('quizzes'));
-
 // Socket.io setup
 setupArenaSocket(io);
 
@@ -111,21 +106,21 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://muhammadyakubov:vN
 
 // Add connection timeout
 const connectWithTimeout = () => {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error('MongoDB connection timeout'));
-    }, 15000); // 15 second timeout
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error('MongoDB connection timeout'));
+        }, 15000); // 15 second timeout
 
-    mongoose.connect(MONGODB_URI)
-      .then(() => {
-        clearTimeout(timeout);
-        resolve();
-      })
-      .catch((err) => {
-        clearTimeout(timeout);
-        reject(err);
-      });
-  });
+        mongoose.connect(MONGODB_URI)
+            .then(() => {
+                clearTimeout(timeout);
+                resolve();
+            })
+            .catch((err) => {
+                clearTimeout(timeout);
+                reject(err);
+            });
+    });
 };
 
 connectWithTimeout()
@@ -146,20 +141,20 @@ connectWithTimeout()
 const initializeServices = async () => {
     // Start services in background without blocking server startup
     setTimeout(() => {
-        testBotConnection().catch(err => 
+        testBotConnection().catch(err =>
             console.log('⚠️ Telegram bot connection failed (non-critical):', err.message)
         );
     }, 2000); // 2 second delay
 
     setTimeout(() => {
-        initSurveyBot().catch(err => 
+        initSurveyBot().catch(err =>
             console.log('⚠️ Survey bot initialization failed (non-critical):', err.message)
         );
     }, 5000); // 5 second delay
 
     if (process.env.NODE_ENV === 'production') {
         setTimeout(() => {
-            setupWebhook().catch(err => 
+            setupWebhook().catch(err =>
                 console.log('⚠️ Webhook setup failed (non-critical):', err.message)
             );
         }, 8000); // 8 second delay
@@ -193,13 +188,13 @@ nodeCron.schedule('0 7 * * *', () => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    env: process.env.NODE_ENV || 'development'
-  });
+    res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        env: process.env.NODE_ENV || 'development'
+    });
 });
 
 // Error handling middleware

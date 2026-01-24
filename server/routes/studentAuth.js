@@ -134,7 +134,7 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
         .sort({ payment_date: -1 })
         .limit(5)
         .lean(),
-      
+
       // Get recent attendance (limit 10 instead of 30)
       Attendance.find({
         student_id: student._id,
@@ -143,33 +143,33 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
         .sort({ date: -1 })
         .limit(10)
         .lean(),
-      
+
       // Get all payments for total calculation
       Payment.find({ student_id: student._id })
         .select('amount')
         .lean(),
-      
+
       // Get recent quiz results (limit 3 instead of 5)
       QuizResult.find({ student_id: student._id })
         .sort({ createdAt: -1 })
         .limit(3)
         .lean(),
-      
+
       // Get tasks for student's group
-      Task.find({ 
+      Task.find({
         group_id: student.group_id._id,
         status: 'ACTIVE'
       })
         .select('_id deadline')
         .lean(),
-      
+
       // Get task submissions
-      TaskSubmission.find({ 
-        student_id: student._id 
+      TaskSubmission.find({
+        student_id: student._id
       })
         .select('task_id status')
         .lean(),
-      
+
       // Get exam results
       ExamResult.find({ student_id: student._id })
         .select('score')
@@ -190,7 +190,7 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
     // Calculate quiz stats (optimized)
     const quizStats = {
       total: quizResults.length,
-      avgPercentage: quizResults.length > 0 
+      avgPercentage: quizResults.length > 0
         ? Math.round(quizResults.reduce((sum, r) => sum + (r.percentage || 0), 0) / quizResults.length)
         : 0
     };
@@ -213,7 +213,7 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
     // Calculate exam stats (optimized)
     const examStats = {
       count: examResults.length,
-      avgScore: examResults.length > 0 
+      avgScore: examResults.length > 0
         ? Math.round(examResults.reduce((sum, e) => sum + (e.score || 0), 0) / examResults.length)
         : 0
     };
@@ -226,7 +226,8 @@ router.get('/dashboard', authenticateStudent, async (req, res) => {
         status: student.status,
         joined_date: student.joined_date,
         next_payment_date: student.next_payment_date,
-        last_payment_date: student.last_payment_date
+        last_payment_date: student.last_payment_date,
+        coin_balance: student.coin_balance || 0
       },
       group: {
         id: student.group_id._id,
