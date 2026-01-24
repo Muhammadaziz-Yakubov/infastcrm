@@ -65,7 +65,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Telegram Webhook route (must be before /api routes or handled specifically)
 app.post('/api/telegram/webhook', handleWebhook);
