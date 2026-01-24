@@ -78,52 +78,64 @@ export default function StudentDashboard() {
   }, []);
 
   const fetchDashboard = async (retryCount = 0) => {
-  // Check cache first
-  const cachedData = localStorage.getItem(CACHE_KEY);
-  const cacheTimestamp = localStorage.getItem(`${CACHE_KEY}_timestamp`);
-  
-  if (cachedData && cacheTimestamp) {
-    const cacheAge = Date.now() - parseInt(cacheTimestamp);
-    if (cacheAge < CACHE_DURATION) {
-      setData(JSON.parse(cachedData));
-      setLoading(false);
-      return;
-    }
-  }
+    // Check cache first
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cacheTimestamp = localStorage.getItem(`${CACHE_KEY}_timestamp`);
 
-  try {
-    const response = await api.get('/student-auth/dashboard');
-    const dashboardData = response.data;
-    
-    // Cache the data
-    localStorage.setItem(CACHE_KEY, JSON.stringify(dashboardData));
-    localStorage.setItem(`${CACHE_KEY}_timestamp`, Date.now().toString());
-    
-    setData(dashboardData);
-  } catch (error) {
-    console.error('❌ Error fetching dashboard:', error);
-    
-    // Retry once if it's a timeout error
-    if (retryCount === 0 && error.code === 'ECONNABORTED') {
-      console.log('🔄 Retrying dashboard fetch...');
-      return fetchDashboard(1);
+    if (cachedData && cacheTimestamp) {
+      const cacheAge = Date.now() - parseInt(cacheTimestamp);
+      if (cacheAge < CACHE_DURATION) {
+        setData(JSON.parse(cachedData));
+        setLoading(false);
+        return;
+      }
     }
-    
-    // Set default data to prevent UI issues
-    setData({
-      student: null,
-      group: null,
-      payments: [],
-      totalPaid: 0,
-      attendance: { records: [], stats: { total: 0, present: 0, absent: 0, late: 0, percentage: 0 } },
-      quizzes: { lastResults: [], stats: { total: 0, avgPercentage: 0 } },
-      tasks: { pendingCount: 0, submittedCount: 0, gradedCount: 0, totalCount: 0 },
-      exams: { stats: { count: 0, avgScore: 0 } }
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+
+    try {
+      const response = await api.get('/student-auth/dashboard');
+      const dashboardData = response.data;
+
+      // Cache the data
+      localStorage.setItem(CACHE_KEY, JSON.stringify(dashboardData));
+      localStorage.setItem(`${CACHE_KEY}_timestamp`, Date.now().toString());
+
+      setData(dashboardData);
+    } catch (error) {
+      console.error('❌ Error fetching dashboard:', error);
+
+      // Check if it's an authentication error
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('🔒 Authentication failed, redirecting to login...');
+        // Clear invalid tokens
+        localStorage.removeItem('studentToken');
+        localStorage.removeItem('studentData');
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(`${CACHE_KEY}_timestamp`);
+        navigate('/student-login');
+        return;
+      }
+
+      // Retry once if it's a timeout error
+      if (retryCount === 0 && error.code === 'ECONNABORTED') {
+        console.log('🔄 Retrying dashboard fetch...');
+        return fetchDashboard(1);
+      }
+
+      // Set default data to prevent UI issues
+      setData({
+        student: null,
+        group: null,
+        payments: [],
+        totalPaid: 0,
+        attendance: { records: [], stats: { total: 0, present: 0, absent: 0, late: 0, percentage: 0 } },
+        quizzes: { lastResults: [], stats: { total: 0, avgPercentage: 0 } },
+        tasks: { pendingCount: 0, submittedCount: 0, gradedCount: 0, totalCount: 0 },
+        exams: { stats: { count: 0, avgScore: 0 } }
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     studentLogout();
@@ -384,31 +396,31 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                {/* 🎉 Upcoming Events */}
-                <div className="space-y-4 md:space-y-8">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg">
-                        <Calendar size={16} md:size={24} />
+                  {/* 🎉 Upcoming Events */}
+                  <div className="space-y-4 md:space-y-8">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg">
+                          <Calendar size={16} md:size={24} />
+                        </div>
+                        <div>
+                          <h3 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Tadbirlar</h3>
+                          <p className="text-[8px] md:text-xs font-black text-purple-500 uppercase tracking-widest mt-1 italic">Yaqin keladigan tadbirlar</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white uppercase italic tracking-tighter">Tadbirlar</h3>
-                        <p className="text-[8px] md:text-xs font-black text-purple-500 uppercase tracking-widest mt-1 italic">Yaqin keladigan tadbirlar</p>
-                      </div>
+                      <button
+                        onClick={() => handleTabChange('events')}
+                        className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 text-sm font-medium flex items-center space-x-1 transition"
+                      >
+                        <span>Barchasi</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleTabChange('events')}
-                      className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 text-sm font-medium flex items-center space-x-1 transition"
-                    >
-                      <span>Barchasi</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                  
-                  <StudentEventsOverview />
-                </div>
 
-                {/* Secondary Shortcuts */}
+                    <StudentEventsOverview />
+                  </div>
+
+                  {/* Secondary Shortcuts */}
                   <div className="grid grid-cols-2 gap-3 md:gap-8">
                     {[
                       { id: 'tasks', label: "Vazifalar", count: data?.tasks?.pendingCount || 0, icon: FileCode, color: 'text-blue-500', bg: 'bg-blue-500/10' },
