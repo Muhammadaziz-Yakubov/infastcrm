@@ -1,7 +1,7 @@
 import express from 'express';
 import Event from '../models/Event.js';
 import Student from '../models/Student.js';
-import { authenticate, requireAdmin } from '../middleware/auth.js';
+import { authenticate, authenticateStudent, requireAdmin } from '../middleware/auth.js';
 import { processEventAttendance } from '../services/eventService.js';
 
 const router = express.Router();
@@ -19,23 +19,24 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
 });
 
 // Get upcoming events for students
-router.get('/upcoming', authenticate, async (req, res) => {
+router.get('/upcoming', authenticateStudent, async (req, res) => {
   try {
     const now = new Date();
     const events = await Event.find({
       event_date: { $gte: now },
       registration_deadline: { $gte: now }
     })
-      .select('title description banner event_date registration_deadline max_participants location')
+      .select('title description banner event_date registration_deadline max_participants location registrations coin_reward coin_penalty')
       .sort({ event_date: 1 });
 
     // Add registration count
+    const studentId = req.student?.id;
     const eventsWithCount = events.map(event => ({
       ...event.toObject(),
-      registered_count: event.registrations.length,
-      is_registered: event.registrations.some(r =>
-        r.student_id.toString() === (req.student?.id || req.user._id)
-      )
+      registered_count: event.registrations?.length || 0,
+      is_registered: event.registrations?.some(r =>
+        r.student_id.toString() === studentId
+      ) || false
     }));
 
     res.json(eventsWithCount);
@@ -90,7 +91,7 @@ router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
 });
 
 // Register for event (student)
-router.post('/:id/register', authenticate, async (req, res) => {
+router.post('/:id/register', authenticateStudent, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: 'Event not found' });
@@ -103,7 +104,7 @@ router.post('/:id/register', authenticate, async (req, res) => {
       return res.status(400).json({ message: 'Event is full' });
     }
 
-    const studentId = req.student?.id || req.user._id;
+    const studentId = req.student?.id;
     const alreadyRegistered = event.registrations.some(r =>
       r.student_id.toString() === studentId
     );
@@ -161,7 +162,7 @@ router.post('/:id/process-rewards', authenticate, requireAdmin, async (req, res)
 });
 
 // Get event details
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticateStudent, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id)
       .populate('registrations.student_id', 'full_name phone');
