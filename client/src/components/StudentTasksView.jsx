@@ -171,15 +171,20 @@ export default function StudentTasksView({ setFullScreen }) {
             const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
             const now = new Date();
 
+            const isCompleted = item.type === 'TASK'
+                ? !!item.submission
+                : (item.status === 'FINISHED' || item.submission?.status === 'FINISHED' || item.status === 'GRADED' || item.submission?.status === 'GRADED');
+
             // Expiry logic only applies if there is an explicit deadline
             const deadline = item.deadline ? new Date(item.deadline) : null;
             const isExpired = deadline && now > deadline;
             const isRecentlyExpired = isExpired && (now - deadline) < 600000;
 
             if (activeTab === 'completed') {
-                return matchesSearch && (isExpired && !isRecentlyExpired);
+                return matchesSearch && isCompleted;
             }
-            return matchesSearch && (!isExpired || isRecentlyExpired);
+            // Keep items visible even after deadline passes; UI already disables submitting when expired.
+            return matchesSearch && !isCompleted;
         });
     }, [items, searchTerm, activeTab]);
 
