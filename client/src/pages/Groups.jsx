@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Modal from '../components/Modal';
@@ -10,6 +10,7 @@ export default function Groups() {
   const [groups, setGroups] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [editingGroup, setEditingGroup] = useState(null);
@@ -282,8 +283,9 @@ export default function Groups() {
         {filteredGroups.map((group, index) => (
           <div 
             key={group._id} 
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden card-hover animate-fade-in-up"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden card-hover animate-fade-in-up cursor-pointer"
             style={{ animationDelay: `${index * 50}ms` }}
+            onClick={() => navigate(`/students?group_id=${group._id}`)}
           >
             <div className={`h-2 bg-gradient-to-r ${getStatusGradient(group.status)}`}></div>
             <div className="p-6">
@@ -332,6 +334,7 @@ export default function Groups() {
               <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                 <Link
                   to={`/students?group_id=${group._id}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-500"
                 >
                   <Users size={16} />
@@ -340,7 +343,8 @@ export default function Groups() {
                 <div className="flex items-center gap-1">
                   {group.status === 'NABOR' && isAdmin && (
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setActivatingGroup(group);
                         setFormData({ ...formData, start_date: '' });
                         setShowActivateModal(true);
@@ -354,20 +358,29 @@ export default function Groups() {
                   {isAdmin && (
                     <>
                       <button
-                        onClick={() => handleEdit(group)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(group);
+                        }}
                         className="p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                       >
                         <Edit size={18} />
                       </button>
                       <button
-                        onClick={() => handleShowMessageModal(group)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShowMessageModal(group);
+                        }}
                         className="p-2 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                         title="Guruhga xabar yuborish"
                       >
                         <MessageSquare size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(group._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(group._id);
+                        }}
                         className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                       >
                         <Trash2 size={18} />
