@@ -67,6 +67,7 @@ function AppRoutes() {
           <Route index element={<Dashboard />} />
           <Route path="courses" element={<Courses />} />
           <Route path="groups" element={<Groups />} />
+          <Route path="students" element={<Students />} />
           <Route path="leads" element={<Leads />} />
           <Route path="marketing" element={<Marketing />} />
           <Route path="exams" element={<Exams />} />
@@ -84,9 +85,6 @@ function AppRoutes() {
           <Route path="/events" element={<AdminEvents />} />
           <Route path="/maintenance" element={<Maintenance />} />
         </Route>
-
-        {/* Students route outside Layout */}
-        <Route path="/students" element={<Students />} />
 
         {/* Catch all - redirect to appropriate dashboard */}
         <Route path="*" element={<Navigate to={user ? "/" : "/student"} replace />} />

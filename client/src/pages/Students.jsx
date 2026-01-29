@@ -45,7 +45,7 @@ export default function Students() {
   const statusFilter = searchParams.get('status');
   const groupFilter = searchParams.get('group_id');
   const paymentFilter = searchParams.get('payment_filter');
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const isAdmin = user?.role === 'ADMIN';
 
   const [formData, setFormData] = useState({
@@ -66,12 +66,12 @@ export default function Students() {
   });
 
   useEffect(() => {
-    // Only fetch if user is admin
-    if (isAdmin) {
+    // Only fetch if user is admin and auth is loaded
+    if (!authLoading && isAdmin) {
       fetchGroups();
       fetchStudents();
     }
-  }, [statusFilter, groupFilter, paymentFilter, isAdmin]);
+  }, [statusFilter, groupFilter, paymentFilter, isAdmin, authLoading]);
 
 
   const fetchGroups = async () => {
@@ -284,7 +284,7 @@ export default function Students() {
   );
 
   // Redirect if not admin
-  if (!isAdmin) {
+  if (!authLoading && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="text-center">
@@ -301,7 +301,7 @@ export default function Students() {
     );
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
