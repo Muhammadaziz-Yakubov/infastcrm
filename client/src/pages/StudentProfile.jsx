@@ -42,7 +42,7 @@ import { uz } from 'date-fns/locale';
 export default function StudentProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { student, studentLogin, user } = useAuth();
+  const { student, studentLogin, user, studentLogout } = useAuth();
 
   const isOwnProfile = !id;
   const isAdmin = !!user && user.role === 'ADMIN';
