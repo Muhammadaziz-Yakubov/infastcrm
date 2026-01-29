@@ -13,9 +13,13 @@ import {
   XCircle,
   AlertCircle,
   ExternalLink,
-  Image
+  Sparkles,
+  ArrowRight,
+  Zap,
+  Ticket
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { uz } from 'date-fns/locale';
 
 export default function StudentEvents() {
   const [events, setEvents] = useState([]);
@@ -50,9 +54,11 @@ export default function StudentEvents() {
     setRegistering(true);
     try {
       await api.post(`/events/${eventId}/register`);
-      alert('Tadbirga muvaffaqiyatli ro\'yxatdan o\'tdingiz!');
       fetchEvents();
-      setShowDetailModal(false);
+      if (selectedEvent?._id === eventId) {
+        setSelectedEvent(prev => ({ ...prev, is_registered: true, registered_count: prev.registered_count + 1 }));
+      }
+      alert('Tadbirga muvaffaqiyatli ro\'yxatdan o\'tdingiz! 🎉');
     } catch (error) {
       console.error('Error registering for event:', error);
       alert(error.response?.data?.message || 'Xatolik yuz berdi');
@@ -82,299 +88,256 @@ export default function StudentEvents() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Tadbirlar</h1>
-        <p className="text-gray-600 dark:text-gray-400">Qiziqarli tadbirlarda qatnashing va coinlarga ega bo'ling!</p>
-      </div>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto font-jakarta animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Tadbirlarni qidirish..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-          />
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+              <Calendar size={20} />
+            </div>
+            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em]">Exclusive Events</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight italic">
+            Tadbirlar & <span className="text-indigo-600">Imkoniyatlar</span>
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Faol bo'ling, bilim oling va coinlarni qo'lga kiriting!</p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative w-full md:w-80 group">
+          <div className="absolute inset-0 bg-indigo-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+          <div className="relative bg-white dark:bg-[#1e2330] rounded-2xl flex items-center px-4 py-3 border border-gray-100 dark:border-white/5 shadow-xl">
+            <Search className="text-gray-400 w-5 h-5 mr-3" />
+            <input
+              type="text"
+              placeholder="Tadbir qidirish..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-transparent border-none outline-none w-full text-sm font-bold text-gray-700 dark:text-white placeholder-gray-400"
+            />
+          </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Tadbirlar yuklanmoqda...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-96 rounded-[2.5rem] bg-gray-100 dark:bg-gray-800 animate-pulse"></div>
+          ))}
         </div>
       ) : filteredEvents.length === 0 ? (
-        <div className="text-center py-12">
-          <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {searchTerm ? 'Tadbirlar topilmadi' : 'Hozircha tadbirlar yo\'q'}
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            {searchTerm ? 'Boshqa kalit so\'zlar bilan urinib ko\'ring' : 'Tez orada yangi tadbirlar qo\'shiladi'}
-          </p>
+        <div className="text-center py-24 bg-white dark:bg-[#161a26] rounded-[3rem] border border-dashed border-gray-200 dark:border-white/5">
+          <div className="w-24 h-24 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Calendar className="w-10 h-10 text-gray-400" />
+          </div>
+          <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Tadbirlar topilmadi</h3>
+          <p className="text-gray-500">Hozircha rejalashtirilgan tadbirlar yo'q.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredEvents.map((event, index) => (
             <div
               key={event._id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
               onClick={() => openEventDetail(event)}
+              className="group relative bg-white dark:bg-[#161a26] rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 shadow-2xl shadow-gray-200/50 dark:shadow-black/50 hover:-translate-y-2 transition-all duration-500 cursor-pointer"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              {/* Banner Image */}
-              <div className="aspect-[2/3] bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
+              {/* Image Banner */}
+              <div className="h-64 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#161a26] via-transparent to-transparent z-10 opacity-90"></div>
                 {event.banner ? (
-                  <img
-                    src={event.banner}
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  <img src={event.banner} alt={event.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Calendar className="w-16 h-16 text-white opacity-50" />
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center">
+                    <Sparkles className="text-white/20 w-32 h-32" />
                   </div>
                 )}
 
-                {/* Status badges */}
-                <div className="absolute top-3 right-3 flex flex-col space-y-2">
+                {/* Badges */}
+                <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
+                  <div className="px-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-2">
+                    <Coins size={14} className="text-yellow-400" />
+                    <span className="text-xs font-black text-white uppercase tracking-wider">{event.coin_reward} COIN</span>
+                  </div>
                   {event.is_registered && (
-                    <span className="px-3 py-1 bg-green-500 text-white rounded-full text-xs font-medium flex items-center space-x-1">
-                      <CheckCircle className="w-3 h-3" />
-                      <span>Ro'yxatdan o'tilgan</span>
-                    </span>
-                  )}
-
-                  {isEventFull(event) && !event.is_registered && (
-                    <span className="px-3 py-1 bg-red-500 text-white rounded-full text-xs font-medium flex items-center space-x-1">
-                      <XCircle className="w-3 h-3" />
-                      <span>To'la</span>
-                    </span>
-                  )}
-
-                  {isRegistrationClosed(event) && !event.is_registered && (
-                    <span className="px-3 py-1 bg-gray-500 text-white rounded-full text-xs font-medium flex items-center space-x-1">
-                      <Clock className="w-3 h-3" />
-                      <span>Muddati o'tgan</span>
-                    </span>
+                    <div className="px-4 py-1.5 bg-green-500/90 backdrop-blur-md rounded-full text-xs font-black text-white uppercase tracking-wider shadow-lg shadow-green-500/20 animate-pulse">
+                      Qatnashmoqdasiz
+                    </div>
                   )}
                 </div>
 
-                {/* Participants overlay */}
-                <div className="absolute bottom-3 left-3 bg-black bg-opacity-50 px-3 py-1 rounded-full">
-                  <div className="flex items-center space-x-2 text-white text-sm">
-                    <Users className="w-4 h-4" />
-                    <span>{event.registered_count}/{event.max_participants}</span>
-                  </div>
+                <div className="absolute bottom-4 left-6 z-20">
+                  <span className="px-3 py-1 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg mb-2 inline-block">
+                    {format(new Date(event.event_date), 'dd MMMM', { locale: uz })}
+                  </span>
+                  <h3 className="text-2xl font-black text-white leading-tight line-clamp-2 italic">{event.title}</h3>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-5">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
-                  {event.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+              <div className="p-6 md:p-8 space-y-6">
+                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 font-medium leading-relaxed">
                   {event.description}
                 </p>
 
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span>{format(new Date(event.event_date), 'dd.MM.yyyy HH:mm')}</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                    <div className="w-8 h-8 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center shrink-0">
+                      <Clock size={16} />
+                    </div>
+                    <span className="text-sm font-bold">{format(new Date(event.event_date), 'HH:mm', { locale: uz })} da boshlanadi</span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="truncate">{event.location}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span>
-                      Ro'yxatdan o'tish: {format(new Date(event.registration_deadline), 'dd.MM.yyyy HH:mm')}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <Coins className="w-4 h-4 mr-2 flex-shrink-0 text-yellow-500" />
-                    <span className="text-green-600 dark:text-green-400 font-medium">+{event.coin_reward}</span>
-                    <span className="text-gray-400 mx-1">/</span>
-                    <span className="text-red-600 dark:text-red-400 font-medium">{event.coin_penalty}</span>
-                    <span className="text-gray-500 ml-1">coin</span>
+                  <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                    <div className="w-8 h-8 rounded-xl bg-gray-50 dark:bg-white/5 flex items-center justify-center shrink-0">
+                      <MapPin size={16} />
+                    </div>
+                    <span className="text-sm font-bold truncate">{event.location}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEventDetail(event);
-                    }}
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium flex items-center space-x-1 transition"
-                  >
-                    <span>Batafsil</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
-
-                  {!event.is_registered && isRegistrationOpen(event) && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRegister(event._id);
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-1 transition"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      <span>Qatnashish</span>
-                    </button>
-                  )}
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs font-black uppercase tracking-wider text-gray-400">
+                    <span>Joylar</span>
+                    <span>{event.registered_count} / {event.max_participants}</span>
+                  </div>
+                  <div className="h-2 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-1000 ${isEventFull(event) ? 'bg-red-500' : 'bg-indigo-500'
+                        }`}
+                      style={{ width: `${Math.min((event.registered_count / event.max_participants) * 100, 100)}%` }}
+                    ></div>
+                  </div>
                 </div>
+
+                <button className="w-full py-4 bg-gray-50 dark:bg-white/5 hover:bg-indigo-600 hover:text-white text-indigo-600 dark:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 group/btn">
+                  Batafsil
+                  <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Event Detail Modal */}
+      {/* Modern Modal */}
       <Modal
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
-        title={selectedEvent?.title}
+        title=""
         size="lg"
       >
         {selectedEvent && (
-          <div className="space-y-6">
-            {/* Banner */}
-            {selectedEvent.banner && (
-              <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                <img
-                  src={selectedEvent.banner}
-                  alt={selectedEvent.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            {/* Description */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Tadbir haqida</h3>
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                {selectedEvent.description}
-              </p>
-            </div>
-
-            {/* Event Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <div className="flex items-center space-x-3 mb-2">
-                  <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-gray-900 dark:text-white">Tadbir sanasi</span>
+          <div className="relative">
+            {/* Modal Header Image */}
+            <div className="h-72 w-full relative">
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#111827] z-10"></div>
+              {selectedEvent.banner ? (
+                <img src={selectedEvent.banner} className="w-full h-full object-cover" alt="" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-purple-800 flex items-center justify-center">
+                  <Ticket size={64} className="text-white/20" />
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {format(new Date(selectedEvent.event_date), 'dd.MM.yyyy HH:mm')}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <div className="flex items-center space-x-3 mb-2">
-                  <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-gray-900 dark:text-white">Manzil</span>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">{selectedEvent.location}</p>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <div className="flex items-center space-x-3 mb-2">
-                  <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-gray-900 dark:text-white">Ro'yxatdan o'tish muddati</span>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {format(new Date(selectedEvent.registration_deadline), 'dd.MM.yyyy HH:mm')}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <div className="flex items-center space-x-3 mb-2">
-                  <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-medium text-gray-900 dark:text-white">Ishtirokchilar</span>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {selectedEvent.registered_count} / {selectedEvent.max_participants} kishi
-                </p>
-                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(selectedEvent.registered_count / selectedEvent.max_participants) * 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Coin Rewards */}
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
-              <div className="flex items-center space-x-3 mb-3">
-                <Coins className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                <span className="font-medium text-gray-900 dark:text-white">Coin mukofotlari</span>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">+{selectedEvent.coin_reward}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Tadbirga kelganda</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">{selectedEvent.coin_penalty}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Kelmaganda</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Registration Status */}
-            {selectedEvent.is_registered ? (
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <div>
-                    <p className="font-medium text-green-900 dark:text-green-100">Siz ro'yxatdan o'tdingiz</p>
-                    <p className="text-sm text-green-700 dark:text-green-300">
-                      Tadbir vaqtida bo'lib, coin mukofotini olishingiz mumkin
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : isRegistrationOpen(selectedEvent) ? (
+              )}
               <button
-                onClick={() => handleRegister(selectedEvent._id)}
-                disabled={registering}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-3 rounded-lg font-medium transition flex items-center justify-center space-x-2"
+                onClick={() => setShowDetailModal(false)}
+                className="absolute top-4 right-4 z-20 w-10 h-10 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-all"
               >
-                {registering ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Ro'yxatdan o'tilmoqda...</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-5 h-5" />
-                    <span>Tadbirga qatnashish</span>
-                  </>
-                )}
+                <XCircle size={24} />
               </button>
-            ) : (
-              <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-4 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <AlertCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </div>
+
+            <div className="px-8 pb-8 -mt-20 relative z-20">
+              {/* Title Block */}
+              <div className="bg-white dark:bg-[#1f2937] p-6 rounded-3xl shadow-xl mb-8 border border-gray-100 dark:border-gray-700">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-wider rounded-lg">
+                    {format(new Date(selectedEvent.event_date), 'dd MMMM yyyy', { locale: uz })}
+                  </span>
+                  {selectedEvent.is_registered && (
+                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs font-black uppercase tracking-wider rounded-lg flex items-center gap-1">
+                      <CheckCircle size={12} /> Ro'yxatdan o'tilgan
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white uppercase italic leading-none mb-2">
+                  {selectedEvent.title}
+                </h2>
+                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-bold text-sm">
+                  <MapPin size={16} className="text-indigo-500" />
+                  {selectedEvent.location}
+                </div>
+              </div>
+
+              {/* Grid Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="space-y-6">
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {isEventFull(selectedEvent) ? 'Tadbir to\'la' : 'Ro\'yxatdan o\'tish muddati tugagan'}
+                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Tadbir Haqida</h4>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium leading-relaxed">
+                      {selectedEvent.description}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Bu tadbirga ro\'yxatdan o\'tib bo\'lmaydi
-                    </p>
+                  </div>
+
+                  <div className="bg-indigo-50 dark:bg-indigo-900/10 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                        <Coins size={24} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-indigo-400 uppercase tracking-wider">Mukofot</p>
+                        <p className="text-xl font-black text-indigo-900 dark:text-indigo-100">+{selectedEvent.coin_reward} Coin</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-3xl space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-2xl">
+                      <div className="flex items-center gap-3">
+                        <Clock className="text-gray-400" size={20} />
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-gray-400">Boshlanish vaqti</p>
+                          <p className="font-bold dark:text-white">{format(new Date(selectedEvent.event_date), 'HH:mm')}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-2xl">
+                      <div className="flex items-center gap-3">
+                        <Users className="text-gray-400" size={20} />
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-gray-400">Bo'sh o'rinlar</p>
+                          <p className="font-bold dark:text-white">{selectedEvent.max_participants - selectedEvent.registered_count} ta qoldi</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      {!selectedEvent.is_registered && isRegistrationOpen(selectedEvent) ? (
+                        <button
+                          onClick={() => handleRegister(selectedEvent._id)}
+                          disabled={registering}
+                          className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-wider shadow-xl shadow-indigo-600/30 hover:-translate-y-1 transition-all disabled:opacity-70 disabled:hover:translate-y-0"
+                        >
+                          {registering ? 'Ro\'yxatdan o\'tilmoqda...' : 'Tadbirga Qatnashish'}
+                        </button>
+                      ) : selectedEvent.is_registered ? (
+                        <button disabled className="w-full py-4 bg-green-500/10 text-green-600 rounded-2xl font-black uppercase tracking-wider cursor-default flex items-center justify-center gap-2">
+                          <CheckCircle size={18} /> Ro'yxatdan o'tilgan
+                        </button>
+                      ) : (
+                        <button disabled className="w-full py-4 bg-gray-100 dark:bg-gray-700 text-gray-400 rounded-2xl font-black uppercase tracking-wider cursor-not-allowed">
+                          {isEventFull(selectedEvent) ? 'Joylar tugagan' : 'Muddati o\'tgan'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         )}
       </Modal>

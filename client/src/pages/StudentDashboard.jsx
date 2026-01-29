@@ -394,113 +394,17 @@ export default function StudentDashboard() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Secondary Shortcuts */}
-                  <div className="grid grid-cols-2 gap-3 md:gap-8">
-                    {[
-                      { id: 'tasks', label: "Vazifalar", count: data?.tasks?.pendingCount || 0, icon: FileCode, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                      { id: 'events', label: "Tadbirlar", count: 'NEW', icon: Calendar, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-                      { id: 'exams', label: "Imtihon", count: data?.exams?.stats?.count || 0, icon: Target, color: 'text-rose-500', bg: 'bg-rose-500/10' },
-                      { id: 'market', label: "Market", count: 'VIP', icon: ShoppingBag, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-                      { id: 'rating', label: "Reyting", count: '#1', icon: Trophy, color: 'text-purple-500', bg: 'bg-purple-500/10' }
-                    ].map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => handleTabChange(s.id)}
-                        className="bg-white dark:bg-[#161a26] p-6 md:p-10 rounded-3xl border border-gray-100 dark:border-white/5 shadow-md flex flex-col items-center text-center gap-3 relative overflow-hidden group"
-                      >
-                        <div className={`w-12 md:w-16 h-12 md:h-16 rounded-2xl ${s.bg} ${s.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                          <s.icon size={24} md:size={32} />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-[7px] md:text-[10px] font-black uppercase tracking-widest text-gray-400 italic">{s.label}</p>
-                          <p className="text-sm md:text-2xl font-black text-gray-900 dark:text-white italic tracking-tighter">{s.count}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
                 </div>
-
-                {/* 🏆 BOTTOM CTA - Exam Link */}
-                <button
-                  onClick={() => handleTabChange('exams')}
-                  className="w-full bg-indigo-950 p-8 md:p-16 rounded-[2.5rem] md:rounded-[4.5rem] text-white shadow-2xl flex items-center justify-between group overflow-hidden relative border border-white/5"
-                >
-                  <div className="absolute top-0 right-0 w-32 md:w-96 h-32 md:h-96 bg-indigo-600/20 rounded-full blur-3xl"></div>
-                  <div className="flex items-center gap-6 relative z-10">
-                    <div className="w-14 h-14 md:w-28 md:h-28 bg-white/5 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center border border-white/10 shrink-0">
-                      <Target size={28} md:size={56} className="text-indigo-400" />
-                    </div>
-                    <div className="text-left">
-                      <h4 className="text-lg md:text-5xl font-black italic uppercase tracking-tighter leading-none">Imtihonlar</h4>
-                      <p className="text-[8px] md:text-lg opacity-40 font-bold uppercase tracking-widest mt-2 italic">Bilimingizni sinash vaqti</p>
-                    </div>
-                  </div>
-                  <div className="w-10 h-10 md:w-20 md:h-20 bg-indigo-600 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-all shrink-0">
-                    <ArrowRight size={20} md:size={40} className="text-white" />
-                  </div>
-                </button>
               </div>
             )}
 
-            {/* Other views will follow the dashboard's responsive padding */}
-            <div className="pb-20">
-              {activeTab === 'tasks' && <StudentTasksView setFullScreen={setFullScreen} />}
-              {activeTab === 'market' && <StudentMarket />}
-              {activeTab === 'events' && <StudentEvents />}
-              {activeTab === 'exams' && <StudentExamsView setFullScreen={setFullScreen} />}
-              {activeTab === 'rating' && <StudentRatingView />}
-              {activeTab === 'classmates' && <StudentClassmatesView />}
-
-              {activeTab === 'payments' && (
-                <div className="space-y-4 md:space-y-10 animate-in slide-in-from-right duration-500">
-                  {data?.payments?.map((p) => (
-                    <div key={p._id} className="bg-white dark:bg-[#161a26] p-5 md:p-10 rounded-[2rem] md:rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-md flex items-center justify-between group">
-                      <div className="flex items-center gap-4 md:gap-8">
-                        <div className="w-10 h-10 md:w-16 md:h-16 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-600">
-                          <Wallet size={20} md:size={32} />
-                        </div>
-                        <div>
-                          <p className="text-lg md:text-4xl font-black dark:text-white italic tracking-tighter">{p.amount.toLocaleString()} UZS</p>
-                          <p className="text-[8px] md:text-xs font-black text-gray-400 uppercase tracking-widest mt-1 italic">{format(new Date(p.payment_date), 'dd MMMM, yyyy', { locale: uz })}</p>
-                        </div>
-                      </div>
-                      <span className="hidden sm:block px-6 py-2 bg-emerald-500/10 text-emerald-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-500/10">CONFIRMED</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {activeTab === 'attendance' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 animate-in slide-in-from-right duration-500">
-                  {data?.attendance?.records?.map((r) => (
-                    <div key={r._id} className="bg-white dark:bg-[#161a26] p-6 md:p-12 rounded-[2rem] md:rounded-[3.5rem] border border-gray-100 dark:border-white/5 shadow-md">
-                      <div className="flex items-center justify-between mb-6 md:mb-10">
-                        <div className="flex items-center gap-4 md:gap-6">
-                          <div className={`w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-white ${r.status === 'PRESENT' ? 'bg-emerald-500 shadow-xl shadow-emerald-500/20' : r.status === 'LATE' ? 'bg-amber-500 shadow-xl shadow-amber-500/20' : 'bg-rose-500 shadow-xl shadow-rose-500/20'}`}>
-                            {r.status === 'PRESENT' ? <CheckCircle2 size={24} md:size={48} /> : r.status === 'LATE' ? <Clock size={24} md:size={48} /> : <XCircle size={24} md:size={48} />}
-                          </div>
-                          <div>
-                            <p className="text-sm md:text-2xl font-black dark:text-white uppercase italic tracking-tighter">{format(new Date(r.date), 'dd MMMM, yyyy', { locale: uz })}</p>
-                            <p className="text-[8px] md:text-xs font-black text-gray-400 uppercase tracking-widest mt-1">{format(new Date(r.date), 'EEEE', { locale: uz })}</p>
-                          </div>
-                        </div>
-                        {r.score > 0 && (
-                          <div className="w-12 h-12 md:w-20 md:h-20 rounded-full border-4 border-amber-500/20 flex items-center justify-center text-amber-500 font-black italic text-sm md:text-2xl bg-amber-50 dark:bg-white/5">
-                            {r.score}
-                          </div>
-                        )}
-                      </div>
-                      {r.note && (
-                        <div className="p-4 md:p-6 bg-indigo-50 dark:bg-[#0c0e14] rounded-2xl md:rounded-3xl border-l-4 border-indigo-500 italic text-[11px] md:text-base text-gray-600 dark:text-gray-300">
-                          "{r.note}"
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* --- OTHER TABS RENDER LOGIC --- */}
+            {activeTab === 'events' && <StudentEvents />}
+            {activeTab === 'tasks' && <StudentTasksView tasksData={data?.tasks} />}
+            {activeTab === 'market' && <StudentMarket coinBalance={data?.student?.coin_balance} />}
+            {activeTab === 'rating' && <StudentRatingView ratingData={data?.quizzes} />}
+            {activeTab === 'classmates' && <StudentClassmatesView />}
+            {activeTab === 'exams' && <StudentExamsView />}
           </div>
         </main>
 
@@ -513,7 +417,7 @@ export default function StudentDashboard() {
                 { id: 'tasks', icon: FileCode, label: 'Vazifa' },
                 { id: 'market', icon: ShoppingBag, label: 'Market' },
                 { id: 'rating', icon: Trophy, label: 'Reyting' },
-                { id: 'exams', icon: Target, label: 'Imtihon' },
+                { id: 'events', icon: Calendar, label: 'Tadbirlar' },
                 { id: 'profile', icon: UserCircle, label: 'Profil' }
               ].map((tab) => {
                 const Icon = tab.icon;

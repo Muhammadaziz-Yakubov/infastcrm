@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import Modal from '../components/Modal';
-import { 
-  Coins, 
-  Plus, 
-  Minus, 
-  Search, 
-  Users, 
-  History, 
+import {
+  Coins,
+  Plus,
+  Minus,
+  Search,
+  Users,
+  History,
   Trash2,
   Filter,
   Award,
@@ -60,8 +60,8 @@ export default function AdminCoins() {
       const params = {};
       if (selectedGroup) params.group_id = selectedGroup;
       if (searchTerm) params.search = searchTerm;
-      
-      const response = await api.get('/admin/coins/balances', { params });
+
+      const response = await api.get('/coins/balances', { params });
       setStudents(response.data);
     } catch (error) {
       console.error('Error fetching balances:', error);
@@ -75,8 +75,8 @@ export default function AdminCoins() {
     try {
       const params = { limit: 100 };
       if (selectedGroup) params.group_id = selectedGroup;
-      
-      const response = await api.get('/admin/coins/history', { params });
+
+      const response = await api.get('/coins/history', { params });
       setHistory(response.data);
     } catch (error) {
       console.error('Error fetching history:', error);
@@ -97,13 +97,13 @@ export default function AdminCoins() {
         return;
       }
 
-      const endpoint = awardType === 'group' ? '/admin/coins/award-group' : '/admin/coins/award';
-      const data = awardType === 'group' 
+      const endpoint = awardType === 'group' ? '/coins/award-group' : '/coins/award';
+      const data = awardType === 'group'
         ? { group_id: formData.group_id, amount: parseInt(formData.amount), reason: formData.reason }
         : { student_ids: selectedStudents, amount: parseInt(formData.amount), reason: formData.reason };
 
       await api.post(endpoint, data);
-      
+
       setShowAwardModal(false);
       setFormData({ amount: '', reason: '', group_id: '' });
       setSelectedStudents([]);
@@ -127,13 +127,13 @@ export default function AdminCoins() {
         return;
       }
 
-      const endpoint = awardType === 'group' ? '/admin/coins/deduct-group' : '/admin/coins/deduct';
-      const data = awardType === 'group' 
+      const endpoint = awardType === 'group' ? '/coins/deduct-group' : '/coins/deduct';
+      const data = awardType === 'group'
         ? { group_id: formData.group_id, amount: parseInt(formData.amount), reason: formData.reason }
         : { student_ids: selectedStudents, amount: parseInt(formData.amount), reason: formData.reason };
 
       await api.post(endpoint, data);
-      
+
       setShowDeductModal(false);
       setFormData({ amount: '', reason: '', group_id: '' });
       setSelectedStudents([]);
@@ -147,9 +147,9 @@ export default function AdminCoins() {
 
   const handleDeleteHistory = async (historyId) => {
     if (!confirm('Bu yozuvni o\'chirmoqchimisiz? O\'quvchi balansiga teskari ta\'sir qiladi.')) return;
-    
+
     try {
-      await api.delete(`/admin/coins/history/${historyId}`);
+      await api.delete(`/coins/history/${historyId}`);
       fetchHistory();
       alert('Yozuv o\'chirildi');
     } catch (error) {
@@ -159,8 +159,8 @@ export default function AdminCoins() {
   };
 
   const toggleStudentSelection = (studentId) => {
-    setSelectedStudents(prev => 
-      prev.includes(studentId) 
+    setSelectedStudents(prev =>
+      prev.includes(studentId)
         ? prev.filter(id => id !== studentId)
         : [...prev, studentId]
     );
@@ -222,8 +222,8 @@ export default function AdminCoins() {
       <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setActiveTab('balances')}
-          className={`pb-2 px-4 font-medium ${activeTab === 'balances' 
-            ? 'text-blue-600 border-b-2 border-blue-600' 
+          className={`pb-2 px-4 font-medium ${activeTab === 'balances'
+            ? 'text-blue-600 border-b-2 border-blue-600'
             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
         >
           <Users className="w-4 h-4 inline mr-2" />
@@ -231,8 +231,8 @@ export default function AdminCoins() {
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`pb-2 px-4 font-medium ${activeTab === 'history' 
-            ? 'text-blue-600 border-b-2 border-blue-600' 
+          className={`pb-2 px-4 font-medium ${activeTab === 'history'
+            ? 'text-blue-600 border-b-2 border-blue-600'
             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
         >
           <History className="w-4 h-4 inline mr-2" />
@@ -311,11 +311,10 @@ export default function AdminCoins() {
                     {student.group_id?.name || '-'}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-bold ${
-                      student.coin_balance > 0 
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' 
+                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-bold ${student.coin_balance > 0
+                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                         : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                    }`}>
+                      }`}>
                       <Coins className="w-4 h-4" />
                       {student.coin_balance || 0}
                     </span>
@@ -362,9 +361,8 @@ export default function AdminCoins() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className={`inline-flex items-center gap-1 font-bold ${
-                      item.amount > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <span className={`inline-flex items-center gap-1 font-bold ${item.amount > 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
                       {item.amount > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                       {item.amount > 0 ? '+' : ''}{item.amount}
                     </span>
@@ -400,22 +398,20 @@ export default function AdminCoins() {
             <button
               type="button"
               onClick={() => setAwardType('students')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium ${
-                awardType === 'students' 
-                  ? 'bg-blue-600 text-white' 
+              className={`flex-1 py-2 px-4 rounded-lg font-medium ${awardType === 'students'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
+                }`}
             >
               Tanlangan o'quvchilar
             </button>
             <button
               type="button"
               onClick={() => setAwardType('group')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium ${
-                awardType === 'group' 
-                  ? 'bg-blue-600 text-white' 
+              className={`flex-1 py-2 px-4 rounded-lg font-medium ${awardType === 'group'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
+                }`}
             >
               Butun guruh
             </button>
@@ -503,22 +499,20 @@ export default function AdminCoins() {
             <button
               type="button"
               onClick={() => setAwardType('students')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium ${
-                awardType === 'students' 
-                  ? 'bg-blue-600 text-white' 
+              className={`flex-1 py-2 px-4 rounded-lg font-medium ${awardType === 'students'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
+                }`}
             >
               Tanlangan o'quvchilar
             </button>
             <button
               type="button"
               onClick={() => setAwardType('group')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium ${
-                awardType === 'group' 
-                  ? 'bg-blue-600 text-white' 
+              className={`flex-1 py-2 px-4 rounded-lg font-medium ${awardType === 'group'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-              }`}
+                }`}
             >
               Butun guruh
             </button>
