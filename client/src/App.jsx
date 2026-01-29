@@ -81,15 +81,19 @@ function AppRoutes() {
         <Route path="/events" element={<AdminEvents />} />
 
         {/* Student Routes - after admin routes */}
-        <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/student/tasks" element={<StudentDashboard />} />
-        <Route path="/student/rating" element={<StudentDashboard />} />
-        <Route path="/student/exams" element={<StudentDashboard />} />
-        <Route path="/student/market" element={<StudentDashboard />} />
         <Route path="/student/code-editor/:taskId" element={<StudentCodeEditor />} />
         <Route path="/student/profile" element={<StudentProfile />} />
         <Route path="/student/profile/:id" element={<StudentProfile />} />
         <Route path="/student/classmates" element={<Classmates />} />
+        <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/overview" element={<StudentDashboard />} />
+        <Route path="/student/tasks" element={<StudentDashboard />} />
+        <Route path="/student/rating" element={<StudentDashboard />} />
+        <Route path="/student/exams" element={<StudentDashboard />} />
+        <Route path="/student/market" element={<StudentDashboard />} />
+        <Route path="/student/events" element={<StudentDashboard />} />
+        <Route path="/student/attendance" element={<StudentDashboard />} />
+        <Route path="/student/payments" element={<StudentDashboard />} />
 
         {/* Catch all - redirect to appropriate dashboard */}
         <Route path="*" element={<Navigate to={user ? "/" : "/student"} replace />} />

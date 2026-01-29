@@ -58,7 +58,7 @@ export default function StudentDashboard() {
 
   // Cache for dashboard data
   const CACHE_KEY = 'student_dashboard_cache';
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  const CACHE_DURATION = 30 * 1000; // 30 seconds (down from 5 min)
 
   // Sync activeTab with URL param if present
   useEffect(() => {
