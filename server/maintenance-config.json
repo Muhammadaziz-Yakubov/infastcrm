@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "message": "Sayt Muhammadaziz Yakubov tomonidan to`grilanmoqda bu xabar 29-yanvar 13:50 da yozildi !",
+  "features": {
+    "dashboard": true,
+    "tasks": true,
+    "exams": true,
+    "quizzes": true,
+    "payments": true,
+    "attendance": true,
+    "market": true,
+    "events": true,
+    "rating": true
+  },
+  "accessCode": "infast2024",
+  "lastUpdated": "2026-01-29T08:50:26.839Z"
+}

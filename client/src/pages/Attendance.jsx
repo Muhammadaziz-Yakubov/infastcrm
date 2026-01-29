@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import {
     Users,
@@ -25,8 +26,11 @@ import {
 } from 'lucide-react';
 
 export default function Attendance() {
+    const [searchParams] = useSearchParams();
+    const groupParam = searchParams.get('group_id');
+
     const [groups, setGroups] = useState([]);
-    const [selectedGroup, setSelectedGroup] = useState('');
+    const [selectedGroup, setSelectedGroup] = useState(groupParam || '');
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [students, setStudents] = useState([]);
     const [attendance, setAttendance] = useState({}); // { studentId: { status, score, note } }
@@ -302,7 +306,7 @@ export default function Attendance() {
                                                 </span>
                                                 <div className="relative">
                                                     <div className={`w-20 h-20 rounded-[2rem] bg-gradient-to-br p-1 shadow-2xl transition-transform group-hover:rotate-3 ${record.status === 'PRESENT' ? 'from-emerald-400 to-indigo-600' :
-                                                            record.status === 'LATE' ? 'from-amber-400 to-orange-600' : 'from-slate-200 to-slate-300'
+                                                        record.status === 'LATE' ? 'from-amber-400 to-orange-600' : 'from-slate-200 to-slate-300'
                                                         }`}>
                                                         <div className="w-full h-full rounded-[1.8rem] bg-white dark:bg-slate-800 overflow-hidden">
                                                             {student.profile_image ? (
@@ -313,7 +317,7 @@ export default function Attendance() {
                                                         </div>
                                                     </div>
                                                     <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-white dark:border-slate-800 flex items-center justify-center ${record.status === 'PRESENT' ? 'bg-emerald-500' :
-                                                            record.status === 'ABSENT' ? 'bg-rose-500 shadow-rose-500/50' : 'bg-amber-500 shadow-amber-500/50'
+                                                        record.status === 'ABSENT' ? 'bg-rose-500 shadow-rose-500/50' : 'bg-amber-500 shadow-amber-500/50'
                                                         } shadow-lg`} />
                                                 </div>
                                                 <div>
@@ -342,8 +346,8 @@ export default function Attendance() {
                                                             key={opt.id}
                                                             onClick={() => updateStudentRecord(student._id, { status: opt.id })}
                                                             className={`px-6 py-4 rounded-2xl flex items-center gap-2 transition-all font-black uppercase text-[10px] tracking-widest ${record.status === opt.id
-                                                                    ? `${opt.color} text-white shadow-xl scale-105`
-                                                                    : 'hover:bg-white dark:hover:bg-slate-800 text-slate-400'
+                                                                ? `${opt.color} text-white shadow-xl scale-105`
+                                                                : 'hover:bg-white dark:hover:bg-slate-800 text-slate-400'
                                                                 }`}
                                                         >
                                                             <opt.icon className="w-4 h-4" />

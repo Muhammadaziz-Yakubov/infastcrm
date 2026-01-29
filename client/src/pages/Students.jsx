@@ -3,12 +3,12 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Modal from '../components/Modal';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  X, 
-  CreditCard, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  CreditCard,
   Search,
   Filter,
   User,
@@ -65,13 +65,31 @@ export default function Students() {
     require_first_payment: true
   });
 
+  const studentIdParam = searchParams.get('student_id');
+
   useEffect(() => {
-    // Only fetch if user is admin and auth is loaded
-    if (!authLoading && isAdmin) {
+    // Wait for auth to complete
+    if (authLoading) return;
+
+    // If user exists (admin or manager), fetch data
+    if (user) {
       fetchGroups();
       fetchStudents();
+    } else {
+      // No user - stop loading
+      setLoading(false);
     }
-  }, [statusFilter, groupFilter, paymentFilter, isAdmin, authLoading]);
+  }, [statusFilter, groupFilter, paymentFilter, authLoading, user]);
+
+  // Handle student_id param to open modal automatically
+  useEffect(() => {
+    if (studentIdParam && students.length > 0) {
+      const student = students.find(s => s._id === studentIdParam);
+      if (student) {
+        handleEdit(student);
+      }
+    }
+  }, [studentIdParam, students]);
 
 
   const fetchGroups = async () => {
@@ -89,21 +107,11 @@ export default function Students() {
       if (statusFilter) params.status = statusFilter;
       if (groupFilter) params.group_id = groupFilter;
       if (paymentFilter) params.payment_filter = paymentFilter;
-      
-      console.log('🔍 Fetching students with params:', params);
+
       const response = await api.get('/students', { params });
-      console.log('📊 Students response:', response.data);
       setStudents(response.data);
     } catch (error) {
-      console.error('❌ Error fetching students:', error);
-      console.error('❌ Error response:', error.response);
-      console.error('❌ Error status:', error.response?.status);
-      console.error('❌ Error data:', error.response?.data);
-      
-      // Don't redirect here - let the component handle auth
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        console.log('🔒 Authentication error in fetchStudents');
-      }
+      console.error('Error fetching students:', error.response?.data?.message || error.message);
     } finally {
       setLoading(false);
     }
@@ -117,14 +125,14 @@ export default function Students() {
       if (!dataToSend.password) {
         delete dataToSend.password;
       }
-      
+
       if (editingStudent) {
         await api.put(`/students/${editingStudent._id}`, dataToSend);
       } else {
         // Create student
         const studentResponse = await api.post('/students', dataToSend);
         const newStudent = studentResponse.data;
-        
+
         // If first payment is required, create payment
         if (dataToSend.require_first_payment && dataToSend.first_payment_amount) {
           const paymentData = {
@@ -134,7 +142,7 @@ export default function Students() {
             payment_type: dataToSend.first_payment_type,
             note: 'Birinchi oy to\'lovi (o\'quvchi qo\'shilganda)'
           };
-          
+
           await api.post('/payments', paymentData);
         } else {
           // If no payment made, set next payment date to today (so they appear in "To'lov yaqin" list)
@@ -142,24 +150,19 @@ export default function Students() {
             next_payment_date: new Date().toISOString().split('T')[0], // Today
             status: 'DEBTOR' // Mark as debtor since they didn't pay
           };
-          
+
           await api.put(`/students/${newStudent._id}`, updateData);
         }
       }
-      
+
       setShowModal(false);
       setEditingStudent(null);
       resetForm();
       fetchStudents();
     } catch (error) {
-      console.error('❌ Error saving student:', error);
-      console.error('❌ Error response:', error.response);
-      console.error('❌ Error data:', JSON.stringify(error.response?.data, null, 2));
-      console.error('❌ Error status:', error.response?.status);
-      console.error('❌ Error headers:', error.response?.headers);
-      
+      console.error('Error saving student:', error.response?.data?.message || error.message);
       const errorMessage = error.response?.data?.message || 'Xatolik yuz berdi';
-      alert(`Xatolik: ${errorMessage}\n\nStatus: ${error.response?.status}\n\nDetails: ${JSON.stringify(error.response?.data, null, 2)}`);
+      alert(`Xatolik: ${errorMessage}`);
     }
   };
 
@@ -195,7 +198,7 @@ export default function Students() {
       alert('Iltimos, avval guruhni tanlang');
       return;
     }
-    
+
     try {
       const groupResponse = await api.get(`/groups/${groupFilter}`);
       setSelectedGroup(groupResponse.data);
@@ -208,10 +211,10 @@ export default function Students() {
 
   const handleSendMessage = async (messageType) => {
     if (!selectedGroup) return;
-    
+
     try {
       const today = new Date().toISOString().split('T')[0];
-      
+
       if (messageType === 'attendance') {
         await api.post(`/groups/${selectedGroup._id}/send-attendance`, {
           date: today
@@ -223,7 +226,7 @@ export default function Students() {
         });
         alert('Ballar xabari yuborildi!');
       }
-      
+
       setShowMessageModal(false);
       setSelectedGroup(null);
     } catch (error) {
@@ -283,24 +286,7 @@ export default function Students() {
     student.phone.includes(searchTerm)
   );
 
-  // Redirect if not admin
-  if (!authLoading && !isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Ruxsat berilmagan</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Bu sahifaga faqat adminlar kirishi mumkin</p>
-          <button
-            onClick={() => window.location.href = '/login'}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-          >
-            Login ga qaytish
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  // Show loading state
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -345,7 +331,7 @@ export default function Students() {
                 <Plus size={20} />
                 Yangi o'quvchi
               </button>
-              
+
               {groupFilter && (
                 <button
                   onClick={handleShowMessageModal}
@@ -364,66 +350,60 @@ export default function Students() {
       <div className="flex flex-wrap gap-2">
         <Link
           to="/students"
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-            !statusFilter && !paymentFilter
-              ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${!statusFilter && !paymentFilter
+            ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
+            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
         >
           <UserCheck size={18} />
           Barchasi
         </Link>
         <Link
           to="/students?status=ACTIVE"
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-            statusFilter === 'ACTIVE'
-              ? 'bg-gradient-to-r from-emerald-400 to-green-500 text-white shadow-lg'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${statusFilter === 'ACTIVE'
+            ? 'bg-gradient-to-r from-emerald-400 to-green-500 text-white shadow-lg'
+            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
         >
           <UserCheck size={18} />
           Faol
         </Link>
         <Link
           to="/students?payment_filter=PAYMENT_DUE"
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-            paymentFilter === 'PAYMENT_DUE'
-              ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${paymentFilter === 'PAYMENT_DUE'
+            ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg'
+            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
         >
           <Bell size={18} />
           To'lov yaqin (3 kun)
         </Link>
         <Link
           to="/students?status=DEBTOR"
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-            statusFilter === 'DEBTOR'
-              ? 'bg-gradient-to-r from-red-400 to-rose-500 text-white shadow-lg'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${statusFilter === 'DEBTOR'
+            ? 'bg-gradient-to-r from-red-400 to-rose-500 text-white shadow-lg'
+            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
         >
           <AlertCircle size={18} />
           Qarzdorlar
         </Link>
         <Link
           to="/students?status=LEAD"
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-            statusFilter === 'LEAD'
-              ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${statusFilter === 'LEAD'
+            ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg'
+            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
         >
           <User size={18} />
           Nabor
         </Link>
         <Link
           to="/students?status=STOPPED"
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-            statusFilter === 'STOPPED'
-              ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${statusFilter === 'STOPPED'
+            ? 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg'
+            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
         >
           <X size={18} />
           To'xtatilgan
@@ -461,11 +441,11 @@ export default function Students() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {filteredStudents.map((student, index) => (
-                <tr 
-                  key={student._id} 
+                <tr
+                  key={student._id}
                   className="table-row-hover cursor-pointer"
                   style={{ animationDelay: `${index * 50}ms` }}
-                  onClick={() => navigate(`/student/profile/${student._id}`)}
+                  onClick={() => navigate(`/payments?student_id=${student._id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
@@ -494,7 +474,7 @@ export default function Students() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
-                    {student.next_payment_date 
+                    {student.next_payment_date
                       ? format(new Date(student.next_payment_date), 'dd.MM.yyyy')
                       : '-'
                     }
@@ -513,7 +493,8 @@ export default function Students() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/student/profile/${student._id}`);
+                          // Navigate to admin student profile page
+                          navigate(`/students?student_id=${student._id}`);
                         }}
                         className="p-2 text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         title="Profil"
@@ -523,7 +504,8 @@ export default function Students() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/student/tasks`);
+                          // Navigate to admin tasks page filtered by student
+                          navigate(`/tasks?student_id=${student._id}`);
                         }}
                         className="p-2 text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                         title="Vazifalar"
@@ -533,7 +515,8 @@ export default function Students() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/attendance`);
+                          // Navigate to attendance page with group filter
+                          navigate(`/attendance?group_id=${student.group_id?._id || student.group_id}`);
                         }}
                         className="p-2 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                         title="Davomat"
@@ -595,268 +578,268 @@ export default function Students() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  To'liq ism *
-                </label>
-                <div className="relative">
-                  <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                    placeholder="Ism Familiya"
-                  />
-                </div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              To'liq ism *
+            </label>
+            <div className="relative">
+              <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                required
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                placeholder="Ism Familiya"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Telefon *
-                  </label>
-                  <div className="relative">
-                    <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      required
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                      placeholder="+998901234567"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ota-ona telefoni
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.parent_phone}
-                    onChange={(e) => setFormData({ ...formData, parent_phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                    placeholder="+998901234567"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Guruh *
-                </label>
-                <select
-                  value={formData.group_id}
-                  onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
+              </label>
+              <div className="relative">
+                <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                >
-                  <option value="">Guruhni tanlang</option>
-                  {groups.map(group => (
-                    <option key={group._id} value={group._id}>
-                      {group.name} ({group.status})
-                    </option>
-                  ))}
-                </select>
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                  placeholder="+998901234567"
+                />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Holati
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                  >
-                    <option value="LEAD">Nabor</option>
-                    <option value="ACTIVE">Faol</option>
-                    <option value="DEBTOR">Qarzdor</option>
-                    <option value="STOPPED">To'xtatilgan</option>
-                  </select>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Ota-ona telefoni
+              </label>
+              <input
+                type="tel"
+                value={formData.parent_phone}
+                onChange={(e) => setFormData({ ...formData, parent_phone: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                placeholder="+998901234567"
+              />
+            </div>
+          </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Manba
-                  </label>
-                  <select
-                    value={formData.lead_source}
-                    onChange={(e) => setFormData({ ...formData, lead_source: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                  >
-                    <option value="Instagram">Instagram</option>
-                    <option value="Telegram">Telegram</option>
-                    <option value="Tanishlar">Tanishlar</option>
-                    <option value="Reklama">Reklama</option>
-                    <option value="Veb-sayt">Veb-sayt</option>
-                    <option value="Boshqa">Boshqa</option>
-                  </select>
-                </div>
-              </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Guruh *
+            </label>
+            <select
+              value={formData.group_id}
+              onChange={(e) => setFormData({ ...formData, group_id: e.target.value })}
+              required
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+            >
+              <option value="">Guruhni tanlang</option>
+              {groups.map(group => (
+                <option key={group._id} value={group._id}>
+                  {group.name} ({group.status})
+                </option>
+              ))}
+            </select>
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Qo'shilgan sana
-                </label>
-                <div className="relative">
-                  <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Holati
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+              >
+                <option value="LEAD">Nabor</option>
+                <option value="ACTIVE">Faol</option>
+                <option value="DEBTOR">Qarzdor</option>
+                <option value="STOPPED">To'xtatilgan</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Manba
+              </label>
+              <select
+                value={formData.lead_source}
+                onChange={(e) => setFormData({ ...formData, lead_source: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+              >
+                <option value="Instagram">Instagram</option>
+                <option value="Telegram">Telegram</option>
+                <option value="Tanishlar">Tanishlar</option>
+                <option value="Reklama">Reklama</option>
+                <option value="Veb-sayt">Veb-sayt</option>
+                <option value="Boshqa">Boshqa</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Qo'shilgan sana
+            </label>
+            <div className="relative">
+              <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="date"
+                value={formData.joined_date}
+                onChange={(e) => setFormData({ ...formData, joined_date: e.target.value })}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Payment section - only for new students */}
+          {!editingStudent && (
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <Wallet size={16} className="text-green-500" />
+                Birinchi oy to'lovi
+              </h3>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
                   <input
-                    type="date"
-                    value={formData.joined_date}
-                    onChange={(e) => setFormData({ ...formData, joined_date: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                    type="checkbox"
+                    id="require_first_payment"
+                    checked={formData.require_first_payment}
+                    onChange={(e) => setFormData({ ...formData, require_first_payment: e.target.checked })}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                   />
+                  <label htmlFor="require_first_payment" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Birinchi oy to'lovini qilish kerak
+                  </label>
                 </div>
-              </div>
 
-              {/* Payment section - only for new students */}
-              {!editingStudent && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Wallet size={16} className="text-green-500" />
-                    Birinchi oy to'lovi
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="require_first_payment"
-                        checked={formData.require_first_payment}
-                        onChange={(e) => setFormData({ ...formData, require_first_payment: e.target.checked })}
-                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                      />
-                      <label htmlFor="require_first_payment" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Birinchi oy to'lovini qilish kerak
+                {formData.require_first_payment && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        To'lov summasi *
                       </label>
+                      <div className="relative">
+                        <Banknote size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="number"
+                          value={formData.first_payment_amount}
+                          onChange={(e) => setFormData({ ...formData, first_payment_amount: e.target.value })}
+                          required={formData.require_first_payment}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                          placeholder="500000"
+                        />
+                      </div>
                     </div>
 
-                    {formData.require_first_payment && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            To'lov summasi *
-                          </label>
-                          <div className="relative">
-                            <Banknote size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                              type="number"
-                              value={formData.first_payment_amount}
-                              onChange={(e) => setFormData({ ...formData, first_payment_amount: e.target.value })}
-                              required={formData.require_first_payment}
-                              className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                              placeholder="500000"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            To'lov turi *
-                          </label>
-                          <select
-                            value={formData.first_payment_type}
-                            onChange={(e) => setFormData({ ...formData, first_payment_type: e.target.value })}
-                            required={formData.require_first_payment}
-                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                          >
-                            <option value="CASH">Naqd pul</option>
-                            <option value="CARD">Plastik karta</option>
-                            <option value="CLICK">Click</option>
-                            <option value="PAYME">Payme</option>
-                          </select>
-                        </div>
-                      </div>
-                    )}
-
-                    {formData.require_first_payment && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          To'lov sanasi *
-                        </label>
-                        <div className="relative">
-                          <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                          <input
-                            type="date"
-                            value={formData.first_payment_date}
-                            onChange={(e) => setFormData({ ...formData, first_payment_date: e.target.value })}
-                            required={formData.require_first_payment}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                          />
-                        </div>
-                      </div>
-                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        To'lov turi *
+                      </label>
+                      <select
+                        value={formData.first_payment_type}
+                        onChange={(e) => setFormData({ ...formData, first_payment_type: e.target.value })}
+                        required={formData.require_first_payment}
+                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                      >
+                        <option value="CASH">Naqd pul</option>
+                        <option value="CARD">Plastik karta</option>
+                        <option value="CLICK">Click</option>
+                        <option value="PAYME">Payme</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Kabinet login/password section */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Key size={16} className="text-indigo-500" />
-                  O'quvchi kabineti
-                </h3>
-                
-                <div className="grid grid-cols-2 gap-4">
+                {formData.require_first_payment && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Login
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.login}
-                      onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                      placeholder="student001"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Parol {editingStudent && <span className="text-gray-400">(ixtiyoriy)</span>}
+                      To'lov sanasi *
                     </label>
                     <div className="relative">
+                      <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all pr-12"
-                        placeholder="••••••••"
+                        type="date"
+                        value={formData.first_payment_date}
+                        onChange={(e) => setFormData({ ...formData, first_payment_date: e.target.value })}
+                        required={formData.require_first_payment}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
                     </div>
                   </div>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  O'quvchi ushbu login va parol bilan shaxsiy kabinetga kirishi mumkin
-                </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Kabinet login/password section */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <Key size={16} className="text-indigo-500" />
+              O'quvchi kabineti
+            </h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Login
+                </label>
+                <input
+                  type="text"
+                  value={formData.login}
+                  onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
+                  placeholder="student001"
+                />
               </div>
 
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
-                >
-                  Bekor qilish
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 btn-primary px-4 py-3 rounded-xl font-medium"
-                >
-                  {editingStudent ? 'Saqlash' : 'Qo\'shish'}
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Parol {editingStudent && <span className="text-gray-400">(ixtiyoriy)</span>}
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all pr-12"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              O'quvchi ushbu login va parol bilan shaxsiy kabinetga kirishi mumkin
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+            >
+              Bekor qilish
+            </button>
+            <button
+              type="submit"
+              className="flex-1 btn-primary px-4 py-3 rounded-xl font-medium"
+            >
+              {editingStudent ? 'Saqlash' : 'Qo\'shish'}
+            </button>
+          </div>
         </form>
       </Modal>
 
@@ -899,7 +882,7 @@ export default function Students() {
 
         <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            <strong>Davomat xabari:</strong> Bugun kelmagan o'quvchilar ro'yxati<br/>
+            <strong>Davomat xabari:</strong> Bugun kelmagan o'quvchilar ro'yxati<br />
             <strong>Ballar xabari:</strong> Bugun kelgan o'quvchilar va ularning ballari
           </p>
         </div>

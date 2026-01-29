@@ -19,11 +19,15 @@ api.interceptors.request.use(
 
     // Add appropriate token if not already present
     if (!config.headers?.Authorization) {
-      const isStudentSite = window.location.pathname.startsWith('/student');
+      // Check if we're on student portal (exact /student or /student/...)
+      // BUT NOT /students (admin page)
+      const pathname = window.location.pathname;
+      const isStudentSite = pathname === '/student' ||
+        (pathname.startsWith('/student/') && !pathname.startsWith('/students'));
 
       if (isStudentSite && studentToken) {
         config.headers.Authorization = `Bearer ${studentToken}`;
-      } else if (!isStudentSite && adminToken) {
+      } else if (adminToken) {
         config.headers.Authorization = `Bearer ${adminToken}`;
       }
     }
@@ -46,24 +50,28 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 503) {
       const isMaintenance = error.response.data?.maintenance;
-      
+
       if (isMaintenance) {
         // Show maintenance message
         const message = error.response.data?.message || 'Texnik ishlar olib borilmoqda';
-        
+
         // Store maintenance state
         localStorage.setItem('maintenance_mode', 'true');
         localStorage.setItem('maintenance_message', message);
-        
+
         // Redirect to maintenance page or show message
         if (!window.location.pathname.includes('/maintenance') && !window.location.pathname.includes('/login')) {
           window.location.href = '/maintenance';
         }
       }
     }
-    
+
     if (error.response?.status === 401) {
-      const isStudentArea = window.location.pathname.startsWith('/student');
+      const pathname = window.location.pathname;
+      // Check if we're on student portal (exact /student or /student/...)
+      // BUT NOT /students (admin page)
+      const isStudentArea = pathname === '/student' ||
+        (pathname.startsWith('/student/') && !pathname.startsWith('/students'));
       if (isStudentArea) {
         localStorage.removeItem('studentToken');
         localStorage.removeItem('studentData');

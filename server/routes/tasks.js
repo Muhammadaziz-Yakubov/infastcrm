@@ -522,6 +522,39 @@ router.get('/:id/submissions', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// Get all task submissions for admin (with optional filters)
+router.get('/submissions/all', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { student_id, task_id } = req.query;
+    const filter = {};
+
+    if (student_id) filter.student_id = student_id;
+    if (task_id) filter.task_id = task_id;
+
+    const submissions = await TaskSubmission.find(filter)
+      .populate('student_id', 'full_name phone')
+      .populate('task_id', 'title max_score group_id')
+      .populate('graded_by', 'name email')
+      .sort({ submitted_at: -1 });
+
+    // Convert file paths to full URLs
+    const submissionsWithFullUrls = submissions.map(submission => {
+      const submissionObj = submission.toObject();
+      return {
+        ...submissionObj,
+        submitted_files: submissionObj.submitted_files.map(file => ({
+          ...file,
+          file_path: file.file_path && (file.file_path.startsWith('http') || file.file_path.startsWith('data:')) ? file.file_path : getFileUrl(file.file_path)
+        }))
+      };
+    });
+
+    res.json(submissionsWithFullUrls);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Grade submission
 router.post('/submissions/:id/grade', authenticate, requireAdmin, async (req, res) => {
   try {

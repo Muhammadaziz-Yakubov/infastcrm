@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Modal from '../components/Modal';
+
 import {
   FileText, Plus, Edit, Trash2, Search, Image as ImageIcon,
   Users, Target, Upload, Clock, X, Eye, Download, CheckCircle,
@@ -9,18 +11,20 @@ import {
   Filter, LayoutGrid, List, BarChart3, ArrowUpRight, Calendar
 } from 'lucide-react';
 
-/**
- * @description AdminTasks Component - Professional Task & Submission Management
- * Senior Level Implementation
- */
+// ... (existing code top)
+
 export default function AdminTasks() {
+  const [searchParams] = useSearchParams();
+  const studentIdParam = searchParams.get('student_id');
+
   // --- STATE MANAGEMENT ---
-  const [activeTab, setActiveTab] = useState('tasks'); // 'tasks' | 'submissions' | 'stats'
+  const [activeTab, setActiveTab] = useState(studentIdParam ? 'submissions' : 'tasks'); // 'tasks' | 'submissions' | 'stats'
   const [tasks, setTasks] = useState([]);
   const [groups, setGroups] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [studentFilter, setStudentFilter] = useState(studentIdParam || '');
 
   // Modals
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -67,12 +71,20 @@ export default function AdminTasks() {
       ]);
       setTasks(tasksRes.data);
       setGroups(groupsRes.data);
+
+      // If studentIdParam is present, fetch their submissions across all tasks
+      if (studentIdParam) {
+        const subRes = await api.get('/tasks/submissions/all', {
+          params: { student_id: studentIdParam }
+        });
+        setSubmissions(subRes.data);
+      }
     } catch (error) {
       console.error("Data Fetch Error:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [studentIdParam]);
 
   useEffect(() => {
     fetchData();
@@ -82,32 +94,22 @@ export default function AdminTasks() {
     e.preventDefault();
     setSubmitting(true);
 
-    console.log('🚀 Starting task submission...');
-    console.log('📝 Form data:', formData);
-    console.log('🖼️ Image file:', imageFile ? `${imageFile.name} (${imageFile.size} bytes)` : 'No image');
-
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     if (imageFile) {
       data.append('image', imageFile);
-      console.log('📎 Added image to FormData');
     }
 
     try {
       const endpoint = selectedTask ? `/tasks/${selectedTask._id}` : '/tasks';
       const method = selectedTask ? 'put' : 'post';
-
-      console.log(`📡 ${method.toUpperCase()} request to: ${endpoint}`);
-
-      const response = await api[method](endpoint, data);
-      console.log('✅ Task submission successful:', response.data);
+      await api[method](endpoint, data);
 
       setShowTaskModal(false);
       resetTaskForm();
       fetchData();
     } catch (error) {
-      console.error('❌ Task submission error:', error);
-      console.error('Error details:', error.response?.data || error.message);
+      console.error('Task submission error:', error);
       alert("Xatolik yuz berdi: " + (error.response?.data?.message || error.message));
     } finally {
       setSubmitting(false);
@@ -134,7 +136,13 @@ export default function AdminTasks() {
         feedback: grading.feedback
       });
       setShowSubmissionDetailModal(false);
-      loadSubmissions(selectedTask._id);
+
+      // Refresh based on current context
+      if (selectedTask) {
+        loadSubmissions(selectedTask._id);
+      } else if (studentIdParam) {
+        fetchData(); // This will re-fetch the global submissions
+      }
     } catch (error) {
       alert("Xatolik");
     }
@@ -490,8 +498,11 @@ export default function AdminTasks() {
                           </div>
                           <div>
                             <h4 className="text-xl font-black dark:text-white">{sub.student_id?.full_name}</h4>
+                            {!selectedTask && sub.task_id && (
+                              <p className="text-xs font-bold text-indigo-500 uppercase tracking-wider">{sub.task_id.title}</p>
+                            )}
                             <div className="flex items-center gap-4 mt-1">
-                              <span className="text-sm text-gray-400 flex items-center gap-1"><Clock size={14} /> {new Date(sub.submitted_at).toLocaleTimeString()}</span>
+                              <span className="text-sm text-gray-400 flex items-center gap-1"><Clock size={14} /> {new Date(sub.submitted_at).toLocaleDateString()} {new Date(sub.submitted_at).toLocaleTimeString()}</span>
                               <span className={`text-[10px] font-black px-3 py-1 rounded-full ${sub.status === 'GRADED' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
                                 {sub.status === 'GRADED' ? 'BAHOLANGAN' : 'KUTILMOQDA'}
                               </span>
@@ -503,7 +514,7 @@ export default function AdminTasks() {
                           {sub.status === 'GRADED' && (
                             <div className="text-right mr-4">
                               <p className="text-[10px] font-bold text-gray-400 uppercase">Ball</p>
-                              <p className="text-2xl font-black text-blue-600">{sub.score} / {selectedTask.max_score}</p>
+                              <p className="text-2xl font-black text-blue-600">{sub.score} / {selectedTask?.max_score || sub.task_id?.max_score}</p>
                             </div>
                           )}
                           <button
@@ -685,12 +696,12 @@ export default function AdminTasks() {
 
                 <div className="space-y-8">
                   <div className="space-y-3">
-                    <label className="text-xs font-black text-gray-400 uppercase">Qo'yiladigan Ball (Max: {selectedTask?.max_score})</label>
+                    <label className="text-xs font-black text-gray-400 uppercase">Qo'yiladigan Ball (Max: {selectedTask?.max_score || selectedSubmission?.task_id?.max_score})</label>
                     <div className="relative">
                       <Star className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-400" size={24} />
                       <input
                         type="number"
-                        max={selectedTask?.max_score}
+                        max={selectedTask?.max_score || selectedSubmission?.task_id?.max_score}
                         className="w-full pl-14 pr-6 py-5 bg-white dark:bg-gray-900 border-none rounded-2xl text-2xl font-black text-blue-600 focus:ring-4 focus:ring-blue-500/20"
                         value={grading.score}
                         onChange={e => setGrading({ ...grading, score: e.target.value })}
