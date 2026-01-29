@@ -353,6 +353,12 @@ export default function StudentProfile() {
                 )}
 
                 {isOwnProfile && (
+                  <button onClick={() => { studentLogout(); navigate('/student-login'); }} className="px-6 py-3 bg-red-500 text-white rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-[10px] uppercase tracking-widest flex items-center gap-2">
+                    <LogOut size={14} /> Chiqish
+                  </button>
+                )}
+
+                {isOwnProfile && (
                   <button onClick={() => navigate('/student')} className="md:hidden px-4 py-3 bg-white/10 text-white rounded-2xl font-bold border border-white/10 backdrop-blur-md">
                     <ArrowRight size={18} />
                   </button>
