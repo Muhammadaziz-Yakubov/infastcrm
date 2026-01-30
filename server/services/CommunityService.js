@@ -10,14 +10,18 @@ class CommunityService {
   // User connects
   userConnected(socket, token) {
     try {
+      console.log('🔐 Verifying token:', token.substring(0, 20) + '...');
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      console.log('🔐 Token decoded:', decoded);
       
       if (decoded.type !== 'student') {
+        console.log('❌ Invalid token type:', decoded.type);
         socket.emit('error', { message: 'Noto\'g\'ri token turi' });
         return null;
       }
 
       const userId = decoded.studentId;
+      console.log('🔐 Student ID:', userId);
       
       // Store mappings
       this.onlineUsers.set(userId, socket.id);
@@ -40,8 +44,8 @@ class CommunityService {
         online_users: this.getOnlineUsersList()
       };
     } catch (error) {
-      console.error('Token verification failed:', error);
-      socket.emit('error', { message: 'Token yaroqsiz' });
+      console.error('❌ Token verification failed:', error);
+      socket.emit('error', { message: 'Token yaroqsiz: ' + error.message });
       return null;
     }
   }

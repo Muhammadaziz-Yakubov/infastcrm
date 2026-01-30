@@ -28,6 +28,8 @@ export default function CommunityChat() {
   useEffect(() => {
     // Initialize Socket.io connection
     const token = localStorage.getItem('studentToken');
+    console.log('Student token found:', token ? 'YES' : 'NO');
+    
     if (!token) {
       console.error('No student token found');
       setLoading(false);
@@ -45,6 +47,8 @@ export default function CommunityChat() {
       reconnectionAttempts: 10,
       timeout: 20000
     });
+
+    console.log('Socket.io client created with token');
 
     newSocket.on('connect', () => {
       console.log('Connected to community chat');

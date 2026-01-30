@@ -13,10 +13,15 @@ export const setupCommunitySocket = (io) => {
 
     // Authenticate user
     socket.on('authenticate', (token) => {
+      console.log('🔐 Authentication request received, token:', token ? 'PRESENT' : 'MISSING');
+      
       try {
         const result = communityService.userConnected(socket, token);
+        console.log('🔐 Authentication result:', result);
         
         if (result) {
+          console.log('✅ User authenticated successfully:', result.user_id);
+          
           // Send initial data
           socket.emit('authenticated', {
             user_id: result.user_id,
@@ -26,10 +31,13 @@ export const setupCommunitySocket = (io) => {
 
           // Send recent messages
           loadRecentMessages(socket);
+        } else {
+          console.log('❌ Authentication failed');
+          socket.emit('error', { message: 'Avtorizatsiya xatolik' });
         }
       } catch (error) {
-        console.error('Authentication error:', error);
-        socket.emit('error', { message: 'Avtorizatsiya xatolik' });
+        console.error('❌ Authentication error:', error);
+        socket.emit('error', { message: 'Avtorizatsiya xatolik: ' + error.message });
       }
     });
 
