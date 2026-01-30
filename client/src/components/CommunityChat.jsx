@@ -42,7 +42,10 @@ export default function CommunityChat() {
       setLoading(false);
     } catch (error) {
       console.error('Xatolik:', error);
-      setLoading(false);
+      // 401 xatolikda logout qilmaslik uchun
+      if (error.response?.status !== 401) {
+        setLoading(false);
+      }
     }
   };
 
@@ -52,6 +55,10 @@ export default function CommunityChat() {
       setOnlineUsers(response.data || []);
     } catch (error) {
       console.error('Online users xatolik:', error);
+      // 401 xatolikda logout qilmaslik uchun
+      if (error.response?.status !== 401) {
+        // Hech narsa qilmaslik, faqat console log
+      }
     }
   };
 
@@ -70,7 +77,10 @@ export default function CommunityChat() {
       setNewMessage('');
     } catch (error) {
       console.error('Xatolik:', error);
-      alert('Xabar yuborishda xatolik yuz berdi');
+      // 401 xatolikda alert ko'rsatmaslik
+      if (error.response?.status !== 401) {
+        alert('Xabar yuborishda xatolik yuz berdi');
+      }
     } finally {
       setSending(false);
     }
