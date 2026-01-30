@@ -24,8 +24,7 @@ import {
   DollarSign,
   GraduationCap,
   Users2,
-  CalendarDays,
-  UserPlus
+  CalendarDays
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
