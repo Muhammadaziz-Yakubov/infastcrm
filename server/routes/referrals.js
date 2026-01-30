@@ -297,4 +297,22 @@ router.get('/statistics', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+router.delete('/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const referral = await Referral.findById(req.params.id);
+    if (!referral) {
+      return res.status(404).json({ message: 'Referral topilmadi' });
+    }
+
+    await Referral.findByIdAndDelete(req.params.id);
+
+    res.json({
+      message: 'Referral muvaffaqiyatli o\'chirildi'
+    });
+  } catch (error) {
+    console.error('Referral o\'chirishda xatolik:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

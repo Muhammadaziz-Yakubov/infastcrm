@@ -141,6 +141,20 @@ const Referrals = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!confirm('Bu referrallarni butunlay o\'chirmoqchimisiz? Bu amal ortga qaytarilmaydi!')) return;
+    
+    try {
+      await api.delete(`/referrals/${id}`);
+      
+      fetchReferrals();
+      fetchStatistics();
+      alert('Referral muvaffaqiyatli o\'chirildi!');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Xatolik yuz berdi');
+    }
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       PENDING: 'bg-yellow-100 text-yellow-800',
@@ -307,10 +321,26 @@ const Referrals = () => {
                       </div>
                     )}
                     {referral.status === 'COMPLETED' && (
-                      <span className="text-green-600 font-medium text-xs">Tugatilgan</span>
+                      <div className="flex gap-2">
+                        <span className="text-green-600 font-medium text-xs">Tugatilgan</span>
+                        <button
+                          onClick={() => handleDelete(referral._id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs"
+                        >
+                          O'chirish
+                        </button>
+                      </div>
                     )}
                     {referral.status === 'CANCELLED' && (
-                      <span className="text-red-600 font-medium text-xs">Rad etilgan</span>
+                      <div className="flex gap-2">
+                        <span className="text-red-600 font-medium text-xs">Rad etilgan</span>
+                        <button
+                          onClick={() => handleDelete(referral._id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs"
+                        >
+                          O'chirish
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
