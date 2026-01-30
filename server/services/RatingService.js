@@ -175,7 +175,7 @@ class RatingService {
 
     // Call this method whenever a score changes (e.g., submission graded, quiz finished)
     // to invalidate the cache.
-    invalidateCache() {
+    static invalidateCache() {
         ratingCache.clear();
     }
 
