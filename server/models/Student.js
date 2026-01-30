@@ -34,11 +34,11 @@ const studentSchema = new mongoose.Schema({
   group_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Group',
-    required: true
+    required: false
   },
   status: {
     type: String,
-    enum: ['LEAD', 'ACTIVE', 'DEBTOR', 'STOPPED'],
+    enum: ['LEAD', 'ACTIVE', 'DEBTOR', 'STOPPED', 'PENDING'],
     default: 'LEAD'
   },
   joined_date: {
