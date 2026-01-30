@@ -92,6 +92,7 @@ function AppRoutes() {
         <Route path="/student/events" element={<StudentDashboard />} />
         <Route path="/student/attendance" element={<StudentDashboard />} />
         <Route path="/student/payments" element={<StudentDashboard />} />
+        <Route path="/student/community" element={<StudentDashboard />} />
 
         {/* Catch all - redirect to appropriate dashboard */}
         <Route path="*" element={<Navigate to={user ? "/" : "/student"} replace />} />

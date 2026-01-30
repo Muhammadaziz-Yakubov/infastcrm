@@ -31,7 +31,9 @@ import {
   ArrowUpRight,
   Coins,
   UserPlus,
-  Share2
+  Share2,
+  MessageCircle,
+  Flame
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -46,6 +48,7 @@ import StudentRatingView from '../components/StudentRatingView';
 import StudentClassmatesView from '../components/StudentClassmatesView';
 import StudentMarket from './StudentMarket';
 import StudentEvents from './StudentEvents';
+import CommunityChat from '../components/CommunityChat';
 
 export default function StudentDashboard() {
   const { tab: urlTab } = useParams();
@@ -70,7 +73,7 @@ export default function StudentDashboard() {
 
   // Sync activeTab with URL param if present
   useEffect(() => {
-    if (urlTab && ['overview', 'tasks', 'classmates', 'market', 'events', 'exams', 'rating', 'attendance', 'payments'].includes(urlTab)) {
+    if (urlTab && ['overview', 'tasks', 'classmates', 'market', 'events', 'exams', 'rating', 'attendance', 'payments', 'community'].includes(urlTab)) {
       setActiveTab(urlTab);
     }
   }, [urlTab]);
@@ -189,6 +192,7 @@ export default function StudentDashboard() {
     { id: 'rating', label: 'Reyting', icon: Trophy },
     { id: 'attendance', label: 'Davomat', icon: Calendar },
     { id: 'payments', label: "To'lovlar", icon: Wallet },
+    { id: 'community', label: 'Community', icon: MessageCircle },
     { id: 'profile', label: 'Profil', icon: UserCircle },
   ];
 
@@ -536,6 +540,7 @@ export default function StudentDashboard() {
             {activeTab === 'rating' && <StudentRatingView ratingData={data?.quizzes} />}
             {activeTab === 'classmates' && <StudentClassmatesView />}
             {activeTab === 'exams' && <StudentExamsView />}
+            {activeTab === 'community' && <CommunityChat />}
           </div>
         </main>
 
