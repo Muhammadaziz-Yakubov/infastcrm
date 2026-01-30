@@ -48,7 +48,6 @@ import StudentRatingView from '../components/StudentRatingView';
 import StudentClassmatesView from '../components/StudentClassmatesView';
 import StudentMarket from './StudentMarket';
 import StudentEvents from './StudentEvents';
-import CommunityChat from '../components/CommunityChat';
 
 export default function StudentDashboard() {
   const { tab: urlTab } = useParams();
@@ -73,7 +72,7 @@ export default function StudentDashboard() {
 
   // Sync activeTab with URL param if present
   useEffect(() => {
-    if (urlTab && ['overview', 'tasks', 'classmates', 'market', 'events', 'exams', 'rating', 'attendance', 'payments', 'community'].includes(urlTab)) {
+    if (urlTab && ['overview', 'tasks', 'classmates', 'market', 'events', 'exams', 'rating', 'attendance', 'payments'].includes(urlTab)) {
       setActiveTab(urlTab);
     }
   }, [urlTab]);
@@ -192,7 +191,6 @@ export default function StudentDashboard() {
     { id: 'rating', label: 'Reyting', icon: Trophy },
     { id: 'attendance', label: 'Davomat', icon: Calendar },
     { id: 'payments', label: "To'lovlar", icon: Wallet },
-    { id: 'community', label: 'Community', icon: MessageCircle },
     { id: 'profile', label: 'Profil', icon: UserCircle },
   ];
 
@@ -384,41 +382,6 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  {/* Community Chat Card - Separate */}
-                  <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3.5rem] bg-gradient-to-br from-purple-600 to-indigo-600 p-6 md:p-14 border border-purple-200 dark:border-purple-500/20 shadow-xl group cursor-pointer hover:scale-[1.02] transition-all duration-300">
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-400/10 rounded-full blur-2xl"></div>
-                    
-                    <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/10 flex items-center justify-center">
-                        <div className="relative">
-                          <MessageCircle className="text-white" size={32} />
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse border-2 border-white"></div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-2xl md:text-4xl font-black text-white italic tracking-tighter">
-                          COMMUNITY
-                        </h3>
-                        <p className="text-purple-100 text-sm md:text-base font-medium">
-                          Barcha o'quvchilar bilan suhbat
-                        </p>
-                        <div className="flex items-center justify-center gap-2 text-white/80 text-xs md:text-sm">
-                          <Flame className="animate-pulse" size={16} />
-                          <span>Real-time chat</span>
-                          <Sparkles size={16} />
-                        </div>
-                      </div>
-                      
-                      <button 
-                        onClick={() => handleTabChange('community')}
-                        className="w-full px-6 md:px-8 py-3 bg-white/20 backdrop-blur-sm text-white rounded-2xl font-black text-[10px] md:text-[12px] uppercase tracking-widest border border-white/20 hover:bg-white/30 transition-all flex items-center justify-center gap-2"
-                      >
-                        CHATGA KIRISH <ArrowUpRight size={16} />
-                      </button>
-                    </div>
-                  </div>
                 </div>
 
                 {/* 📊 STATS GRID - 2x2 on small mobile */}
@@ -576,7 +539,6 @@ export default function StudentDashboard() {
             {activeTab === 'rating' && <StudentRatingView ratingData={data?.quizzes} />}
             {activeTab === 'classmates' && <StudentClassmatesView />}
             {activeTab === 'exams' && <StudentExamsView />}
-            {activeTab === 'community' && <CommunityChat />}
           </div>
         </main>
 

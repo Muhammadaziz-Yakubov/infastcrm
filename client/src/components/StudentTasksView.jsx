@@ -44,10 +44,9 @@ export default function StudentTasksView({ setFullScreen }) {
     const getImageUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http') || url.startsWith('data:')) return url;
-        // Use the same base URL as API but remove /api for static files
-        const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api/' : 'https://infastcrm-0b2r.onrender.com/api/');
-        const staticBaseUrl = baseURL.replace('/api/', '/');
-        return `${staticBaseUrl}${url.startsWith('/') ? url.slice(1) : url}`;
+        // Use the same base URL as API for static files
+        const baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://infastcrm-0b2r.onrender.com');
+        return `${baseURL}${url.startsWith('/') ? url : '/' + url}`;
     };
 
     const fetchData = useCallback(async () => {
