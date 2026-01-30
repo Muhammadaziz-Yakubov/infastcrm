@@ -11,39 +11,11 @@ export default function StudentLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [maintenanceMessage, setMaintenanceMessage] = useState('');
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const { studentLogin } = useAuth();
   const { darkMode } = useTheme();
 
-  // Check maintenance status on component mount
-  useEffect(() => {
-    checkMaintenanceStatus();
-    
-    // Set up periodic check
-    const interval = setInterval(checkMaintenanceStatus, 30000); // Check every 30 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const checkMaintenanceStatus = async () => {
-    try {
-      const response = await api.get('/maintenance/status');
-      if (response.data.enabled) {
-        setMaintenanceMode(true);
-        setMaintenanceMessage(response.data.message);
-      } else {
-        setMaintenanceMode(false);
-        setMaintenanceMessage('');
-      }
-    } catch (error) {
-      // If maintenance endpoint fails, assume no maintenance
-      setMaintenanceMode(false);
-      setMaintenanceMessage('');
-    }
-  };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -61,14 +33,7 @@ export default function StudentLogin() {
       studentLogin(token, student);
       navigate('/student');
     } catch (err) {
-      // Check if it's a maintenance error
-      if (err.response?.status === 503 && err.response?.data?.maintenance) {
-        setMaintenanceMode(true);
-        setMaintenanceMessage(err.response.data.message || 'Texnik ishlar olib borilmoqda');
-        setError('Tizim vaqtincha texnik ishlarda');
-      } else {
-        setError(err.response?.data?.message || 'Login yoki parol xato');
-      }
+      setError(err.response?.data?.message || 'Login yoki parol xato');
     } finally {
       setLoading(false);
     }
@@ -105,42 +70,15 @@ export default function StudentLogin() {
           </div>
 
           {error && (
-            <div className={`mb-8 p-4 rounded-2xl text-xs font-bold text-center animate-fade-in uppercase tracking-wider ${
-              maintenanceMode 
-                ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400' 
-                : 'bg-red-500/10 border border-red-500/20 text-red-400'
-            }`}>
+            <div className="mb-8 p-4 rounded-2xl text-xs font-bold text-center animate-fade-in uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-400">
               <div className="flex items-center justify-center gap-2 mb-2">
-                {maintenanceMode ? <AlertTriangle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                <XCircle className="w-4 h-4" />
               </div>
               {error}
             </div>
           )}
 
-          {/* Maintenance Mode Overlay */}
-          {maintenanceMode && (
-            <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 rounded-[3rem] p-8">
-              <div className="text-center space-y-6">
-                <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center animate-pulse">
-                  <AlertTriangle className="w-10 h-10 text-amber-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-amber-400">Texnik Rejim</h3>
-                <p className="text-amber-300 text-lg max-w-md">{maintenanceMessage}</p>
-                <div className="space-y-3">
-                  <p className="text-amber-200 text-sm">Tizim vaqtincha texnik ishlarda</p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="px-8 py-4 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-colors flex items-center gap-3 mx-auto"
-                  >
-                    <RefreshCw className="w-5 h-5" />
-                    Sahifani Yangilash
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className={`space-y-6 ${maintenanceMode ? 'opacity-30 pointer-events-none' : ''}`}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-4">Login</label>
               <div className="relative group">

@@ -44,28 +44,10 @@ api.interceptors.request.use(
   }
 );
 
-// Handle 503 errors (maintenance mode)
+// Handle 401 errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 503) {
-      const isMaintenance = error.response.data?.maintenance;
-
-      if (isMaintenance) {
-        // Show maintenance message
-        const message = error.response.data?.message || 'Texnik ishlar olib borilmoqda';
-
-        // Store maintenance state
-        localStorage.setItem('maintenance_mode', 'true');
-        localStorage.setItem('maintenance_message', message);
-
-        // Redirect to maintenance page or show message
-        if (!window.location.pathname.includes('/maintenance') && !window.location.pathname.includes('/login')) {
-          window.location.href = '/maintenance';
-        }
-      }
-    }
-
     if (error.response?.status === 401) {
       const pathname = window.location.pathname;
       // Check if we're on student portal (exact /student or /student/...)
