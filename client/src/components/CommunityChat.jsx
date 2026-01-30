@@ -38,11 +38,11 @@ export default function CommunityChat() {
       auth: {
         token: token
       },
-      transports: ['websocket', 'polling'],
+      transports: ['polling'], // Use only polling for production compatibility
       forceNew: true,
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
       timeout: 20000
     });
 

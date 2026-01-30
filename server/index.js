@@ -58,8 +58,10 @@ const io = new Server(httpServer, {
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true
     },
-    transports: ['websocket', 'polling'],
-    allowEIO3: true
+    transports: ['polling'], // Use polling for production compatibility
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000
 });
 
 // Middleware
