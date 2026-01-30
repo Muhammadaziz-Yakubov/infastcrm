@@ -121,6 +121,10 @@ class RatingService {
                     (stats.quizzes.total * 15) +
                     (stats.exams.total * 50);
 
+                // Calculate percentage (max 100 points)
+                const maxPossiblePoints = 100;
+                const percentage = Math.min((totalPoints / maxPossiblePoints) * 100, 100);
+
                 return {
                     student_id: student._id,
                     full_name: student.full_name,
@@ -128,6 +132,7 @@ class RatingService {
                     group_name: student.group_id?.name || 'Noma\'lum',
                     course_name: student.group_id?.course_id?.name || 'InFast IT',
                     total_points: totalPoints,
+                    percentage: percentage,
                     stats: {
                         lessons: stats.lessons.count,
                         tasks: stats.tasks.count,
