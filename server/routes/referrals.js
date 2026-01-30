@@ -4,6 +4,7 @@ import ReferralService from '../services/ReferralService.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import Student from '../models/Student.js';
 import Referral from '../models/Referral.js';
+import CoinHistory from '../models/CoinHistory.js';
 
 const router = express.Router();
 
@@ -163,7 +164,6 @@ router.post('/complete/:id', authenticate, requireAdmin, async (req, res) => {
       await referrer.save();
 
       // Create coin history record
-      const CoinHistory = require('../models/CoinHistory').default;
       const coinHistory = new CoinHistory({
         student_id: referrer._id,
         amount: 1000,
