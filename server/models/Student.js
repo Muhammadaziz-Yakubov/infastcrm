@@ -72,6 +72,16 @@ const studentSchema = new mongoose.Schema({
     min: 0
   },
 
+  // Arena PTS (rating) system
+  arena_pts: {
+    type: Number,
+    default: 1000
+  },
+  arena_rank: {
+    type: String,
+    default: 'Bronze'
+  },
+
   // Gamification fields
   gamification: {
     total_xp: {

@@ -30,6 +30,7 @@ import AdminCoins from './pages/AdminCoins';
 import AdminMarket from './pages/AdminMarket';
 import StudentMarket from './pages/StudentMarket';
 import AdminEvents from './pages/AdminEvents';
+import AdminArena from './pages/AdminArena';
 import Layout from './components/Layout';
 
 // PrivateRoute komponenti endi ishlatilmaydi, chunki AppRoutes buni boshqaradi
@@ -73,6 +74,7 @@ function AppRoutes() {
           <Route path="referrals" element={<Referrals />} />
           <Route path="coins" element={<AdminCoins />} />
           <Route path="market" element={<AdminMarket />} />
+          <Route path="admin-arena" element={<AdminArena />} />
         </Route>
 
         {/* Events route without Layout */}
@@ -90,6 +92,7 @@ function AppRoutes() {
         <Route path="/student/exams" element={<StudentDashboard />} />
         <Route path="/student/market" element={<StudentDashboard />} />
         <Route path="/student/events" element={<StudentDashboard />} />
+        <Route path="/student/arena" element={<StudentDashboard />} />
         <Route path="/student/attendance" element={<StudentDashboard />} />
         <Route path="/student/payments" element={<StudentDashboard />} />
         
