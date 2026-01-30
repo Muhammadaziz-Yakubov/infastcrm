@@ -10,6 +10,8 @@ router.post('/add-power', authenticate, requireAdmin, async (req, res) => {
   try {
     const { student_id, power, reason } = req.body;
 
+    console.log('Power qo\'shish so\'rovi:', { student_id, power, reason });
+
     if (!student_id || power === undefined || power === null || !reason) {
       return res.status(400).json({ 
         message: 'Student ID, power miqdori va sabab talab qilinadi' 
@@ -28,12 +30,16 @@ router.post('/add-power', authenticate, requireAdmin, async (req, res) => {
       return res.status(404).json({ message: 'O\'quvchi topilmadi' });
     }
 
+    console.log('Topilgan student:', student.full_name, 'current coin_balance:', student.coin_balance);
+
     // Add power to student (assuming power is stored in coin_balance)
     const currentBalance = student.coin_balance || 0;
     const newBalance = currentBalance + power;
     
     student.coin_balance = newBalance;
     await student.save();
+
+    console.log('Yangilangan coin_balance:', newBalance);
 
     // Create coin history record
     const coinHistory = new CoinHistory({
@@ -46,6 +52,8 @@ router.post('/add-power', authenticate, requireAdmin, async (req, res) => {
       admin_id: req.user.id
     });
     await coinHistory.save();
+
+    console.log('Coin history yaratildi');
 
     res.json({
       message: `${power} power muvaffaqiyatli qo'shildi`,
