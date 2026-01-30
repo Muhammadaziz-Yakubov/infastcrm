@@ -163,8 +163,8 @@ class RatingService {
 
             const finalResult = ratings.slice(0, limit);
 
-            // Save to cache (TTL: 5 minutes)
-            ratingCache.set(cacheKey, finalResult, 300);
+            // Save to cache (TTL: 30 seconds - for faster updates)
+            ratingCache.set(cacheKey, finalResult, 30);
 
             return finalResult;
         } catch (error) {

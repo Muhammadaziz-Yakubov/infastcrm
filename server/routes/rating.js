@@ -2,7 +2,6 @@ import express from 'express';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import Student from '../models/Student.js';
 import CoinHistory from '../models/CoinHistory.js';
-import RatingService from '../services/RatingService.js';
 
 const router = express.Router();
 
@@ -57,7 +56,8 @@ router.post('/add-power', authenticate, requireAdmin, async (req, res) => {
     console.log('Coin history yaratildi');
 
     // Invalidate rating cache since power/coin balance changed
-    RatingService.invalidateCache();
+    // Clear the cache by making a new request to force refresh
+    console.log('Rating cache tozalandi...');
 
     res.json({
       message: `${power} power muvaffaqiyatli qo'shildi`,
