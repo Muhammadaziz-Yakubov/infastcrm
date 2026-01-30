@@ -140,7 +140,7 @@ const StudentArena = () => {
 
   const loadStats = async () => {
     try {
-      const response = await api.get('/api/arena/stats');
+      const response = await api.get('/arena/stats');
       setStats(response.data);
     } catch (err) {
       console.error('Stats loading error:', err);
@@ -160,7 +160,7 @@ const StudentArena = () => {
 
   const loadLeaderboard = async () => {
     try {
-      const response = await api.get('/api/arena/leaderboard?limit=10');
+      const response = await api.get('/arena/leaderboard?limit=10');
       setLeaderboard(response.data);
     } catch (err) {
       console.error('Leaderboard loading error:', err);
@@ -175,7 +175,7 @@ const StudentArena = () => {
 
   const loadAvailableRooms = async () => {
     try {
-      const response = await api.get('/api/arena/rooms');
+      const response = await api.get('/arena/rooms');
       setAvailableRooms(response.data);
     } catch (err) {
       console.error('Available rooms loading error:', err);

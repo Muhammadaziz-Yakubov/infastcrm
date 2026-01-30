@@ -68,7 +68,7 @@ const AdminArena = () => {
 
   const loadStats = async () => {
     try {
-      const response = await api.get('/api/admin/arena/stats');
+      const response = await api.get('/admin/arena/stats');
       setStats(response.data);
     } catch (err) {
       console.error('Stats loading error:', err);
@@ -94,7 +94,7 @@ const AdminArena = () => {
 
   const loadRecentGames = async () => {
     try {
-      const response = await api.get('/api/admin/arena/recent-games?limit=20');
+      const response = await api.get('/admin/arena/recent-games?limit=20');
       setRecentGames(response.data.games);
     } catch (err) {
       console.error('Recent games loading error:', err);
@@ -105,7 +105,7 @@ const AdminArena = () => {
 
   const loadTopPlayers = async () => {
     try {
-      const response = await api.get('/api/admin/arena/top-players?limit=50');
+      const response = await api.get('/admin/arena/top-players?limit=50');
       setTopPlayers(response.data);
     } catch (err) {
       console.error('Top players loading error:', err);
@@ -119,7 +119,7 @@ const AdminArena = () => {
 
   const loadAnalytics = async () => {
     try {
-      const response = await api.get(`/api/admin/arena/analytics?period=${period}`);
+      const response = await api.get(`/admin/arena/analytics?period=${period}`);
       setAnalytics(response.data);
     } catch (err) {
       console.error('Analytics loading error:', err);
