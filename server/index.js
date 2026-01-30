@@ -55,8 +55,11 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
         origin: process.env.FRONTEND_URL || "*",
-        methods: ["GET", "POST"]
-    }
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        credentials: true
+    },
+    transports: ['websocket', 'polling'],
+    allowEIO3: true
 });
 
 // Middleware

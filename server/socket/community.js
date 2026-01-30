@@ -5,7 +5,10 @@ import Message from '../models/Message.js';
 export const setupCommunitySocket = (io) => {
   console.log('🔥 Setting up Community Socket.io handlers...');
 
-  io.of('/community').on('connection', (socket) => {
+  // Create namespace with CORS
+  const communityNamespace = io.of('/community');
+  
+  communityNamespace.on('connection', (socket) => {
     console.log(`🔌 New community socket connection: ${socket.id}`);
 
     // Authenticate user
@@ -79,7 +82,10 @@ export const setupCommunitySocket = (io) => {
           reactions: []
         };
 
-        communityService.sendMessage(socket, messageData);
+        communityNamespace.emit('new_message', messageData);
+        
+        // Also send back to sender
+        socket.emit('message_sent', messageData);
       } catch (error) {
         console.error('Send message error:', error);
         socket.emit('error', { message: 'Xabar yuborishda xatolik' });
@@ -88,7 +94,10 @@ export const setupCommunitySocket = (io) => {
 
     // Typing indicator
     socket.on('typing', (isTyping) => {
-      communityService.sendTypingIndicator(socket, isTyping);
+      socket.broadcast.to('community').emit('user_typing', {
+        user_id: communityService.userSockets.get(socket.id),
+        is_typing: isTyping
+      });
     });
 
     // Add reaction
@@ -107,7 +116,15 @@ export const setupCommunitySocket = (io) => {
         
         await message.addReaction(decoded.studentId, emoji);
         
-        communityService.sendReaction(socket, messageId, emoji);
+        const reaction = {
+          message_id: messageId,
+          user_id: decoded.studentId,
+          emoji: emoji,
+          created_at: new Date().toISOString()
+        };
+
+        socket.broadcast.to('community').emit('message_reaction', reaction);
+        socket.emit('reaction_added', reaction);
       } catch (error) {
         console.error('Reaction error:', error);
         socket.emit('error', { message: 'Reaksiya qo\'shishda xatolik' });
@@ -135,7 +152,11 @@ export const setupCommunitySocket = (io) => {
         message.is_deleted = true;
         await message.save();
         
-        communityService.deleteMessage(socket, messageId);
+        socket.broadcast.to('community').emit('message_deleted', {
+          message_id: messageId,
+          deleted_by: decoded.studentId,
+          deleted_at: new Date().toISOString()
+        });
       } catch (error) {
         console.error('Delete message error:', error);
         socket.emit('error', { message: 'Xabarni o\'chirishda xatolik' });
