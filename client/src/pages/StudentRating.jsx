@@ -247,13 +247,22 @@ export default function StudentRating() {
 
                 {/* Student Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base">
-                    {rating.student?.full_name}
-                  </h3>
-                  <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500">
-                    <Users size={12} className="sm:size-14" />
-                    <span className="truncate">{rating.student?.group?.name || 'Guruh yo\'q'}</span>
-                  </div>
+                  <button
+                    onClick={() => {
+                      if (rating.student?._id) {
+                        navigate(`/student-profile/${rating.student._id}`);
+                      }
+                    }}
+                    className="text-left w-full hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg p-1 sm:p-2 transition-colors"
+                  >
+                    <h3 className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                      {rating.student?.full_name}
+                    </h3>
+                    <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500">
+                      <Users size={12} className="sm:size-14" />
+                      <span className="truncate">{rating.student?.group?.name || 'Guruh yo\'q'}</span>
+                    </div>
+                  </button>
                 </div>
 
                 {/* Score */}
