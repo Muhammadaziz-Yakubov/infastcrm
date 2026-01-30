@@ -83,6 +83,58 @@ const Referrals = () => {
     }
   };
 
+  const handleStart = async (id) => {
+    if (!confirm('Taklif jarayonini boshlaysizmi?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/api/referrals/start/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      fetchReferrals();
+      fetchStatistics();
+      alert('Taklif jarayoni boshlandi!');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Xatolik yuz berdi');
+    }
+  };
+
+  const handleComplete = async (id) => {
+    if (!confirm('Taklif muvaffaqiyatli tugatilsin va 1000 coin berilsinmi?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/api/referrals/complete/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      fetchReferrals();
+      fetchStatistics();
+      alert('Taklif tugatildi va 1000 coin berildi!');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Xatolik yuz berdi');
+    }
+  };
+
+  const handleReject = async (id) => {
+    const reason = prompt('Rad etish sababini kiriting:');
+    if (!reason) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/api/referrals/reject/${id}`, { reason }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      fetchReferrals();
+      fetchStatistics();
+      alert('Taklif rad etildi!');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Xatolik yuz berdi');
+    }
+  };
+
   const handleApprove = async (id) => {
     if (!confirm('Referralni tasdiqlaysizmi?')) return;
     
@@ -127,10 +179,10 @@ const Referrals = () => {
     };
     
     const labels = {
-      PENDING: 'Kutilmoqda',
-      ACTIVE: 'Aktiv',
-      COMPLETED: 'Yakunlangan',
-      CANCELLED: 'Bekor qilingan'
+      PENDING: 'Boshlandi',
+      ACTIVE: 'Jarayonda',
+      COMPLETED: 'Tayyor',
+      CANCELLED: 'Rad etildi'
     };
     
     return (
@@ -152,7 +204,7 @@ const Referrals = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Referral Tizimi</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Takliflar</h1>
           <button
             onClick={() => setShowAddModal(true)}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -164,19 +216,19 @@ const Referrals = () => {
         {statistics && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white p-6 rounded-lg shadow">
-              <div className="text-gray-500 text-sm">Jami Referrallar</div>
+              <div className="text-gray-500 text-sm">Jami Takliflar</div>
               <div className="text-3xl font-bold text-gray-800">{statistics.totalReferrals}</div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <div className="text-gray-500 text-sm">Kutilmoqda</div>
+              <div className="text-gray-500 text-sm">Boshlandi</div>
               <div className="text-3xl font-bold text-yellow-600">{statistics.pendingReferrals}</div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <div className="text-gray-500 text-sm">Aktiv</div>
+              <div className="text-gray-500 text-sm">Jarayonda</div>
               <div className="text-3xl font-bold text-blue-600">{statistics.activeReferrals}</div>
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <div className="text-gray-500 text-sm">Yakunlangan</div>
+              <div className="text-gray-500 text-sm">Tayyor</div>
               <div className="text-3xl font-bold text-green-600">{statistics.completedReferrals}</div>
             </div>
           </div>
@@ -194,19 +246,19 @@ const Referrals = () => {
               onClick={() => setFilterStatus('PENDING')}
               className={`px-4 py-2 rounded ${filterStatus === 'PENDING' ? 'bg-yellow-600 text-white' : 'bg-gray-200'}`}
             >
-              Kutilmoqda
+              Boshlandi
             </button>
             <button
               onClick={() => setFilterStatus('ACTIVE')}
               className={`px-4 py-2 rounded ${filterStatus === 'ACTIVE' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
             >
-              Aktiv
+              Jarayonda
             </button>
             <button
               onClick={() => setFilterStatus('COMPLETED')}
               className={`px-4 py-2 rounded ${filterStatus === 'COMPLETED' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
             >
-              Yakunlangan
+              Tayyor
             </button>
           </div>
         </div>
@@ -254,26 +306,40 @@ const Referrals = () => {
                     {referral.status === 'PENDING' && (
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleApprove(referral._id)}
-                          className="text-green-600 hover:text-green-900"
+                          onClick={() => handleStart(referral._id)}
+                          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs"
                         >
-                          Tasdiqlash
+                          Boshlash
                         </button>
                         <button
-                          onClick={() => handleCancel(referral._id)}
-                          className="text-red-600 hover:text-red-900"
+                          onClick={() => handleReject(referral._id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs"
                         >
-                          Bekor qilish
+                          Rad etish
                         </button>
                       </div>
                     )}
                     {referral.status === 'ACTIVE' && (
-                      <button
-                        onClick={() => handleCancel(referral._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Bekor qilish
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleComplete(referral._id)}
+                          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-xs"
+                        >
+                          Tayyor
+                        </button>
+                        <button
+                          onClick={() => handleReject(referral._id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs"
+                        >
+                          Rad etish
+                        </button>
+                      </div>
+                    )}
+                    {referral.status === 'COMPLETED' && (
+                      <span className="text-green-600 font-medium text-xs">Tugatilgan</span>
+                    )}
+                    {referral.status === 'CANCELLED' && (
+                      <span className="text-red-600 font-medium text-xs">Rad etilgan</span>
                     )}
                   </td>
                 </tr>

@@ -29,7 +29,9 @@ import {
   Settings,
   MoreVertical,
   ArrowUpRight,
-  Coins
+  Coins,
+  UserPlus,
+  Share2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -55,6 +57,12 @@ export default function StudentDashboard() {
   const navigate = useNavigate();
   const [fullScreen, setFullScreen] = useState(false);
   const [dashboardCache, setDashboardCache] = useState(null);
+  const [showReferralModal, setShowReferralModal] = useState(false);
+  const [referralData, setReferralData] = useState({
+    friend_name: '',
+    friend_phone: ''
+  });
+  const [referralSubmitting, setReferralSubmitting] = useState(false);
 
   // Cache for dashboard data
   const CACHE_KEY = 'student_dashboard_cache';
@@ -139,6 +147,36 @@ export default function StudentDashboard() {
   const handleLogout = () => {
     studentLogout();
     navigate('/student-login');
+  };
+
+  const handleReferralSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!referralData.friend_name || !referralData.friend_phone) {
+      alert('Iltimos, barcha maydonlarni to\'ldiring');
+      return;
+    }
+
+    setReferralSubmitting(true);
+    
+    try {
+      const response = await api.post('/api/referrals/submit', {
+        friend_name: referralData.friend_name,
+        friend_phone: referralData.friend_phone
+      });
+
+      alert('Taklif muvaffaqiyatli yuborildi! Admin ko\'rib chiqadi.');
+      setShowReferralModal(false);
+      setReferralData({ friend_name: '', friend_phone: '' });
+      
+      // Refresh dashboard data to update coins if needed
+      fetchDashboard();
+    } catch (error) {
+      console.error('Referral yuborishda xatolik:', error);
+      alert(error.response?.data?.message || 'Taklif yuborishda xatolik yuz berdi');
+    } finally {
+      setReferralSubmitting(false);
+    }
   };
 
   const tabs = [
@@ -394,7 +432,100 @@ export default function StudentDashboard() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Tezkor Havolalar */}
+                  <div className="bg-white dark:bg-[#161a26] p-6 md:p-14 rounded-[2rem] md:rounded-[4rem] shadow-xl relative overflow-hidden border border-gray-100 dark:border-white/5">
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-600/5 rounded-full blur-3xl"></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-6">
+                        <Share2 className="text-indigo-600" size={20} />
+                        <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest italic">TEZKOR HAVOLALAR</span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <button
+                          onClick={() => setShowReferralModal(true)}
+                          className="w-full flex items-center justify-between gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-500/10 dark:to-purple-500/10 rounded-2xl border border-indigo-100 dark:border-indigo-500/20 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-500/20 dark:hover:to-purple-500/20 transition-all group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
+                              <UserPlus size={18} />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-black text-gray-900 dark:text-white text-sm">Referal</p>
+                              <p className="text-[9px] text-gray-500 dark:text-gray-400">Do'stingizni taklif qiling</p>
+                            </div>
+                          </div>
+                          <ArrowRight size={16} className="text-indigo-600 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Referal Modal */}
+                {showReferralModal && (
+                  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[#161a26] rounded-3xl p-6 md:p-8 w-full max-w-md mx-4 border border-gray-100 dark:border-white/5">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-black text-gray-900 dark:text-white">Do'stingizni taklif qiling</h3>
+                        <button
+                          onClick={() => setShowReferralModal(false)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors"
+                        >
+                          <XCircle size={20} className="text-gray-500" />
+                        </button>
+                      </div>
+
+                      <form onSubmit={handleReferralSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-black text-gray-700 dark:text-gray-300 mb-2">
+                            Do'stning ismi
+                          </label>
+                          <input
+                            type="text"
+                            value={referralData.friend_name}
+                            onChange={(e) => setReferralData({...referralData, friend_name: e.target.value})}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0c0e14] text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="Ismni kiriting"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-black text-gray-700 dark:text-gray-300 mb-2">
+                            Telefon raqami
+                          </label>
+                          <input
+                            type="tel"
+                            value={referralData.friend_phone}
+                            onChange={(e) => setReferralData({...referralData, friend_phone: e.target.value})}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0c0e14] text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="+998 XX XXX-XX-XX"
+                            required
+                          />
+                        </div>
+
+                        <div className="flex gap-3 pt-4">
+                          <button
+                            type="button"
+                            onClick={() => setShowReferralModal(false)}
+                            className="flex-1 px-4 py-3 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded-xl font-black hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+                          >
+                            Bekor qilish
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={referralSubmitting}
+                            className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl font-black hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {referralSubmitting ? 'Yuborilmoqda...' : 'Yuborish'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

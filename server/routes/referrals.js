@@ -1,8 +1,74 @@
 import express from 'express';
 import ReferralService from '../services/ReferralService.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
+import Student from '../models/Student.js';
+import Referral from '../models/Referral.js';
 
 const router = express.Router();
+
+router.post('/submit', async (req, res) => {
+  try {
+    const { friend_name, friend_phone } = req.body;
+    const studentToken = req.headers.authorization?.replace('Bearer ', '');
+
+    if (!friend_name || !friend_phone) {
+      return res.status(400).json({ message: 'Ism va telefon raqami talab qilinadi' });
+    }
+
+    // Get student from token
+    const student = await Student.findOne({ token: studentToken });
+    if (!student) {
+      return res.status(401).json({ message: 'Avtorizatsiya xatoligi' });
+    }
+
+    // Check if friend already exists
+    const existingFriend = await Student.findOne({ phone: friend_phone });
+    let friendId;
+
+    if (existingFriend) {
+      friendId = existingFriend._id;
+    } else {
+      // Create new student record for friend with PENDING status
+      const newFriend = new Student({
+        full_name: friend_name,
+        phone: friend_phone,
+        status: 'PENDING',
+        coin_balance: 0
+      });
+      const savedFriend = await newFriend.save();
+      friendId = savedFriend._id;
+    }
+
+    // Check if referral already exists
+    const existingReferral = await Referral.findOne({
+      referrer_id: student._id,
+      friend_id: friendId
+    });
+
+    if (existingReferral) {
+      return res.status(400).json({ message: 'Bu taklif allaqachon yuborilgan' });
+    }
+
+    // Create referral with PENDING status
+    const referral = new Referral({
+      referrer_id: student._id,
+      friend_id: friendId,
+      admin_id: null, // Will be assigned when admin processes
+      status: 'PENDING',
+      notes: `Student submission: ${friend_name} - ${friend_phone}`
+    });
+
+    await referral.save();
+
+    res.status(201).json({
+      message: 'Taklif muvaffaqiyatli yuborildi',
+      referral
+    });
+  } catch (error) {
+    console.error('Referral submit xatolik:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 router.post('/create', authenticate, requireAdmin, async (req, res) => {
   try {
@@ -29,6 +95,103 @@ router.post('/create', authenticate, requireAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Referral yaratishda xatolik:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/start/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const referral = await Referral.findById(req.params.id);
+    if (!referral) {
+      return res.status(404).json({ message: 'Taklif topilmadi' });
+    }
+
+    if (referral.status !== 'PENDING') {
+      return res.status(400).json({ message: 'Faqat PENDING statusdagi takliflarni boshlash mumkin' });
+    }
+
+    referral.status = 'ACTIVE';
+    referral.admin_id = req.user.userId;
+    referral.approved_date = new Date();
+    await referral.save();
+
+    res.json({
+      message: 'Taklif jarayoni boshlandi',
+      referral
+    });
+  } catch (error) {
+    console.error('Taklifni boshlashda xatolik:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/complete/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const referral = await Referral.findById(req.params.id).populate('referrer_id');
+    if (!referral) {
+      return res.status(404).json({ message: 'Taklif topilmadi' });
+    }
+
+    if (referral.status !== 'ACTIVE') {
+      return res.status(400).json({ message: 'Faqat ACTIVE statusdagi takliflarni tugatish mumkin' });
+    }
+
+    referral.status = 'COMPLETED';
+    
+    // Add 1000 coins to referrer
+    const referrer = await Student.findById(referral.referrer_id._id);
+    if (referrer) {
+      referrer.coin_balance = (referrer.coin_balance || 0) + 1000;
+      await referrer.save();
+
+      // Create coin history record
+      const CoinHistory = require('../models/CoinHistory').default;
+      const coinHistory = new CoinHistory({
+        student_id: referrer._id,
+        amount: 1000,
+        type: 'REFERRAL_BONUS',
+        description: `Do'st taklifi uchun bonus: ${referral.friend_id}`,
+        balance_after: referrer.coin_balance
+      });
+      await coinHistory.save();
+    }
+
+    await referral.save();
+
+    res.json({
+      message: 'Taklif muvaffaqiyatli tugatildi va 1000 coin berildi',
+      referral
+    });
+  } catch (error) {
+    console.error('Taklifni tugatishda xatolik:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/reject/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({ message: 'Rad etish sababi talab qilinadi' });
+    }
+
+    const referral = await Referral.findById(req.params.id);
+    if (!referral) {
+      return res.status(404).json({ message: 'Taklif topilmadi' });
+    }
+
+    referral.status = 'CANCELLED';
+    referral.notes = `${referral.notes}\nRad etildi: ${reason}`;
+    referral.admin_id = req.user.userId;
+    await referral.save();
+
+    res.json({
+      message: 'Taklif rad etildi',
+      referral
+    });
+  } catch (error) {
+    console.error('Taklifni rad etishda xatolik:', error);
     res.status(500).json({ message: error.message });
   }
 });
