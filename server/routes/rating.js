@@ -10,7 +10,7 @@ router.post('/add-power', authenticate, requireAdmin, async (req, res) => {
   try {
     const { student_id, power, reason } = req.body;
 
-    if (!student_id || !power || !reason) {
+    if (!student_id || power === undefined || power === null || !reason) {
       return res.status(400).json({ 
         message: 'Student ID, power miqdori va sabab talab qilinadi' 
       });
