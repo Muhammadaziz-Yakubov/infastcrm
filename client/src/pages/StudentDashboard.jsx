@@ -33,8 +33,7 @@ import {
   UserPlus,
   Share2,
   MessageCircle,
-  Flame,
-  Sword
+  Flame
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
@@ -49,7 +48,6 @@ import StudentRatingView from '../components/StudentRatingView';
 import StudentClassmatesView from '../components/StudentClassmatesView';
 import StudentMarket from './StudentMarket';
 import StudentEvents from './StudentEvents';
-import StudentArena from './StudentArena';
 
 export default function StudentDashboard() {
   const { tab: urlTab } = useParams();
@@ -189,7 +187,6 @@ export default function StudentDashboard() {
     { id: 'classmates', label: 'Guruhim', icon: Users },
     { id: 'market', label: 'Coin Market', icon: ShoppingBag },
     { id: 'events', label: 'Tadbirlar', icon: Calendar },
-    { id: 'arena', label: 'Arena', icon: Sword },
     { id: 'exams', label: 'Imtihonlar', icon: Target },
     { id: 'rating', label: 'Reyting', icon: Trophy },
     { id: 'attendance', label: 'Davomat', icon: Calendar },
@@ -537,7 +534,6 @@ export default function StudentDashboard() {
 
             {/* --- OTHER TABS RENDER LOGIC --- */}
             {activeTab === 'events' && <StudentEvents />}
-            {activeTab === 'arena' && <StudentArena />}
             {activeTab === 'tasks' && <StudentTasksView tasksData={data?.tasks} />}
             {activeTab === 'market' && <StudentMarket coinBalance={data?.student?.coin_balance} />}
             {activeTab === 'rating' && <StudentRatingView ratingData={data?.quizzes} />}

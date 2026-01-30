@@ -35,11 +35,8 @@ import quizzesRoutes from './routes/quizzes.js';
 import studentExamsRoutes from './routes/studentExams.js';
 import studentQuizzesRoutes from './routes/studentQuizzes.js';
 import ratingRoutes from './routes/rating.js';
-import arenaRoutes from './routes/arena.js';
-import adminArenaRoutes from './routes/adminArena.js';
 
 // Services & Jobs
-import { setupArenaSocket } from './socket/arena.js';
 import { sendDailyReminders, testBotConnection, setupWebhook, handleWebhook, sendAllClassReminders } from './services/telegramBot.js';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
 import { initSurveyBot } from './surveyBotService.js';
@@ -103,12 +100,8 @@ app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/student-exams', studentExamsRoutes);
 app.use('/api/student-quizzes', studentQuizzesRoutes);
 app.use('/api/rating', ratingRoutes);
-app.use('/api/arena', arenaRoutes);
-app.use('/api/admin/arena', adminArenaRoutes);
 
 // Socket.io setup
-setupArenaSocket(io);
-
 // Database connection with timeout
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://muhammadyakubov:vNq4X9x9X9x9X9x9@cluster0.abcde.mongodb.net/infastcrm';
 

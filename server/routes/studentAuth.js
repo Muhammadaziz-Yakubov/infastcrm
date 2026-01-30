@@ -9,7 +9,6 @@ import Group from '../models/Group.js';
 import QuizResult from '../models/QuizResult.js';
 import { authenticateStudent } from '../middleware/auth.js';
 import ExamResult from '../models/ExamResult.js';
-import ArenaResult from '../models/ArenaResult.js';
 import RatingService from '../services/RatingService.js';
 import Task from '../models/Task.js';
 import TaskSubmission from '../models/TaskSubmission.js';
