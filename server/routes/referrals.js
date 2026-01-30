@@ -168,7 +168,8 @@ router.post('/complete/:id', authenticate, requireAdmin, async (req, res) => {
         student_id: referrer._id,
         amount: 1000,
         type: 'REFERRAL_BONUS',
-        description: `Do'st taklifi uchun bonus: ${referral.friend_id}`,
+        reason: `Do'st taklifi uchun bonus: ${referral.friend_id}`,
+        reason_type: 'REFERRAL_BONUS',
         balance_after: referrer.coin_balance
       });
       await coinHistory.save();

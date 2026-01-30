@@ -12,7 +12,7 @@ const coinHistorySchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['EARN', 'SPEND', 'ADMIN_ADD', 'ADMIN_DEDUCT'],
+    enum: ['EARN', 'SPEND', 'ADMIN_ADD', 'ADMIN_DEDUCT', 'REFERRAL_BONUS'],
     required: true
   },
   reason: {
@@ -21,7 +21,7 @@ const coinHistorySchema = new mongoose.Schema({
   },
   reason_type: {
     type: String,
-    enum: ['ATTENDANCE_PRESENT', 'ATTENDANCE_ABSENT', 'HOMEWORK_SUBMITTED', 'HOMEWORK_NOT_SUBMITTED', 'QUIZ_COMPLETED', 'QUIZ_NOT_COMPLETED', 'ADMIN_MANUAL', 'MARKET_PURCHASE', 'ORDER_CANCELLED'],
+    enum: ['ATTENDANCE_PRESENT', 'ATTENDANCE_ABSENT', 'HOMEWORK_SUBMITTED', 'HOMEWORK_NOT_SUBMITTED', 'QUIZ_COMPLETED', 'QUIZ_NOT_COMPLETED', 'ADMIN_MANUAL', 'MARKET_PURCHASE', 'ORDER_CANCELLED', 'REFERRAL_BONUS'],
     required: true
   },
   balance_after: {
