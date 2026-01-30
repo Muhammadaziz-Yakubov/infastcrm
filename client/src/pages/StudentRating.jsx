@@ -143,17 +143,17 @@ export default function StudentRating() {
 
         {/* Top 3 Podium */}
         {top3.length >= 3 && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="flex justify-center items-end gap-2 sm:gap-4 mb-8 p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl overflow-x-auto">
             {/* 2nd Place */}
             <div className="flex flex-col items-center mt-8 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center mb-3 shadow-lg shadow-gray-400/30">
                 <Medal className="text-white" size={28} />
               </div>
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
+                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[150px] text-sm sm:text-base">
                   {top3[1]?.student?.full_name}
                 </h3>
-                <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[100px] sm:max-w-[150px]">
                   {top3[1]?.student?.group?.name}
                 </p>
                 <div className="flex items-center justify-center gap-1 mt-2">
@@ -177,10 +177,10 @@ export default function StudentRating() {
                 </div>
               </div>
               <div className="text-center">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate max-w-[150px]">
+                <h3 className="font-bold text-lg sm:text-xl text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[150px] text-sm sm:text-base">
                   {top3[0]?.student?.full_name}
                 </h3>
-                <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[100px] sm:max-w-[150px]">
                   {top3[0]?.student?.group?.name}
                 </p>
                 <div className="flex items-center justify-center gap-1 mt-2">
@@ -199,10 +199,10 @@ export default function StudentRating() {
                 <Medal className="text-white" size={24} />
               </div>
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
+                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[150px] text-sm sm:text-base">
                   {top3[2]?.student?.full_name}
                 </h3>
-                <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[100px] sm:max-w-[150px]">
                   {top3[2]?.student?.group?.name}
                 </p>
                 <div className="flex items-center justify-center gap-1 mt-2">
@@ -230,13 +230,13 @@ export default function StudentRating() {
             {ratings.map((rating, index) => (
               <div 
                 key={rating.student_id || index}
-                className={`flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors animate-fade-in-up ${
+                className={`flex items-center gap-2 sm:gap-4 p-2 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors animate-fade-in-up ${
                   rating.rank <= 3 ? 'bg-gradient-to-r from-yellow-50 to-transparent dark:from-yellow-900/10' : ''
                 }`}
                 style={{ animationDelay: `${index * 30}ms` }}
               >
                 {/* Rank */}
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${
                   rating.rank === 1 ? 'bg-yellow-100 dark:bg-yellow-900/30' :
                   rating.rank === 2 ? 'bg-gray-100 dark:bg-gray-700' :
                   rating.rank === 3 ? 'bg-amber-100 dark:bg-amber-900/30' :
@@ -247,26 +247,26 @@ export default function StudentRating() {
 
                 {/* Student Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                  <h3 className="font-semibold text-gray-900 dark:text-white truncate text-sm sm:text-base">
                     {rating.student?.full_name}
                   </h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Users size={14} />
+                  <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500">
+                    <Users size={12} className="sm:size-14" />
                     <span className="truncate">{rating.student?.group?.name || 'Guruh yo\'q'}</span>
                   </div>
                 </div>
 
                 {/* Score */}
-                <div className="text-right">
-                  <div className={`text-2xl font-bold ${getScoreColor(rating.averageScore)}`}>
+                <div className="text-right flex-shrink-0">
+                  <div className={`text-lg sm:text-2xl font-bold ${getScoreColor(rating.averageScore)}`}>
                     {rating.averageScore}
                   </div>
-                  <div className="text-xs text-gray-400">ball</div>
+                  <div className="text-xs text-gray-400 hidden sm:block">ball</div>
                 </div>
 
                 {/* Stars for top 3 */}
                 {rating.rank <= 3 && (
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-shrink-0">
                     {[...Array(4 - rating.rank)].map((_, i) => (
                       <Star 
                         key={i} 
@@ -275,7 +275,7 @@ export default function StudentRating() {
                           rating.rank === 2 ? 'text-gray-400 fill-gray-400' :
                           'text-amber-500 fill-amber-500'
                         }`} 
-                        size={16} 
+                        size={12} 
                       />
                     ))}
                   </div>
