@@ -34,6 +34,7 @@ import examsRoutes from './routes/exams.js';
 import quizzesRoutes from './routes/quizzes.js';
 import studentExamsRoutes from './routes/studentExams.js';
 import studentQuizzesRoutes from './routes/studentQuizzes.js';
+import ratingRoutes from './routes/rating.js';
 
 // Services & Jobs
 import { setupArenaSocket } from './socket/arena.js';
@@ -94,6 +95,7 @@ app.use('/api/exams', examsRoutes);
 app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/student-exams', studentExamsRoutes);
 app.use('/api/student-quizzes', studentQuizzesRoutes);
+app.use('/api/rating', ratingRoutes);
 
 // Socket.io setup
 setupArenaSocket(io);
