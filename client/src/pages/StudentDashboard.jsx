@@ -378,9 +378,14 @@ export default function StudentDashboard() {
                           {(data?.student?.coin_balance || 0).toLocaleString()}
                         </h3>
                       </div>
-                      <button onClick={() => handleTabChange('market')} className="w-full md:w-auto px-8 md:px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] md:text-[12px] uppercase tracking-widest shadow-xl shadow-indigo-600/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
-                        MARKETGA O'TISH <ArrowUpRight size={18} />
-                      </button>
+                      <div className="flex gap-3">
+                        <button onClick={() => handleTabChange('market')} className="px-6 md:px-8 py-3 md:py-4 bg-indigo-600 text-white rounded-2xl font-black text-[9px] md:text-[11px] uppercase tracking-widest shadow-xl shadow-indigo-600/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                          MARKET <ArrowUpRight size={16} />
+                        </button>
+                        <button onClick={() => handleTabChange('community')} className="px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl font-black text-[9px] md:text-[11px] uppercase tracking-widest shadow-xl shadow-purple-600/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                          <Flame className="animate-pulse" size={16} /> CHAT
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
