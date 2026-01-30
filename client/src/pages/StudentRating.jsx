@@ -250,7 +250,7 @@ export default function StudentRating() {
                   <button
                     onClick={() => {
                       if (rating.student?._id) {
-                        navigate(`/student-profile/${rating.student._id}`);
+                        navigate(`/student/profile/${rating.student._id}`);
                       }
                     }}
                     className="text-left w-full hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg p-1 sm:p-2 transition-colors"
