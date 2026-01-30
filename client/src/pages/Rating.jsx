@@ -193,18 +193,18 @@ export default function Rating() {
         )}
 
         {/* Top 3 Podium */}
-        {top3.length >= 3 && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
+        {top3 && top3.length > 0 && (
+          <div className="flex justify-center items-end gap-2 sm:gap-4 mb-8 p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl overflow-x-auto">
             {/* 2nd Place */}
             <div className="flex flex-col items-center mt-8 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center mb-3 shadow-lg shadow-gray-400/30">
                 <Medal className="text-white" size={28} />
               </div>
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
+                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[150px] text-sm sm:text-base">
                   {top3[1]?.full_name}
                 </h3>
-                <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[100px] sm:max-w-[150px]">
                   {top3[1]?.group_name}
                 </p>
                 <div className="flex items-center justify-center gap-1 mt-2">
@@ -228,10 +228,10 @@ export default function Rating() {
                 </div>
               </div>
               <div className="text-center">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate max-w-[150px]">
+                <h3 className="font-bold text-lg sm:text-xl text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[150px] text-sm sm:text-base">
                   {top3[0]?.full_name}
                 </h3>
-                <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[100px] sm:max-w-[150px]">
                   {top3[0]?.group_name}
                 </p>
                 <div className="flex items-center justify-center gap-1 mt-2">
@@ -250,10 +250,10 @@ export default function Rating() {
                 <Medal className="text-white" size={24} />
               </div>
               <div className="text-center">
-                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[150px]">
+                <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[100px] sm:max-w-[150px] text-sm sm:text-base">
                   {top3[2]?.full_name}
                 </h3>
-                <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[100px] sm:max-w-[150px]">
                   {top3[2]?.group_name}
                 </p>
                 <div className="flex items-center justify-center gap-1 mt-2">
@@ -271,25 +271,25 @@ export default function Rating() {
         {/* Rest of Ratings */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-2 sm:px-6 py-2 sm:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     O'rin
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-2 sm:px-6 py-2 sm:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     O'quvchi
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Guruh
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-2 sm:px-6 py-2 sm:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Ball
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-2 sm:px-6 py-2 sm:py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Foiz
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-2 sm:px-6 py-2 sm:py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Amallar
                   </th>
                 </tr>
@@ -297,29 +297,34 @@ export default function Rating() {
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredRatings.map((rating, index) => (
                   <tr key={rating.student_id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getRankStyle(rating.rank)}`}>
+                    <td className="px-2 sm:px-6 py-2 sm:py-4">
+                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${getRankStyle(rating.rank)}`}>
                         {getRankIcon(rating.rank)}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        {rating.full_name}
+                    <td className="px-2 sm:px-6 py-2 sm:py-4">
+                      <div className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">
+                        <div className="truncate max-w-[120px] sm:max-w-none">
+                          {rating.full_name}
+                        </div>
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 sm:hidden">
+                          {rating.group_name}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="hidden sm:table-cell px-6 py-4">
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         {rating.group_name}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className={`font-bold ${getScoreColor(Math.round(rating.percentage))}`}>
+                    <td className="px-2 sm:px-6 py-2 sm:py-4">
+                      <div className={`font-bold text-sm sm:text-base ${getScoreColor(Math.round(rating.percentage))}`}>
                         {Math.round(rating.percentage)}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <td className="px-2 sm:px-6 py-2 sm:py-4">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <div className="w-16 sm:w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div 
                             className={`h-2 rounded-full ${
                               rating.percentage >= 70 ? 'bg-emerald-500' :
@@ -328,12 +333,12 @@ export default function Rating() {
                             style={{ width: `${Math.min(rating.percentage, 100)}%` }}
                           ></div>
                         </div>
-                        <span className={`text-sm font-medium ${getScoreColor(Math.round(rating.percentage))}`}>
+                        <span className={`text-xs sm:text-sm font-medium ${getScoreColor(Math.round(rating.percentage))}`}>
                           {Math.round(rating.percentage)}%
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 sm:px-6 py-2 sm:py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => {
@@ -341,10 +346,10 @@ export default function Rating() {
                             setPowerForm({ ...powerForm, student_id: rating.student_id });
                             setShowAddPowerModal(true);
                           }}
-                          className="p-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                          className="p-1.5 sm:p-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors"
                           title="Power qo'shish"
                         >
-                          <Zap size={16} />
+                          <Zap size={14} className="sm:size-16" />
                         </button>
                       </div>
                     </td>
