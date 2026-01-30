@@ -9,16 +9,34 @@ const router = express.Router();
 router.post('/submit', async (req, res) => {
   try {
     const { friend_name, friend_phone } = req.body;
-    const studentToken = req.headers.authorization?.replace('Bearer ', '');
+    const authHeader = req.headers.authorization;
 
     if (!friend_name || !friend_phone) {
       return res.status(400).json({ message: 'Ism va telefon raqami talab qilinadi' });
     }
 
-    // Get student from token
-    const student = await Student.findOne({ token: studentToken });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Avtorizatsiya talab etiladi' });
+    }
+
+    const token = authHeader.substring(7);
+    const jwt = require('jsonwebtoken');
+    
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    } catch (error) {
+      return res.status(401).json({ message: 'Token yaroqsiz' });
+    }
+
+    if (decoded.type !== 'student') {
+      return res.status(401).json({ message: 'Faqat studentlar referral yuborishi mumkin' });
+    }
+
+    // Get student from decoded token
+    const student = await Student.findById(decoded.studentId);
     if (!student) {
-      return res.status(401).json({ message: 'Avtorizatsiya xatoligi' });
+      return res.status(401).json({ message: 'O\'quvchi topilmadi' });
     }
 
     // Check if friend already exists
