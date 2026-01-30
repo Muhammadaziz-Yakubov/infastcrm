@@ -67,7 +67,7 @@ class RatingService {
 
             // 2. Get students
             const students = await Student.find(studentFilter)
-                .select('full_name profile_image group_id')
+                .select('full_name profile_image group_id coin_balance')
                 .populate({
                     path: 'group_id',
                     select: 'name course_id',
