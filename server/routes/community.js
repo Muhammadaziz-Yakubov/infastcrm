@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticate } from '../middleware/auth.js';
+import { authenticateStudent } from '../middleware/auth.js';
 import Student from '../models/Student.js';
 
 const router = express.Router();
@@ -33,7 +33,7 @@ let messages = [
 ];
 
 // Get all messages
-router.get('/messages', authenticate, async (req, res) => {
+router.get('/messages', authenticateStudent, async (req, res) => {
   try {
     // Sort by created_at descending (newest first)
     const sortedMessages = messages.sort((a, b) => 
@@ -48,7 +48,7 @@ router.get('/messages', authenticate, async (req, res) => {
 });
 
 // Send new message
-router.post('/messages', authenticate, async (req, res) => {
+router.post('/messages', authenticateStudent, async (req, res) => {
   try {
     const { message, type = 'text' } = req.body;
     const student = req.student;
@@ -77,7 +77,7 @@ router.post('/messages', authenticate, async (req, res) => {
 });
 
 // Get online users (mock data)
-router.get('/online-users', authenticate, async (req, res) => {
+router.get('/online-users', authenticateStudent, async (req, res) => {
   try {
     // Mock online users - in real implementation, this would track actual online status
     const onlineUsers = [
