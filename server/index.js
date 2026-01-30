@@ -39,6 +39,7 @@ import communityRoutes from './routes/community.js';
 
 // Services & Jobs
 import { setupArenaSocket } from './socket/arena.js';
+import { setupCommunitySocket } from './socket/community.js';
 import { sendDailyReminders, testBotConnection, setupWebhook, handleWebhook, sendAllClassReminders } from './services/telegramBot.js';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
 import { initSurveyBot } from './surveyBotService.js';
@@ -101,6 +102,7 @@ app.use('/api/community', communityRoutes);
 
 // Socket.io setup
 setupArenaSocket(io);
+setupCommunitySocket(io);
 
 // Database connection with timeout
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://muhammadyakubov:vNq4X9x9X9x9X9x9@cluster0.abcde.mongodb.net/infastcrm';

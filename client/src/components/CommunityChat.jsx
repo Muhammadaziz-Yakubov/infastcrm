@@ -3,6 +3,7 @@ import { Send, Users, MessageCircle, Zap, Flame, Sparkles, Crown, Shield, Star, 
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../utils/api';
+import { io } from 'socket.io-client';
 
 export default function CommunityChat() {
   const { student } = useAuth();
@@ -12,6 +13,8 @@ export default function CommunityChat() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [socket, setSocket] = useState(null);
+  const [connected, setConnected] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -23,16 +26,80 @@ export default function CommunityChat() {
   }, [messages]);
 
   useEffect(() => {
-    fetchMessages();
-    fetchOnlineUsers();
-    
-    // Mock real-time updates
-    const interval = setInterval(() => {
+    // Initialize Socket.io connection
+    const token = localStorage.getItem('studentToken');
+    if (!token) {
+      console.error('No student token found');
+      setLoading(false);
+      return;
+    }
+
+    const newSocket = io('/community', {
+      auth: {
+        token: token
+      },
+      transports: ['websocket', 'polling']
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Connected to community chat');
+      setConnected(true);
+      newSocket.emit('authenticate', token);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('Disconnected from community chat');
+      setConnected(false);
+    });
+
+    newSocket.on('authenticated', (data) => {
+      console.log('Authenticated to community chat:', data);
+      setOnlineUsers(data.online_users || []);
+    });
+
+    newSocket.on('recent_messages', (data) => {
+      setMessages(data.messages || []);
+      setLoading(false);
+    });
+
+    newSocket.on('new_message', (message) => {
+      setMessages(prev => [message, ...prev]);
+    });
+
+    newSocket.on('message_sent', (message) => {
+      setMessages(prev => [message, ...prev]);
+    });
+
+    newSocket.on('user_online', (data) => {
+      setOnlineUsers(prev => [...prev.filter(u => u._id !== data.user_id), {
+        _id: data.user_id,
+        socket_id: data.socket_id,
+        full_name: 'Online User',
+        role: 'student'
+      }]);
+    });
+
+    newSocket.on('user_offline', (data) => {
+      setOnlineUsers(prev => prev.filter(u => u._id !== data.user_id));
+    });
+
+    newSocket.on('user_typing', (data) => {
+      // Handle typing indicator
+      console.log('User typing:', data);
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('Socket error:', error);
+      // Fallback to HTTP polling
       fetchMessages();
       fetchOnlineUsers();
-    }, 5000);
+    });
 
-    return () => clearInterval(interval);
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
   }, []);
 
   const fetchMessages = async () => {
@@ -67,14 +134,25 @@ export default function CommunityChat() {
     if (!newMessage.trim()) return;
 
     setSending(true);
+    
     try {
-      const response = await api.post('/community/messages', {
-        message: newMessage.trim(),
-        type: 'text'
-      });
-      
-      setMessages(prev => [response.data, ...prev]);
-      setNewMessage('');
+      if (socket && connected) {
+        // Send via Socket.io for real-time
+        socket.emit('send_message', {
+          message: newMessage.trim(),
+          type: 'text'
+        });
+        setNewMessage('');
+      } else {
+        // Fallback to HTTP
+        const response = await api.post('/community/messages', {
+          message: newMessage.trim(),
+          type: 'text'
+        });
+        
+        setMessages(prev => [response.data, ...prev]);
+        setNewMessage('');
+      }
     } catch (error) {
       console.error('Xatolik:', error);
       // 401 xatolikda alert ko'rsatmaslik
@@ -125,11 +203,15 @@ export default function CommunityChat() {
           <div className="flex items-center gap-3">
             <div className="relative">
               <MessageCircle className="text-white" size={28} />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse ${
+                connected ? 'bg-green-400' : 'bg-red-400'
+              }`}></div>
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">InFast Community</h2>
-              <p className="text-purple-100 text-sm">Barcha o'quvchilar bilan suhbat</p>
+              <p className="text-purple-100 text-sm">
+                {connected ? 'Real-time suhbat' : 'Connecting...'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -138,6 +220,13 @@ export default function CommunityChat() {
                 <Flame className="inline mr-1" size={16} />
                 {onlineUsers.length} online
               </span>
+            </div>
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+              connected 
+                ? 'bg-green-500/20 text-green-100 border border-green-400/30' 
+                : 'bg-red-500/20 text-red-100 border border-red-400/30'
+            }`}>
+              {connected ? '🟢 Connected' : '🔴 Offline'}
             </div>
           </div>
         </div>
