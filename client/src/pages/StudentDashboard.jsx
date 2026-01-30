@@ -160,7 +160,7 @@ export default function StudentDashboard() {
     setReferralSubmitting(true);
     
     try {
-      const response = await api.post('/referrals/submit', {
+      const response = await api.post('referrals/submit', {
         friend_name: referralData.friend_name,
         friend_phone: referralData.friend_phone
       });

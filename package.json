@@ -9,11 +9,17 @@
     "client": "cd client && npm run dev",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install"
   },
-  "keywords": ["crm", "education", "uzbekistan", "infast", "it-academy", "muhammadaziz yakubov"],
+  "keywords": [
+    "crm",
+    "education",
+    "uzbekistan",
+    "infast",
+    "it-academy",
+    "muhammadaziz yakubov"
+  ],
   "author": "Muhammadaziz Yakubov",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
 }
-

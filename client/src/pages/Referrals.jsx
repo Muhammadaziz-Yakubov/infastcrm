@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import api from '../utils/api';
 
 const Referrals = () => {
   const [referrals, setReferrals] = useState([]);
@@ -25,14 +23,11 @@ const Referrals = () => {
 
   const fetchReferrals = async () => {
     try {
-      const token = localStorage.getItem('token');
       const url = filterStatus 
-        ? `${API_URL}/api/referrals/all?status=${filterStatus}`
-        : `${API_URL}/api/referrals/all`;
+        ? `/referrals/all?status=${filterStatus}`
+        : `/referrals/all`;
       
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get(url);
       setReferrals(response.data.referrals);
       setLoading(false);
     } catch (error) {
@@ -43,10 +38,7 @@ const Referrals = () => {
 
   const fetchStudents = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/students`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/students');
       setStudents(response.data);
     } catch (error) {
       console.error('Talabalarni yuklashda xatolik:', error);
@@ -55,10 +47,7 @@ const Referrals = () => {
 
   const fetchStatistics = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/referrals/statistics`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/referrals/statistics');
       setStatistics(response.data);
     } catch (error) {
       console.error('Statistikani yuklashda xatolik:', error);
@@ -68,10 +57,7 @@ const Referrals = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/referrals/create`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/referrals/create', formData);
       
       setShowAddModal(false);
       setFormData({ referrer_id: '', friend_id: '', notes: '' });
@@ -87,10 +73,7 @@ const Referrals = () => {
     if (!confirm('Taklif jarayonini boshlaysizmi?')) return;
     
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/referrals/start/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/referrals/start/${id}`);
       
       fetchReferrals();
       fetchStatistics();
@@ -104,10 +87,7 @@ const Referrals = () => {
     if (!confirm('Taklif muvaffaqiyatli tugatilsin va 1000 coin berilsinmi?')) return;
     
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/referrals/complete/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/referrals/complete/${id}`);
       
       fetchReferrals();
       fetchStatistics();
@@ -122,10 +102,7 @@ const Referrals = () => {
     if (!reason) return;
     
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/referrals/reject/${id}`, { reason }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/referrals/reject/${id}`, { reason });
       
       fetchReferrals();
       fetchStatistics();
@@ -139,10 +116,7 @@ const Referrals = () => {
     if (!confirm('Referralni tasdiqlaysizmi?')) return;
     
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/referrals/approve/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/referrals/approve/${id}`);
       
       fetchReferrals();
       fetchStatistics();
@@ -157,10 +131,7 @@ const Referrals = () => {
     if (!reason) return;
     
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/referrals/cancel/${id}`, { reason }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/referrals/cancel/${id}`, { reason });
       
       fetchReferrals();
       fetchStatistics();
