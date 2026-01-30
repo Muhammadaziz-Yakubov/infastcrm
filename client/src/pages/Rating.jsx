@@ -70,7 +70,7 @@ export default function Rating() {
   const handleAddPower = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/admin/rating/add-power', powerForm);
+      await api.post('/rating/add-power', powerForm);
       
       setShowAddPowerModal(false);
       setPowerForm({ student_id: '', power: 0, reason: '' });
