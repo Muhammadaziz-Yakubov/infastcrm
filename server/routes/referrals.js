@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import ReferralService from '../services/ReferralService.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import Student from '../models/Student.js';
@@ -20,7 +21,6 @@ router.post('/submit', async (req, res) => {
     }
 
     const token = authHeader.substring(7);
-    const jwt = require('jsonwebtoken');
     
     let decoded;
     try {

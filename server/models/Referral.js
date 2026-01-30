@@ -41,7 +41,7 @@ const referralSchema = new mongoose.Schema({
   admin_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   approved_date: {
     type: Date
