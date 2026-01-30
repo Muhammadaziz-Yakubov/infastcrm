@@ -111,15 +111,17 @@ class RatingService {
                     lessons: attendanceMap.get(sid) || { total: 0, count: 0 },
                     tasks: taskMap.get(sid) || { total: 0, count: 0 },
                     quizzes: quizMap.get(sid) || { total: 0, count: 0 },
-                    exams: examMap.get(sid) || { total: 0, count: 0 }
+                    exams: examMap.get(sid) || { total: 0, count: 0 },
+                    power: student.coin_balance || 0
                 };
 
-                // Formula: (LessonScore*10) + (TaskScore*20) + (QuizScore*15) + (ExamScore*50)
+                // Formula: (LessonScore*10) + (TaskScore*20) + (QuizScore*15) + (ExamScore*50) + (Power*0.1)
                 const totalPoints =
                     (stats.lessons.total * 10) +
                     (stats.tasks.total * 20) +
                     (stats.quizzes.total * 15) +
-                    (stats.exams.total * 50);
+                    (stats.exams.total * 50) +
+                    (stats.power * 0.1); // Power ni reytingga qo'shish (1000 power = 100 ball)
 
                 // Calculate percentage (max 100 points)
                 const maxPossiblePoints = 100;
