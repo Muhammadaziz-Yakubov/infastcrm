@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import ArenaRoom from '../models/ArenaRoom.js';
 import ArenaResult from '../models/ArenaResult.js';
 import ArenaPlayer from '../models/ArenaPlayer.js';
@@ -10,6 +11,26 @@ const router = express.Router();
 // Get all arena statistics
 router.get('/stats', authenticate, requireAdmin, async (req, res) => {
     try {
+        // Check MongoDB connection status
+        if (mongoose.connection.readyState !== 1) {
+            return res.json({
+                total_rooms: 0,
+                active_rooms: 0,
+                lobby_rooms: 0,
+                finished_rooms: 0,
+                total_games: 0,
+                today_games: 0,
+                total_players: 0,
+                active_players: 0,
+                avg_wpm: 0,
+                avg_accuracy: 0,
+                total_pts_awarded: 0,
+                game_completion_rate: 0,
+                pts_distribution: {},
+                message: 'Database not connected - using mock data'
+            });
+        }
+
         // Total rooms
         const totalRooms = await ArenaRoom.countDocuments();
         const activeRooms = await ArenaRoom.countDocuments({ status: 'PLAYING' });
@@ -71,6 +92,15 @@ router.get('/stats', authenticate, requireAdmin, async (req, res) => {
 // Get recent games with details
 router.get('/recent-games', authenticate, requireAdmin, async (req, res) => {
     try {
+        // Check MongoDB connection status
+        if (mongoose.connection.readyState !== 1) {
+            return res.json({
+                games: [],
+                pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+                message: 'Database not connected - using mock data'
+            });
+        }
+
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
@@ -102,6 +132,15 @@ router.get('/recent-games', authenticate, requireAdmin, async (req, res) => {
 // Get room details
 router.get('/rooms/:roomCode', authenticate, requireAdmin, async (req, res) => {
     try {
+        // Check MongoDB connection status
+        if (mongoose.connection.readyState !== 1) {
+            return res.json({
+                room: null,
+                results: [],
+                message: 'Database not connected - using mock data'
+            });
+        }
+
         const room = await ArenaRoom.findOne({ room_code: req.params.roomCode })
             .populate('host_id', 'full_name phone')
             .populate({
@@ -134,6 +173,14 @@ router.get('/rooms/:roomCode', authenticate, requireAdmin, async (req, res) => {
 // Get top players
 router.get('/top-players', authenticate, requireAdmin, async (req, res) => {
     try {
+        // Check MongoDB connection status
+        if (mongoose.connection.readyState !== 1) {
+            return res.json([
+                { full_name: 'Demo Player 1', phone: '+998901234567', arena_pts: 1500, arena_rank: 'Gold', games_played: 25 },
+                { full_name: 'Demo Player 2', phone: '+998907654321', arena_pts: 1200, arena_rank: 'Silver', games_played: 18 }
+            ]);
+        }
+
         const limit = parseInt(req.query.limit) || 100;
         const players = await Student.find({ arena_pts: { $gt: 0 } })
             .select('full_name phone arena_pts arena_rank gamification')
@@ -167,6 +214,17 @@ router.get('/top-players', authenticate, requireAdmin, async (req, res) => {
 // Get arena performance analytics
 router.get('/analytics', authenticate, requireAdmin, async (req, res) => {
     try {
+        // Check MongoDB connection status
+        if (mongoose.connection.readyState !== 1) {
+            return res.json({
+                daily_stats: [],
+                hourly_distribution: [],
+                game_type_stats: { TYPING: 0, QUIZ: 0 },
+                rank_distribution: {},
+                message: 'Database not connected - using mock data'
+            });
+        }
+
         const period = req.query.period || '7d'; // 7d, 30d, 90d
         
         let startDate;

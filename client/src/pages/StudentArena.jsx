@@ -144,6 +144,17 @@ const StudentArena = () => {
       setStats(response.data);
     } catch (err) {
       console.error('Stats loading error:', err);
+      // Set fallback data for development/offline mode
+      setStats({
+        total_games: 0,
+        total_score: 0,
+        arena_pts: 0,
+        arena_rank: 'Bronze',
+        avg_wpm: 0,
+        avg_accuracy: 0,
+        recent_results: [],
+        message: 'Using offline mode - connect to server for live data'
+      });
     }
   };
 
@@ -153,6 +164,12 @@ const StudentArena = () => {
       setLeaderboard(response.data);
     } catch (err) {
       console.error('Leaderboard loading error:', err);
+      // Set fallback data
+      setLeaderboard([
+        { full_name: 'Demo Player 1', arena_pts: 1500, arena_rank: 'Gold' },
+        { full_name: 'Demo Player 2', arena_pts: 1200, arena_rank: 'Silver' },
+        { full_name: 'Demo Player 3', arena_pts: 800, arena_rank: 'Bronze' }
+      ]);
     }
   };
 
@@ -162,6 +179,8 @@ const StudentArena = () => {
       setAvailableRooms(response.data);
     } catch (err) {
       console.error('Available rooms loading error:', err);
+      // Set fallback data
+      setAvailableRooms([]);
     }
   };
 
