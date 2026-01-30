@@ -20,7 +20,8 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Power
+  Power,
+  X
 } from 'lucide-react';
 import api from '../utils/api';
 
