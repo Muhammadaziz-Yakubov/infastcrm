@@ -5,6 +5,7 @@ import CoinHistory from '../models/CoinHistory.js';
 import RatingService from '../services/RatingService.js';
 
 const router = express.Router();
+const ratingService = new RatingService();
 
 // Add power to student
 router.post('/add-power', authenticate, requireAdmin, async (req, res) => {

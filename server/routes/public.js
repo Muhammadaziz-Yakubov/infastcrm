@@ -2,12 +2,13 @@ import express from 'express';
 import RatingService from '../services/RatingService.js';
 
 const router = express.Router();
+const ratingService = new RatingService();
 
 // 1. Get filters for ratings (Groups and Courses/Centers)
 // Putting this above /ratings to avoid potential conflict
 router.get('/filters', async (req, res) => {
   try {
-    const filters = await RatingService.getFilters();
+    const filters = await ratingService.getFilters();
     res.json(filters);
   } catch (error) {
     console.error('❌ Error fetching rating filters:', error);
@@ -19,7 +20,7 @@ router.get('/filters', async (req, res) => {
 router.get('/ratings', async (req, res) => {
   try {
     const { groupId, courseId, limit } = req.query;
-    const ratings = await RatingService.getGlobalRatings({
+    const ratings = await ratingService.getGlobalRatings({
       groupId,
       courseId,
       limit: limit ? parseInt(limit) : 100
