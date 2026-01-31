@@ -15,6 +15,7 @@ import TaskSubmission from '../models/TaskSubmission.js';
 import fs from 'fs';
 
 const router = express.Router();
+const ratingService = new RatingService();
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
@@ -552,7 +553,7 @@ router.get('/submissions', authenticateStudent, async (req, res) => {
 // Get student's rating info
 router.get('/my-rating', authenticateStudent, async (req, res) => {
   try {
-    const ratingData = await RatingService.getStudentRank(req.student._id);
+    const ratingData = await ratingService.getStudentRank(req.student._id);
 
     res.json({
       averageScore: ratingData.total_points, // Mapped to expected frontend field
