@@ -186,7 +186,9 @@ export default function StudentTasks() {
             {filteredItems.map(item => (
               <div key={`${item.type}-${item._id}`} onClick={() => handleItemClick(item)} className="bg-white dark:bg-gray-800 rounded-[2rem] border overflow-hidden cursor-pointer hover:shadow-lg transition-all p-1">
                 <div className={`h-40 rounded-[1.8rem] relative flex items-center justify-center ${getCardColor(item.type)}`}>
-                  {item.type === 'TASK' && item.image_url ? <img src={item.image_url} className="w-full h-full object-cover" /> : <Brain size={48} className="text-white/30" />}
+                  {item.type === 'TASK' && item.image_url ? (
+                    <img src={item.image_url} className="w-full h-full object-cover rounded-[1.8rem]" alt={item.title} />
+                  ) : <Brain size={48} className="text-white/30" />}
                   <div className="absolute top-4 left-4 flex gap-2">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold text-white bg-black/20 backdrop-blur-sm border border-white/20`}>{item.type}</span>
                     {(item.status === 'FINISHED' || item.submitted || item.status === 'GRADED') && <span className={`px-3 py-1 rounded-full text-[10px] font-bold text-white bg-green-500 shadow-lg`}>BITDI</span>}

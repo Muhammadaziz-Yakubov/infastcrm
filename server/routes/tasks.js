@@ -61,7 +61,7 @@ const getFileUrl = (filePath) => {
   }
 
   // Use environment variable for base URL, fallback to hardcoded production URL
-  const baseUrl = process.env.API_URL || process.env.RENDER_EXTERNAL_URL || 'https://infastcrm-0b2r.onrender.com';
+  const baseUrl = process.env.API_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:5000';
 
   // Ensure path starts with /uploads
   let cleanPath = filePath.startsWith('/') ? filePath : '/' + filePath;

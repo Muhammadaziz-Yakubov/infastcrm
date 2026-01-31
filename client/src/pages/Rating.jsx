@@ -74,7 +74,9 @@ export default function Rating() {
       
       setShowAddPowerModal(false);
       setPowerForm({ student_id: '', power: 0, reason: '' });
-      fetchRatings();
+      
+      // Reytingni darhol yangilash
+      await fetchRatings();
       alert('Power muvaffaqiyatli qo\'shildi!');
     } catch (error) {
       alert(error.response?.data?.message || 'Xatolik yuz berdi');
