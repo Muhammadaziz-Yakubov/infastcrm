@@ -65,7 +65,7 @@ class RatingService {
                 studentFilter.group_id = { $in: groupIds };
             }
 
-            // 2. Get students
+            // 2. Get students with limit to prevent timeout
             const students = await Student.find(studentFilter)
                 .select('full_name profile_image group_id coin_balance')
                 .populate({
@@ -73,6 +73,7 @@ class RatingService {
                     select: 'name course_id',
                     populate: { path: 'course_id', select: 'name' }
                 })
+                .limit(limit || 1000)
                 .lean();
 
             if (students.length === 0) return [];
