@@ -2,61 +2,45 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const API_PROXY_TARGET = process.env.VITE_API_URL || process.env.API_URL || 'http://localhost:5000';
+
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-<<<<<<< HEAD
+    host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: API_PROXY_TARGET,
         changeOrigin: true,
-        rewrite: (path) => path
-=======
-    // YANGI QO'SHILGAN QISM:
-    headers: {
-      'Content-Type': 'application/javascript'
-    },
-    proxy: {
-      '/api': {
-        target: 'http://infast-crm-server.vercel.app',
-        changeOrigin: true
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
   },
   preview: {
     port: process.env.PORT || 3000,
-<<<<<<< HEAD
-    host: '0.0.0.0',
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        rewrite: (path) => path
-      }
-    }
-=======
     host: '0.0.0.0'
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
   },
-  // YANGI QO'SHILGAN QISM:
   build: {
+    target: 'es2017',
+    minify: 'esbuild',
+    sourcemap: false,
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
-          let extType = assetInfo.name.split('.').at(1);
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
-            extType = 'img';
-          }
-          if (/jsx?/i.test(extType)) {
-            extType = 'js';
-          }
-          return `assets/${extType}/[name]-[hash][extname]`;
+          const name = assetInfo.name || '';
+          const ext = name.split('.').pop();
+          let folder = ext;
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) folder = 'img';
+          if (/css/i.test(ext)) folder = 'css';
+          if (/jsx?|tsx?/i.test(ext)) folder = 'js';
+          return `assets/${folder}/[name]-[hash][extname]`;
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
-      },
-    },
+        entryFileNames: 'assets/js/[name]-[hash].js'
+      }
+    }
   }
 });
