@@ -2,7 +2,6 @@ import express from 'express';
 import Student from '../models/Student.js';
 import Group from '../models/Group.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
-<<<<<<< HEAD
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -158,34 +157,11 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
       message: 'Database connection error. Please try again.',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
-=======
-
-const router = express.Router();
-
-// Get all students
-router.get('/', authenticate, async (req, res) => {
-  try {
-    const { group_id, status } = req.query;
-    const filter = {};
-    if (group_id) filter.group_id = group_id;
-    if (status) filter.status = status;
-
-    const students = await Student.find(filter)
-      .populate('group_id')
-      .sort({ createdAt: -1 });
-    res.json(students);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
   }
 });
 
 // Get single student
-<<<<<<< HEAD
 router.get('/:id', authenticate, requireAdmin, async (req, res) => {
-=======
-router.get('/:id', authenticate, async (req, res) => {
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
   try {
     const student = await Student.findById(req.params.id).populate('group_id');
     if (!student) {
@@ -198,11 +174,7 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // Check if login is unique
-<<<<<<< HEAD
 router.get('/check-login/:login', authenticate, requireAdmin, async (req, res) => {
-=======
-router.get('/check-login/:login', authenticate, async (req, res) => {
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
   try {
     const existing = await Student.findOne({ login: req.params.login });
     res.json({ exists: !!existing });
@@ -214,14 +186,9 @@ router.get('/check-login/:login', authenticate, async (req, res) => {
 // Create student (Admin only)
 router.post('/', authenticate, requireAdmin, async (req, res) => {
   try {
-<<<<<<< HEAD
     console.log('📝 Creating student with data:', req.body);
     const { login, password, ...studentData } = req.body;
-
-=======
-    const { login, password, ...studentData } = req.body;
     
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     // Check if login already exists
     if (login) {
       const existingStudent = await Student.findOne({ login });
@@ -232,7 +199,6 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
 
     const student = new Student({
       ...studentData,
-<<<<<<< HEAD
       login: login || undefined,
       password
     });
@@ -243,16 +209,7 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
     res.status(201).json(student);
   } catch (error) {
     console.error('❌ Error creating student:', error);
-=======
-      login,
-      password
-    });
     
-    await student.save();
-    await student.populate('group_id');
-    res.status(201).json(student);
-  } catch (error) {
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     res.status(400).json({ message: error.message });
   }
 });
@@ -261,11 +218,7 @@ router.post('/', authenticate, requireAdmin, async (req, res) => {
 router.put('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { login, password, ...updateData } = req.body;
-<<<<<<< HEAD
-
-=======
     
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     // Check if login already exists for different student
     if (login) {
       const existingStudent = await Student.findOne({ login, _id: { $ne: req.params.id } });
@@ -273,11 +226,6 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
         return res.status(400).json({ message: 'Bu login allaqachon band' });
       }
       updateData.login = login;
-<<<<<<< HEAD
-    } else if (login === "") {
-      updateData.login = null;
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     }
 
     // Get current student to update
@@ -288,11 +236,7 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
 
     // Update fields
     Object.assign(student, updateData);
-<<<<<<< HEAD
-
-=======
     
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     // If password is provided, update it (will be hashed by pre-save hook)
     if (password) {
       student.password = password;
@@ -300,11 +244,7 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
 
     await student.save();
     await student.populate('group_id');
-<<<<<<< HEAD
-
-=======
     
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     res.json(student);
   } catch (error) {
     res.status(400).json({ message: error.message });
