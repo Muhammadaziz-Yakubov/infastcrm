@@ -2,13 +2,9 @@ import express from 'express';
 import Group from '../models/Group.js';
 import Student from '../models/Student.js';
 import Lead from '../models/Lead.js';
-<<<<<<< HEAD
 import Attendance from '../models/Attendance.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import { sendTelegramMessageToChat, sendAttendanceSummary } from '../services/telegramBot.js';
-=======
-import { authenticate } from '../middleware/auth.js';
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
 
 const router = express.Router();
 
@@ -43,8 +39,6 @@ router.post('/', authenticate, async (req, res) => {
     const group = new Group(req.body);
     await group.save();
     await group.populate('course_id');
-<<<<<<< HEAD
-
     // Send test message to Telegram group if chat_id provided
     if (group.telegram_chat_id) {
       try {
@@ -67,9 +61,6 @@ Endi guruhga avtomatik eslatmalar yuboriladi.
         console.error(`❌ Failed to send test message to group ${group.name}:`, telegramError.message);
       }
     }
-
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     res.status(201).json(group);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -107,17 +98,10 @@ router.post('/:id/activate', authenticate, async (req, res) => {
 
     // Count students in group
     const studentCount = await Student.countDocuments({ group_id: group._id });
-<<<<<<< HEAD
 
     if (studentCount < group.min_students) {
       return res.status(400).json({
         message: `Minimum ${group.min_students} students required. Current: ${studentCount}`
-=======
-    
-    if (studentCount < group.min_students) {
-      return res.status(400).json({ 
-        message: `Minimum ${group.min_students} students required. Current: ${studentCount}` 
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
       });
     }
 
@@ -133,19 +117,10 @@ router.post('/:id/activate', authenticate, async (req, res) => {
     // Convert all leads to students
     const leads = await Lead.find({ group_id: group._id });
     for (const lead of leads) {
-<<<<<<< HEAD
       const existingStudent = await Student.findOne({
         phone: lead.phone,
         group_id: group._id
       });
-
-=======
-      const existingStudent = await Student.findOne({ 
-        phone: lead.phone, 
-        group_id: group._id 
-      });
-      
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
       if (!existingStudent) {
         const student = new Student({
           full_name: lead.name,
@@ -177,7 +152,6 @@ router.delete('/:id', authenticate, async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // Send attendance message to group
 router.post('/:id/send-attendance', authenticate, requireAdmin, async (req, res) => {
   try {
@@ -274,8 +248,5 @@ router.get('/:id/students', authenticate, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
 export default router;
 
