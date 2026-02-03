@@ -18,7 +18,6 @@ const leadSchema = new mongoose.Schema({
   },
   lead_status: {
     type: String,
-<<<<<<< HEAD
     enum: ['LEAD', 'INTERESTED', 'REGISTERED', 'CONFIRMED', 'CONVERTED', 'LOST'],
     default: 'LEAD'
   },
@@ -46,12 +45,7 @@ const leadSchema = new mongoose.Schema({
     type: Date
   },
   last_contact_date: {
-    type: Date
-=======
-    enum: ['INTERESTED', 'REGISTERED', 'CONFIRMED'],
-    default: 'INTERESTED'
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
-  }
+    type: Date  }
 }, {
   timestamps: true
 });

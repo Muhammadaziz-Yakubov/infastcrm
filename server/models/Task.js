@@ -10,41 +10,49 @@ const taskSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  image_url: {
-    type: String,
-    default: ''
-  },
   group_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Group',
     required: true
   },
-  deadline: {
-    type: Date
+  teacher_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Staff',
+    required: true
+  },
+  due_date: {
+    type: Date,
+    required: true
   },
   max_score: {
     type: Number,
-    default: 100,
+    required: true,
     min: 0,
-    max: 100
+    default: 100
+  },
+  file_path: {
+    type: String,
+    trim: true
   },
   status: {
     type: String,
-    enum: ['ACTIVE', 'CLOSED'],
-    default: 'ACTIVE'
+    enum: ['DRAFT', 'PUBLISHED', 'CLOSED'],
+    default: 'DRAFT'
   },
-  created_by: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  task_type: {
+    type: String,
+    enum: ['HOMEWORK', 'PROJECT', 'EXAM', 'QUIZ'],
+    default: 'HOMEWORK'
   }
 }, {
   timestamps: true
 });
 
-<<<<<<< HEAD
-taskSchema.index({ group_id: 1, status: 1, createdAt: -1 });
+// Index for better query performance
+taskSchema.index({ group_id: 1, status: 1 });
+taskSchema.index({ teacher_id: 1 });
+taskSchema.index({ due_date: 1 });
 
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
-export default mongoose.model('Task', taskSchema);
+const Task = mongoose.model('Task', taskSchema);
 
+export default Task;
