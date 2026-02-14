@@ -37,7 +37,7 @@ import studentQuizzesRoutes from './routes/studentQuizzes.js';
 import maintenanceRoutes from './routes/maintenance.js';
 
 // Services & Jobs
-import { setupArenaSocket } from './socket/arena.js';
+// import { setupArenaSocket } from './socket/arena.js'; // Commented out - file not found
 import { sendDailyReminders, testBotConnection, setupWebhook, handleWebhook, sendAllClassReminders } from './services/telegramBot.js';
 import { checkPaymentStatus } from './jobs/paymentJob.js';
 import { initSurveyBot } from './surveyBotService.js';
@@ -106,7 +106,7 @@ app.use('/api/student-quizzes', studentQuizzesRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 
 // Socket.io setup
-setupArenaSocket(io);
+// setupArenaSocket(io); // Commented out - arena.js not found
 
 // Function to create default admin user (non-blocking, safe defaults)
 const createDefaultAdmin = async () => {
