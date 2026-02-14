@@ -18,7 +18,7 @@ const studentSchema = new mongoose.Schema({
   profile_image: {
     type: String,
     default: '' // Profile rasmi (base64 yoki URL)
-  },  }
+  }
 }, {
   timestamps: true
 });
