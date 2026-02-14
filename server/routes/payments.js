@@ -3,7 +3,20 @@ import Payment from '../models/Payment.js';
 import Student from '../models/Student.js';
 import { authenticate } from '../middleware/auth.js';
 import { sendPaymentNotification } from '../services/telegramBot.js';
-import ReferralService from '../services/ReferralService.js';      filter.payment_date = {};
+import ReferralService from '../services/ReferralService.js';
+
+const router = express.Router();
+
+// Get all payments
+router.get('/', authenticate, async (req, res) => {
+  try {
+    const { student_id, start_date, end_date } = req.query;
+    let filter = {};
+    
+    if (student_id) filter.student_id = student_id;
+    
+    if (start_date || end_date) {
+      filter.payment_date = {};
       if (start_date) filter.payment_date.$gte = new Date(start_date);
       if (end_date) filter.payment_date.$lte = new Date(end_date);
     }
@@ -18,7 +31,8 @@ import ReferralService from '../services/ReferralService.js';      filter.paymen
     console.log(`📊 Found ${payments.length} payments`);
     res.json(payments);
   } catch (error) {
-    console.error('❌ Payments error:', error);    res.status(500).json({ message: error.message });
+    console.error('❌ Payments error:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -78,6 +92,7 @@ router.post('/', authenticate, async (req, res) => {
       req.body.student_id,
       req.body.amount
     );
+    
     if (student) {
       const paymentDate = new Date(payment.payment_date);
       student.last_payment_date = paymentDate;
@@ -91,7 +106,8 @@ router.post('/', authenticate, async (req, res) => {
         nextPaymentDate.setFullYear(targetYear, targetMonth + 1, 0);
       }
 
-      student.next_payment_date = nextPaymentDate;      student.status = 'ACTIVE';
+      student.next_payment_date = nextPaymentDate;
+      student.status = 'ACTIVE';
       await student.save();
     }
 
@@ -107,7 +123,8 @@ router.post('/', authenticate, async (req, res) => {
       discountInfo,
       referralActivated: friendReferralResult ? true : false,
       referralMessage: friendReferralResult?.message
-    });  } catch (error) {
+    });
+  } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
@@ -173,4 +190,3 @@ router.delete('/:id', authenticate, async (req, res) => {
 });
 
 export default router;
-

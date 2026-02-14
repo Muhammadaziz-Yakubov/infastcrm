@@ -2,12 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-<<<<<<< HEAD
-import Modal from '../components/Modal';
-import { Plus, Edit, Trash2, CreditCard, Search, Wallet, Calendar, Banknote } from 'lucide-react';
-=======
 import { Plus, Edit, Trash2, X, CreditCard, Search, Wallet, Calendar, Banknote } from 'lucide-react';
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
 import { format } from 'date-fns';
 
 export default function Payments() {
@@ -17,11 +12,6 @@ export default function Payments() {
   const [showModal, setShowModal] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-<<<<<<< HEAD
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
   const [searchParams] = useSearchParams();
   const studentFilter = searchParams.get('student_id');
   const { user } = useAuth();
@@ -38,11 +28,7 @@ export default function Payments() {
   useEffect(() => {
     fetchStudents();
     fetchPayments();
-<<<<<<< HEAD
-  }, [studentFilter, selectedMonth, selectedYear]);
-=======
   }, [studentFilter]);
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
 
   useEffect(() => {
     if (studentFilter) {
@@ -63,13 +49,6 @@ export default function Payments() {
     try {
       const params = {};
       if (studentFilter) params.student_id = studentFilter;
-<<<<<<< HEAD
-      if (selectedMonth && selectedYear) {
-        params.month = selectedMonth;
-        params.year = selectedYear;
-      }
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
       
       const response = await api.get('/payments', { params });
       setPayments(response.data);
@@ -132,15 +111,6 @@ export default function Payments() {
     });
   };
 
-<<<<<<< HEAD
-  const closeModal = () => {
-    setShowModal(false);
-    setEditingPayment(null);
-    resetForm();
-  };
-
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
   const getPaymentTypeLabel = (type) => {
     switch (type) {
       case 'CASH': return 'Naqd';
@@ -186,39 +156,6 @@ export default function Payments() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-<<<<<<< HEAD
-          <div className="flex gap-2">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            >
-              <option value="1">Yanvar</option>
-              <option value="2">Fevral</option>
-              <option value="3">Mart</option>
-              <option value="4">Aprel</option>
-              <option value="5">May</option>
-              <option value="6">Iyun</option>
-              <option value="7">Iyul</option>
-              <option value="8">Avgust</option>
-              <option value="9">Sentabr</option>
-              <option value="10">Oktabr</option>
-              <option value="11">Noyabr</option>
-              <option value="12">Dekabr</option>
-            </select>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            >
-              {[...Array(5)].map((_, i) => {
-                const year = new Date().getFullYear() - 2 + i;
-                return <option key={year} value={year}>{year}</option>;
-              })}
-            </select>
-          </div>
-=======
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
           <div className="relative flex-1 lg:w-64">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
@@ -368,15 +305,6 @@ export default function Payments() {
       </div>
 
       {/* Modal */}
-<<<<<<< HEAD
-      <Modal
-        isOpen={showModal}
-        onClose={closeModal}
-        title={editingPayment ? "To'lovni tahrirlash" : "Yangi to'lov"}
-        size="sm"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-=======
       {showModal && (
         <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fade-in-up max-h-[calc(100vh-2rem)] overflow-y-auto">
@@ -393,7 +321,6 @@ export default function Payments() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   O'quvchi *
@@ -480,25 +407,6 @@ export default function Payments() {
                 />
               </div>
 
-<<<<<<< HEAD
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
-            >
-              Bekor qilish
-            </button>
-            <button
-              type="submit"
-              className="flex-1 btn-success px-4 py-3 rounded-xl font-medium"
-            >
-              {editingPayment ? 'Saqlash' : 'To\'lov qo\'shish'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-=======
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -518,7 +426,6 @@ export default function Payments() {
           </div>
         </div>
       )}
->>>>>>> f76e6b7a4f867ecdb448a60fb5faf9d6925d5c88
     </div>
   );
 }
