@@ -13,7 +13,8 @@ const taskSubmissionSchema = new mongoose.Schema({
   },
   code: {
     type: String,
-    default: ''  },
+    default: ''
+  },
   description: {
     type: String,
     default: ''
@@ -25,5 +26,28 @@ const taskSubmissionSchema = new mongoose.Schema({
     file_size: Number,
     mime_type: String
   }],
-export default mongoose.model('TaskSubmission', taskSubmissionSchema);
+  score: {
+    type: Number,
+    default: 0
+  },
+  feedback: {
+    type: String,
+    default: ''
+  },
+  status: {
+    type: String,
+    enum: ['SUBMITTED', 'GRADED'],
+    default: 'SUBMITTED'
+  },
+  submitted_at: {
+    type: Date,
+    default: Date.now
+  },
+  graded_at: {
+    type: Date
+  }
+}, {
+  timestamps: true
+});
 
+export default mongoose.model('TaskSubmission', taskSubmissionSchema);
